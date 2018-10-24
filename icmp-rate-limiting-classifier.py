@@ -15,8 +15,8 @@ import seaborn as sns
 from sklearn import metrics
 import tensorflow as tf
 from tensorflow.python.data import Dataset
-from KMeans.kmeans import kmeans
-
+from Cluster.dbscan import kmeans, DBSCAN_impl
+from Classification import neural_network as nn
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     for result_file in os.listdir(results_dir):
         i += 1
         print i
-        if i == 10:
+        if i == 1:
             break
         print result_file
         split_file_name = result_file.split("_")
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         # 1 point is represented by different dimensions:
         df_result = pd.read_csv(results_dir+result_file, names = columns,  skipinitialspace=True,)
 
-        print df_result.to_string()
+        # print df_result.to_string()
 
         c_c_spr_cor = {}
         w_c_spr_cor = {}
@@ -210,15 +210,61 @@ if __name__ == "__main__":
         computed_df.loc[result_file] = new_entry
 
 
-    print computed_df.to_string()
+    # print computed_df.to_string()
     # Build labels (Yes, No, Unknown)
 
-    computed_df = tf.convert_to_tensor(computed_df)
+    feature_columns = ["c_c_dpr_lr_9000", "w_c_dpr_lr_0_9000"]
+    label = "cluster"
+    # computed_df.to_csv("resources/test_set", encoding='utf-8')
+    computed_df = pd.read_csv("resources/test_set", index_col=0)
+
+    labeled_df, cluster_n = DBSCAN_impl(computed_df, feature_columns)
+
+    # Now train a classifier on the labeled data.
+
+    # Shuffle the data
+    labeled_df.reindex(np.random.permutation(labeled_df.index))
+
+    # Split the training validation and test set
+    training_n = int(0.3 * len(labeled_df))
+    training_df = labeled_df.iloc[0:training_n]
+
+    cross_validation_n = int(0.3 * len(labeled_df))
+    cross_validation_df = labeled_df.iloc[training_n + 1:cross_validation_n + training_n]
+
+    test_df = labeled_df.iloc[cross_validation_n + training_n + 1:]
+
+    training_targets, training_examples = nn.parse_labels_and_features(training_df, label, feature_columns)
+    print "Size of the training examples: " + str(training_examples.shape)
 
 
-    kmeans(computed_df, i, 3, 1000)
+    validation_targets, validation_examples = nn.parse_labels_and_features(cross_validation_df, label, feature_columns)
+    print "Size of the training examples: " + str(validation_examples.shape)
 
-    # Build features
+    test_targets, test_examples = nn.parse_labels_and_features(test_df, label, feature_columns)
+    print "Size of the training examples: " + str(test_examples.shape)
 
 
-    #
+
+    classifier = nn.train_nn_classification_model(
+        periods = 20,
+        classes_n = cluster_n,
+        feature_columns = feature_columns,
+        learning_rate=0.05,
+        steps=1000,
+        batch_size=30,
+        hidden_units=[5, 5],
+        training_examples=training_examples,
+        training_targets=training_targets,
+        validation_examples=validation_examples,
+        validation_targets=validation_targets)
+
+    predict_test_input_fn = nn.create_predict_input_fn(
+        test_examples, test_targets, batch_size=100)
+
+    test_predictions = classifier.predict(input_fn=predict_test_input_fn)
+    test_predictions = np.array([item['class_ids'][0] for item in test_predictions])
+
+    accuracy = metrics.accuracy_score(test_targets, test_predictions)
+    print("Accuracy on test data: %0.3f" % accuracy)
+
