@@ -35,15 +35,19 @@ computed_columns = [
                     "c_c_ind_lr",
                     "w_c_ind_lr_0",
                     "w_c_ind_lr_1",
+                    "w_c_ind_lr",
                     "c_c_spr_lr",
                     "w_c_spr_lr_0",
                     "w_c_spr_lr_1",
+                    "w_c_spr_lr",
                     "cor_c_c_spr",
                     "cor_w_c_spr_0",
                     "cor_w_c_spr_1",
+                    "cor_w_c_spr",
                     "c_c_dpr_lr",
                     "w_c_dpr_lr_0",
-                    "w_c_dpr_lr_1"
+                    "w_c_dpr_lr_1",
+                    "w_c_dpr_lr"
                     ]
 
 feature_columns = []
@@ -78,7 +82,7 @@ def parse_correlation(df, row, correlation_columns, candidates, witnesses):
 
             split_cor = correlation_value.split(":")
             ip_address_2 = split_cor[0]
-            cor = split_cor[1]
+            cor = float(split_cor[1])
             if ip_address in candidates and ip_address_2 in candidates:
                 if candidate_candidate_difference_correlation.has_key(probing_rate_value):
                     candidate_candidate_difference_correlation[probing_rate_value].append(cor)
@@ -120,6 +124,7 @@ def compute_diff_loss_rate(df, candidates, witnesses):
                     else:
                         witness_candidate_difference_loss_rate[probing_rate_i] = [abs(loss_rate_i - loss_rate_j)]
 
+
     return candidate_candidate_difference_loss_rate, witness_candidate_difference_loss_rate
 
 def build_feature_values(c_c_feature_prefix, w_c_feature_prefix, rates, c_c_values, w_c_values):
@@ -133,14 +138,25 @@ def build_feature_values(c_c_feature_prefix, w_c_feature_prefix, rates, c_c_valu
         if w_c_values.has_key(rate):
             w_c_values_rate = w_c_values[rate]
             for i in range (0, len(w_c_values_rate)):
-                new_entry[w_c_feature_prefix + str(i) + "_" + str(rate)] = w_c_values[rate][i]
+                new_entry[w_c_feature_prefix + str(i) + "_" + str(rate)] = w_c_values_rate[i]
             if len(w_c_values_rate) < 2:
                 new_entry[w_c_feature_prefix + str(1) + "_" + str(rate)] = np.nan
+                new_entry[w_c_feature_prefix + str(rate)] = np.nan
+            else:
+                new_entry[w_c_feature_prefix + str(rate)] = min(w_c_values_rate[k] for k in range(0, len(w_c_values_rate)))
         else:
             new_entry[w_c_feature_prefix + "0_" + str(rate)] = np.nan
             new_entry[w_c_feature_prefix + "1_" + str(rate)] = np.nan
+            new_entry[w_c_feature_prefix + str(rate)] = np.nan
 
     return new_entry
+
+
+def remove_anomalies(df, candidate, witness, alpha):
+    # If the loss rate is not monotonic, and the difference between a loss rate and the next one is really high, do not
+    # take the line into account
+
+    
 
 if __name__ == "__main__":
 
@@ -163,7 +179,7 @@ if __name__ == "__main__":
         print i
         if i == 1:
             break
-        print result_file
+        # print result_file
         split_file_name = result_file.split("_")
         candidates = [split_file_name[1], split_file_name[2]]
         witnesses = [split_file_name[3]]
@@ -174,6 +190,9 @@ if __name__ == "__main__":
 
         c_c_spr_cor = {}
         w_c_spr_cor = {}
+
+
+
         # Parse correlation
         for row in df_result.itertuples():
             c_c_spr_cor_row, w_c_spr_cor_row = parse_correlation(df_result, row, ["correlation_1", "correlation_2"], candidates, witnesses)
@@ -191,8 +210,11 @@ if __name__ == "__main__":
 
         df_group_dpr = df_result[df_result["probing_type"] == "GROUPDPR"]
         df_group_dpr.reset_index(drop=True, inplace=True)
-        c_c_dpr_loss_rate, w_c_dpr_loss_rate = compute_diff_loss_rate(df_group_dpr, candidates, witnesses)
 
+        # Remove anomalies of measurement
+
+
+        c_c_dpr_loss_rate, w_c_dpr_loss_rate = compute_diff_loss_rate(df_group_dpr, candidates, witnesses)
 
         new_entry = {}
 
@@ -210,21 +232,26 @@ if __name__ == "__main__":
         computed_df.loc[result_file] = new_entry
 
 
+
     # print computed_df.to_string()
     # Build labels (Yes, No, Unknown)
 
-    feature_columns = ["c_c_dpr_lr_9000", "w_c_dpr_lr_0_9000"]
+    feature_columns = ["c_c_dpr_lr_9000", "w_c_dpr_lr_9000"]
     label = "cluster"
     # computed_df.to_csv("resources/test_set", encoding='utf-8')
     computed_df = pd.read_csv("resources/test_set", index_col=0)
 
     labeled_df, cluster_n = DBSCAN_impl(computed_df, feature_columns)
 
+    true_negatives_df = labeled_df["label"] == "N"
+    true_negatives_df = labeled_df[true_negatives_df]
+    print true_negatives_df["label"].to_string()
+
     # Now train a classifier on the labeled data.
 
     # Shuffle the data
     labeled_df.reindex(np.random.permutation(labeled_df.index))
-
+    labeled_df.to_csv("resources/labeled_test_set", encoding='utf-8')
     # Split the training validation and test set
     training_n = int(0.3 * len(labeled_df))
     training_df = labeled_df.iloc[0:training_n]
@@ -247,13 +274,13 @@ if __name__ == "__main__":
 
 
     classifier = nn.train_nn_classification_model(
-        periods = 20,
+        periods = 30,
         classes_n = cluster_n,
         feature_columns = feature_columns,
         learning_rate=0.05,
         steps=1000,
         batch_size=30,
-        hidden_units=[5, 5],
+        hidden_units=[20, 20],
         training_examples=training_examples,
         training_targets=training_targets,
         validation_examples=validation_examples,
@@ -267,4 +294,7 @@ if __name__ == "__main__":
 
     accuracy = metrics.accuracy_score(test_targets, test_predictions)
     print("Accuracy on test data: %0.3f" % accuracy)
+
+
+
 

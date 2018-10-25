@@ -9,6 +9,9 @@ from sklearn.datasets.samples_generator import make_blobs
 from sklearn.preprocessing import StandardScaler
 
 
+def normalize_feature(points):
+    points = points / points.max()
+    return points
 
 
 def get_columns(points, feature_columns):
@@ -18,6 +21,7 @@ def DBSCAN_impl(points, feature_columns):
 
     points = points[feature_columns].dropna()
     processed_points = get_columns(points, feature_columns)
+    # processed_points = normalize_feature(processed_points)
     print processed_points.to_string()
     X = processed_points.values.tolist()
 
@@ -25,7 +29,7 @@ def DBSCAN_impl(points, feature_columns):
     # X = X.fit_transform(X)
     # #############################################################################
     # Compute DBSCAN
-    db = DBSCAN(eps=0.05, min_samples=10).fit(X)
+    db = DBSCAN(eps=0.05, min_samples=15).fit(X)
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
     core_samples_mask[db.core_sample_indices_] = True
     labels = db.labels_
@@ -84,17 +88,19 @@ def DBSCAN_impl(points, feature_columns):
         if x[0] - x[1] < - 0.6:
             classification[labels[i]] = "P"
             classified_cluster_n.add(labels[i])
-        elif x[0] - x[1] < - 0.2 and x[0] < 0.05:
+        elif x[0] - x[1] < - 0.4 and x[0] < 0.05:
             classification[labels[i]] = "P"
             classified_cluster_n.add(labels[i])
         elif abs(x[0] - x[1]) > 0 and x[0] > 0.5 :
             classification[labels[i]] = "N"
             classified_cluster_n.add(labels[i])
-        elif abs(x[0] - x[1]) < 0.05:
+        elif abs(x[0] - x[1]) < 0.2:
             classification[labels[i]] = "U"
             classified_cluster_n.add(labels[i])
 
     print classification
+
+
 
     # Create a column in the data frame
     label_column = np.array([classification[labels[i]] for i in range(0, len(X))])
@@ -104,7 +110,6 @@ def DBSCAN_impl(points, feature_columns):
     points = points[points.cluster != -1]
 
     print "Labeling done."
-    print points.to_string()
     return points, n_clusters_
 
 def kmeans(points, clusters_n, iteration_n):
