@@ -1,0 +1,367 @@
+interfaces {
+    et-3/0/0 {
+        description "I2-S185168 Roche Genentech | I2-INDI-INDI-100GE-185824";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 10 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] Roche INDI";
+            vlan-id 10;
+            family inet {
+                mtu 9000;
+                address 163.253.5.0/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:15:10::1/126;
+            }
+        }
+        unit 20 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] Roche INDI";
+            vlan-id 20;
+            family inet {
+                mtu 1500;
+                address 198.71.47.82/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2706::1/126;
+            }
+        }
+        unit 30 {
+            description OESS-L2VPN-337031;
+            encapsulation vlan-ccc;
+            vlan-id 30;
+            output-vlan-map swap;
+        }
+        unit 40 {
+            description OESS-L2VPN-343911;
+            encapsulation vlan-ccc;
+            vlan-id 40;
+            output-vlan-map swap;
+        }
+        unit 50 {
+            description OESS-L2VPN-346421;
+            encapsulation vlan-ccc;
+            vlan-id 50;
+            output-vlan-map swap;
+        }
+        unit 51 {
+            description OESS-L2VPN-348291;
+            encapsulation vlan-ccc;
+            vlan-id 51;
+            output-vlan-map swap;
+        }
+        unit 60 {
+            description OESS-L2CCC-353051;
+            encapsulation vlan-ccc;
+            vlan-id 60;
+            output-vlan-map swap;
+        }
+        unit 70 {
+            description OESS-L2VPN-356831;
+            encapsulation vlan-ccc;
+            vlan-id 70;
+            output-vlan-map swap;
+        }
+    }
+    et-4/0/0 {
+        apply-groups-except INTERFACE;
+        description "[ae1] BACKBONE: CHIC-INDI | I2-CHIC-INDI-100GE-50993";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-5/0/0 {
+        description "pas-tst.indi, em1";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 291 {
+            description OESS-L2CCC-309561;
+            encapsulation vlan-ccc;
+            vlan-id 291;
+            output-vlan-map swap;
+        }
+        unit 292 {
+            description OESS-L2CCC-309861;
+            encapsulation vlan-ccc;
+            vlan-id 292;
+            output-vlan-map swap;
+        }
+        unit 294 {
+            description OESS-L2CCC-308881;
+            encapsulation vlan-ccc;
+            vlan-id 294;
+            output-vlan-map swap;
+        }
+        unit 681 {
+            description "test vlan for iperf | [NO-MONITOR][18456:144]";
+            encapsulation vlan-ccc;
+            vlan-id 681;
+            output-vlan-map swap;
+        }
+        unit 2214 {
+            description OESS-L2CCC-309411;
+            encapsulation vlan-ccc;
+            vlan-id 2214;
+            output-vlan-map swap;
+        }
+        unit 3920 {
+            description OESS-L2CCC-309481;
+            encapsulation vlan-ccc;
+            vlan-id 3920;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/1 {
+        description "pas-tst.indi, em2";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "INDI Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.244/31;
+            }
+        }
+        unit 666 {
+            description OESS-L2VPN-318371;
+            encapsulation vlan-ccc;
+            vlan-id 666;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/2 {
+        description "ons-demo.indi, em2 | [NO-MONITOR]";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/0/3 {
+        description "ons-demo2.indi, em2 | [NO-MONITOR]";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/1/0 {
+        description "AVAILABLE: patched to S301, Cage5, RR 06A RU 36, ports 1/2 | [NO-MONITOR]";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/1/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/0/0 {
+        description "BACKBONE: CINC-INDI | I2-CINC-INDI-100GE-51692";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: CINC-INDI | I2-CINC-INDI-VLAN-70295";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.87/31;
+            }
+            family inet6 {
+                address 2001:468:fc:55::2/64;
+            }
+        }
+    }
+    et-8/0/0 {
+        description "I2-S51698 IUGP | I2-INDI-INDI-100GE-51697";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 118 {
+            description OESS-L2VPN-319831;
+            encapsulation vlan-ccc;
+            vlan-id 118;
+            output-vlan-map swap;
+        }
+        unit 213 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] Indiana Gigapop [snapp_private] | I2-S183860";
+            vlan-id 213;
+            family inet {
+                mtu 9000;
+                address 163.253.4.36/31;
+            }
+            family inet6 {
+                address 2001:468:fb:17::1/126;
+            }
+        }
+        unit 214 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-ing-iu] IU via ING | I2-S187002";
+            vlan-id 214;
+            family inet {
+                address 163.253.7.54/31;
+            }
+            family inet6 {
+                address 2001:468:fd:4::1/126;
+            }
+        }
+        unit 215 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-ing-wustl] WUSTL MS Express | I2-S187673";
+            vlan-id 215;
+            family inet {
+                address 163.253.7.110/31;
+            }
+        }
+        unit 1001 {
+            description OESS-L2VPN-367031;
+            encapsulation vlan-ccc;
+            vlan-id 1001;
+            output-vlan-map swap;
+        }
+        unit 1004 {
+            description OESS-L2VPN-367041;
+            encapsulation vlan-ccc;
+            vlan-id 1004;
+            output-vlan-map swap;
+        }
+        unit 1005 {
+            description OESS-L2VPN-367641;
+            encapsulation vlan-ccc;
+            vlan-id 1005;
+            output-vlan-map swap;
+        }
+        unit 1235 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] iu gigapop AS19782 | I2-S55778";
+            vlan-id 1235;
+            family inet {
+                mtu 1500;
+                address 64.57.21.173/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2216::1/64;
+            }
+        }
+        unit 2002 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Indiana Gigapop R&E | I2-S11798";
+            vlan-id 2002;
+            family inet {
+                mtu 9000;
+                address 149.165.254.3/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:18e8:ff00:1d::2/64;
+            }
+        }
+        unit 2003 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][LHCONE] Indiana Gigapop AS19782 | I2-S13524";
+            vlan-id 2003;
+            family inet {
+                mtu 9000;
+                address 149.165.254.7/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:18e8:ff00:19::b/127;
+            }
+        }
+        unit 2319 {
+            description OESS-L2VPN-346371;
+            encapsulation vlan-ccc;
+            vlan-id 2319;
+            output-vlan-map swap;
+        }
+        unit 3013 {
+            description OESS-L2VPN-310891;
+            encapsulation vlan-ccc;
+            vlan-id 3013;
+            output-vlan-map swap;
+        }
+        unit 3014 {
+            description OESS-L2VPN-310541;
+            encapsulation vlan-ccc;
+            vlan-id 3014;
+            output-vlan-map swap;
+        }
+        unit 3209 {
+            description OESS-L2VPN-346551;
+            encapsulation vlan-ccc;
+            vlan-id 3209;
+            output-vlan-map swap;
+        }
+    }
+    et-9/0/0 {
+        apply-groups-except INTERFACE;
+        description "[ae1] CHIC-INDI | I2-CHIC-INDI-100GE-186098";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    ae1 {
+        description "BACKBONE: CHIC-INDI | I2-CHIC-INDI-LAG-186164";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 681 {
+            description "test vlan for iperf | [NO-MONITOR][18456:144]";
+            encapsulation vlan-ccc;
+            vlan-id 681;
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: CHIC-INDI | I2-CHIC-INDI-VLAN-70294";
+            vlan-id 4079;
+            family inet {
+                mtu 9170;
+                address 162.252.70.153/31;
+            }
+            family inet6 {
+                mtu 9170;
+                address 2001:468:fc:6a::2/64;
+            }
+            family mpls {
+                mtu 9170;
+            }
+        }
+    }
+}

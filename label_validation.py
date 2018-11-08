@@ -1,6 +1,6 @@
 import pandas as pd
 import copy
-
+from Validation.midar import compute_midar_routers
 def extract_router_set(points):
     labels = points[[points.index, "label"]]
 
@@ -21,9 +21,11 @@ def extract_candidates(df):
 
     return pairs
 
+
+
 if __name__ == "__main__":
 
-
+    midar_path = "resources/internet2/midar/v4/"
     labeled_df_file = "resources/labeled_test_set"
 
     df = pd.read_csv(labeled_df_file, index_col=0)
@@ -34,12 +36,15 @@ if __name__ == "__main__":
 
     # Extract P, U and N labels
 
-    p_labeled_df = labeled_df[labeled_df["label"] == "P"]
-    u_labeled_df = labeled_df[labeled_df["label"] == "U"]
-    n_labeled_df = labeled_df[labeled_df["label"] == "N"]
+    p_labeled_df = labeled_df[labeled_df["label"] == 1]
+    u_labeled_df = labeled_df[labeled_df["label"] == 2]
+    n_labeled_df = labeled_df[labeled_df["label"] == 0]
 
     # Build routers from positives labels.
-    routers = extract_candidates(p_labeled_df)
+    routers = compute_midar_routers(midar_path)
+
+
+
     # Hack here
     pair_routers = copy.deepcopy(routers)
     # Apply transitive closure
@@ -66,6 +71,45 @@ if __name__ == "__main__":
     final_routers = tc_routers
 
     print "Number of routers found " + str(len(tc_routers))
+
+    list_routers = [list(router) for router in final_routers]
+    distinct_ips = set()
+    for router in routers:
+        for ip in router:
+            distinct_ips.add(ip)
+    print len(distinct_ips)
+
+    already_found_router = []
+
+    for router in list_routers:
+        import os
+        # Find to which router this ip belongs to
+        internet2_router_conf_path = "resources/internet2/routers/v4/"
+        internet2_midar_routers_path = "resources/internet2/midar/v4/routers/"
+        found_router_conf = False
+        corresponding_router = ""
+
+        for router_conf_file in os.listdir(internet2_router_conf_path):
+
+            with open(internet2_router_conf_path + router_conf_file, "r") as f:
+                for line in f.readlines():
+                    line = line.strip()
+                    if router[0] == line:
+                        found_router_conf = True
+                        corresponding_router = router_conf_file
+                        break
+            if found_router_conf:
+                break
+        if found_router_conf:
+            mode = "w"
+            if corresponding_router in already_found_router:
+                mode = "a"
+            already_found_router.append(corresponding_router)
+            with open(internet2_midar_routers_path + corresponding_router, mode) as f:
+                for ip in router:
+                    f.write(ip + "\n")
+
+
 
     # See if some have been discarded by "N" labels
     discarded_pairs = extract_candidates(n_labeled_df)

@@ -1,0 +1,953 @@
+interfaces {
+    xe-3/0/0 {
+        description "AVAILABLE patched to wave-sw.dall 7.1 | [NO-MONITOR]";
+    }
+    xe-3/0/1 {
+        description "AVAILABLE patched to wave-sw.dall 7.2 | [NO-MONITOR]";
+    }
+    xe-3/0/2 {
+        description "AVAILABLE patched to wave-sw.dall 7.3 | [NO-MONITOR]";
+    }
+    xe-3/0/3 {
+        description "AVAILABLE patched to wave-sw.dall 7.4 | [NO-MONITOR]";
+    }
+    et-3/1/0 {
+        description "BACKBONE: DALL-TULS | I2-DALL-TULS-100GE-11300";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DALL-TULS | I2-DALL-TULS-VLAN-70242";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.32/31;
+            }
+            family inet6 {
+                address 2001:468:fc:41::1/64;
+            }
+        }
+    }
+    xe-3/2/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-3/2/1 {
+        description "AVAILABLE patched to wave-sw.dall 6.2 | [NO-MONITOR]";
+    }
+    xe-3/2/2 {
+        description "AVAILABLE patched to wave-sw.dall 6.3 | [NO-MONITOR]";
+    }
+    xe-3/2/3 {
+        description "AVAILABLE patched to wave-sw.dall 6.4 | [NO-MONITOR]";
+    }
+    et-3/3/0 {
+        apply-groups-except INTERFACE;
+        description "[ae11] DALL-KANS | I2-DALL-KANS-100GE-185420";
+        gigether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-5/0/0 {
+        description "pas-tst.dall, em1";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 3076 {
+            description OESS-L2CCC-309271;
+            encapsulation vlan-ccc;
+            vlan-id 3076;
+            output-vlan-map swap;
+        }
+        unit 3177 {
+            description OESS-L2CCC-309371;
+            encapsulation vlan-ccc;
+            vlan-id 3177;
+            output-vlan-map swap;
+        }
+        unit 3180 {
+            description OESS-L2CCC-309251;
+            encapsulation vlan-ccc;
+            vlan-id 3180;
+            output-vlan-map swap;
+        }
+        unit 3181 {
+            description OESS-L2CCC-309261;
+            encapsulation vlan-ccc;
+            vlan-id 3181;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/1 {
+        description "pas-tst.dall, em2";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 301 {
+            description OESS-L2VPLS-311191;
+            encapsulation vlan-vpls;
+            vlan-id 301;
+            output-vlan-map swap;
+        }
+        unit 400 {
+            description "DALL Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.202/31;
+            }
+        }
+    }
+    xe-5/0/2 {
+        description "I2-S51450 NOAA | I2-DALL-DALL-10GE-51449";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 801 {
+            description OESS-L2CCC-315491;
+            encapsulation vlan-ccc;
+            vlan-id 801;
+            output-vlan-map swap;
+        }
+        unit 4067 {
+            description OESS-L2VPN-315541;
+            encapsulation vlan-ccc;
+            vlan-id 4067;
+            output-vlan-map swap;
+        }
+        unit 4069 {
+            description OESS-L2VPN-315511;
+            encapsulation vlan-ccc;
+            vlan-id 4069;
+            output-vlan-map swap;
+        }
+        unit 4071 {
+            description OESS-L2CCC-315501;
+            encapsulation vlan-ccc;
+            vlan-id 4071;
+            output-vlan-map swap;
+        }
+        unit 4073 {
+            description OESS-L2VPN-315581;
+            encapsulation vlan-ccc;
+            vlan-id 4073;
+            output-vlan-map swap;
+        }
+        unit 4075 {
+            description OESS-L2VPN-315531;
+            encapsulation vlan-ccc;
+            vlan-id 4075;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/3 {
+        description "I2-S11464 SoX | I2-DALL-DALL-10GE-11465";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 601 {
+            description OESS-L2VPN-313391;
+            encapsulation vlan-ccc;
+            vlan-id 601;
+            output-vlan-map swap;
+        }
+        unit 602 {
+            description OESS-L2VPN-313401;
+            encapsulation vlan-ccc;
+            vlan-id 602;
+            output-vlan-map swap;
+        }
+        unit 613 {
+            description OESS-L2CCC-338131;
+            encapsulation vlan-ccc;
+            vlan-id 613;
+            output-vlan-map swap;
+        }
+        unit 616 {
+            description OESS-L2VPN-313361;
+            encapsulation vlan-ccc;
+            vlan-id 616;
+            output-vlan-map swap;
+        }
+        unit 617 {
+            description OESS-L2VPN-313261;
+            encapsulation vlan-ccc;
+            vlan-id 617;
+            output-vlan-map swap;
+        }
+        unit 821 {
+            description OESS-L2VPN-312801;
+            encapsulation vlan-ccc;
+            vlan-id 821;
+            output-vlan-map swap;
+        }
+        unit 839 {
+            description OESS-L2VPN-312751;
+            encapsulation vlan-ccc;
+            vlan-id 839;
+            output-vlan-map swap;
+        }
+        unit 2116 {
+            description OESS-L2VPN-312761;
+            encapsulation vlan-ccc;
+            vlan-id 2116;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/1/0 {
+        apply-groups-except INTERFACE;
+        description "routing-instance trcps - [ae13] Amazon LAG | I2-DALL3-DALL3-FIBR-184226 [PENDING][18002:144]";
+        gigether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-5/1/1 {
+        apply-groups-except INTERFACE;
+        description "routing-instance trcps - [ae9] Microsoft LAG | I2-DALL3-DALL3-FIBR-184228";
+        gigether-options {
+            802.3ad ae9;
+        }
+    }
+    xe-5/1/2 {
+        description "AVAILABLE patched to wave-sw.dall 5.3 | [NO-MONITOR]";
+    }
+    xe-5/1/3 {
+        apply-groups-except INTERFACE;
+        description "[ae3] Facebook LAG | I2-DALL-DALL3-10GE-186314";
+        gigether-options {
+            802.3ad ae3;
+        }
+    }
+    xe-5/2/0 {
+        apply-groups-except INTERFACE;
+        description "routing-instance trcps - [ae10] Microsoft LAG | I2-DALL3-DALL3-FIBR-184229";
+        gigether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-5/2/1 {
+        apply-groups-except INTERFACE;
+        description "routing-instance trcps - [ae14] Amazon LAG | I2-DALL3-DALL3-FIBR-184227 [PENDING][18002:144]";
+        gigether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-5/2/2 {
+        apply-groups-except INTERFACE;
+        description "[ae6] Facebook LAG | I2-DALL-DALL3-10GE-186315";
+        gigether-options {
+            802.3ad ae6;
+        }
+    }
+    xe-5/2/3 {
+        apply-groups-except INTERFACE;
+        description "[ae0] Equinix Dallas public LAG";
+        gigether-options {
+            802.3ad ae0;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+        }
+    }
+    xe-5/3/0 {
+        apply-groups-except INTERFACE;
+        description "[ae2] apple AS714 LAG 2x10GE, Link #1 | I2-DALL-DALL3-10GE-70816";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-5/3/1 {
+        apply-groups-except INTERFACE;
+        description "Cox | I2-DALL-DALL3-10GE-70817";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Cox AS22773";
+            family inet {
+                mtu 1500;
+                address 70.167.150.169/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:578:20:8100::3:1/127;
+            }
+        }
+    }
+    xe-5/3/2 {
+        apply-groups-except INTERFACE;
+        description "[ae3] Facebook LAG | I2-DALL-DALL3-10GE-70818";
+        gigether-options {
+            802.3ad ae3;
+        }
+    }
+    xe-5/3/3 {
+        apply-groups-except INTERFACE;
+        description "[ae6] Facebook LAG #2 | I2-DALL-DALL3-10GE-70819";
+        gigether-options {
+            802.3ad ae6;
+        }
+    }
+    et-7/0/0 {
+        apply-groups-except INTERFACE;
+        description "[ae12] DALL-HOUS | I2-DALL-HOUS-100GE-186970";
+        gigether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-9/0/0 {
+        description "AVAILABLE patched to wave-sw.dall 8.1 | [NO-MONITOR]";
+    }
+    xe-9/0/1 {
+        description "AVAILABLE patched to wave-sw.dall 8.2 | [NO-MONITOR]";
+    }
+    xe-9/0/2 {
+        description "AVAILABLE patched to wave-sw.dall 8.3 | [NO-MONITOR]";
+    }
+    xe-9/0/3 {
+        description "Amazon AWS Direct Connect wave-sw 8.4 [PENDING][20160:144]";
+    }
+    et-9/1/0 {
+        description "I2-S11423 LEARN | I2-DALL-DALL-100GE-11424";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 301 {
+            description OESS-L2VPLS-311191;
+            encapsulation vlan-vpls;
+            vlan-id 301;
+            output-vlan-map swap;
+        }
+        unit 306 {
+            description OESS-L2VPN-322651;
+            encapsulation vlan-ccc;
+            vlan-id 306;
+            output-vlan-map swap;
+        }
+        unit 3725 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] LEARN | I2-S12076";
+            vlan-id 3725;
+            family inet {
+                mtu 9000;
+                address 74.200.187.38/30;
+            }
+        }
+        unit 3726 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] LEARN";
+            vlan-id 3726;
+            family inet6 {
+                mtu 9000;
+                address 2607:f928:2:11::2/64;
+            }
+        }
+        unit 3727 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] learn AS14085 v4 | I2-S55648";
+            vlan-id 3727;
+            family inet {
+                mtu 1500;
+                address 198.71.47.141/30;
+            }
+        }
+        unit 3728 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] learn AS14085 v6 | I2-S55790";
+            vlan-id 3728;
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2363::1/64;
+            }
+        }
+        unit 3791 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] LEARN AS22645 v4 & v6 | I2-S185856";
+            vlan-id 3791;
+            family inet {
+                mtu 1500;
+                address 198.71.47.12/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2653::1/64;
+            }
+        }
+        unit 4030 {
+            description OESS-L2VPN-318121;
+            encapsulation vlan-ccc;
+            vlan-id 4030;
+            output-vlan-map swap;
+        }
+        unit 4086 {
+            description OESS-L2VPN-317541;
+            encapsulation vlan-ccc;
+            vlan-id 4086;
+            output-vlan-map swap;
+        }
+        unit 4087 {
+            description OESS-L2VPN-317621;
+            encapsulation vlan-ccc;
+            vlan-id 4087;
+            output-vlan-map swap;
+        }
+    }
+    xe-9/2/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-9/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-9/2/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-9/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-9/3/0 {
+        apply-groups-except INTERFACE;
+        description "[ae12] DALL-HOUS | I2-DALL-HOUS-100GE-185848";
+        gigether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-11/0/0 {
+        description "TWC [snapp_private] | I2-DALL-DALL3-10GE-70820";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] TWCable AS7843 [snapp_private]";
+            family inet {
+                mtu 1500;
+                address 107.14.16.203/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:1998::8:0:0:0:fa/126;
+            }
+        }
+    }
+    xe-11/0/1 {
+        description "Netflix | I2-DALL-DALL3-10GE-70821";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Netflix AS2906";
+            family inet {
+                mtu 1500;
+                address 108.175.38.9/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:10c:7003:672a:01c::2/126;
+            }
+        }
+    }
+    xe-11/0/2 {
+        description "Microsoft Express Route Secondary | I2-DALL-DALL3-10GE-187234";
+    }
+    xe-11/0/3 {
+        description "Comast [snapp_private] | I2-DALL-DALL3-10GE-70823";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Comcast AS7922 [snapp_private] | I2-S55676";
+            family inet {
+                mtu 1500;
+                address 64.57.20.93/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:160a::1/64;
+            }
+        }
+    }
+    xe-11/1/0 {
+        apply-groups-except INTERFACE;
+        description "[ae0] Equinix Dallas public LAG (18849643) | I2-DALL-DALL3-10GE-70824";
+        gigether-options {
+            802.3ad ae0;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+        }
+    }
+    xe-11/1/1 {
+        apply-groups-except INTERFACE;
+        description "[ae1] Google PNI (18800554) | I2-DALL-DALL3-10GE-70825";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-11/1/2 {
+        description "Zayo AS6461 [snapp_private] | I2-DALL-DALL3-10GE-70826";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Zayo AS6461 [snapp_private] | I2-S55662";
+            family inet {
+                mtu 1500;
+                address 162.252.69.180/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1016::1/126;
+            }
+        }
+    }
+    xe-11/1/3 {
+        apply-groups-except INTERFACE;
+        description "[ae2] apple AS714 LAG 2x10GE, Link #2 | I2-DALL-DALL3-10GE-70827";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-11/2/0 {
+        description "Charter [snapp_private] | I2-DALL-DALL3-10GE-70828";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Charter AS20115 [snapp_private]";
+            family inet {
+                mtu 1500;
+                address 96.34.149.54/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:506:100:f305::2/126;
+            }
+        }
+    }
+    xe-11/2/1 {
+        apply-groups-except INTERFACE;
+        description "[ae1] Google PNI (1806963) | I2-DALL-DALL3-10GE-70829";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-11/2/2 {
+        apply-groups-except INTERFACE;
+        description "[ae0] Equinix Dallas public LAG (1727242) | I2-DALL-DALL3-10GE-70830";
+        gigether-options {
+            802.3ad ae0;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+        }
+    }
+    xe-11/2/3 {
+        apply-groups-except INTERFACE;
+        description "[ae7] Edgecast LAG | I2-DALL-DALL3-10GE-70831";
+        gigether-options {
+            802.3ad ae7;
+        }
+    }
+    xe-11/3/0 {
+        apply-groups-except INTERFACE;
+        description "[ae5] Google PNI #3 | I2-DALL-DALL3-10GE-70832";
+        gigether-options {
+            802.3ad ae5;
+        }
+    }
+    xe-11/3/1 {
+        apply-groups-except INTERFACE;
+        description "[ae5] Google PNI #4 | I2-DALL-DALL3-10GE-70833";
+        gigether-options {
+            802.3ad ae5;
+        }
+    }
+    xe-11/3/2 {
+        apply-groups-except INTERFACE;
+        description "[ae15] DALL-DALL3 | I2-DALL-DALL3-10GE-186814";
+        gigether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-11/3/3 {
+        apply-groups-except INTERFACE;
+        description "routing-instance trcps - [ae8] Fastly LAG | I2-DALL3-DALL3-FIBR-185350";
+        gigether-options {
+            802.3ad ae8;
+        }
+    }
+    ae0 {
+        description "trcps - Equinix Dallas public 3x10G LAG";
+        mtu 9192;
+        mac 00:23:9c:d6:20:29;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpsixp] Equinix Dallas public 3x10G LAG";
+            family inet {
+                mtu 1500;
+                address 206.223.118.32/24;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:504:0:5::1:1164:1/64;
+            }
+        }
+    }
+    ae1 {
+        description "trcps - Google PNI 2x10G LAG";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Google AS15169 2x10G LAG";
+            family inet {
+                mtu 1500;
+                address 162.252.69.176/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1012::1/126;
+            }
+        }
+    }
+    ae2 {
+        description "trcps - Peer AS714 LAG 2x10GE";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Apple AS714 2x10G LAG";
+            family inet {
+                mtu 9000;
+                address 17.1.138.2/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2620:149:bb:8a10::2/126;
+            }
+        }
+    }
+    ae3 {
+        description "trcps - Peer facebook 2x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] facebook AS32934 2x10G LAG";
+            family inet {
+                mtu 1500;
+                address 103.4.97.243/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:0:1cff:dead:beee::2a5/127;
+            }
+        }
+    }
+    ae4 {
+        description "I2-S53585 TRCPS to rtr.dall3:ae4 | I2-DALL-DALL3-LAG-56598 [NO-MONITOR]";
+        disable;
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+    }
+    ae5 {
+        description "trcps - Google PNI 2x10G LAG";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Google AS15169 2x10G LAG";
+            family inet {
+                mtu 1500;
+                address 162.252.69.164/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1007::1/126;
+            }
+        }
+    }
+    ae6 {
+        description "trcps - Peer facebook 2x10G LAG";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] facebook AS32934 2x10G LAG";
+            family inet {
+                mtu 1500;
+                address 162.252.69.184/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1018::1/126;
+            }
+        }
+    }
+    ae7 {
+        description "trcps - Peer Edgecast 1x10G LAG";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Edgecast AS15133 1x10G LAG";
+            family inet {
+                mtu 1500;
+                address 162.252.69.166/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1019::1/126;
+            }
+        }
+    }
+    ae8 {
+        description "routing-instance trcps - Peer Fastly 1x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Fastly AS54113 1x10G LAG | I2-S184189";
+            family inet {
+                mtu 1500;
+                address 199.27.73.213/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:011a:c000:0106:fa57::1/127;
+            }
+        }
+    }
+    ae9 {
+        description "routing-instance trcps - Peer Microsoft 1x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Microsoft AS8075 1x10G LAG | I2-S55690";
+            family inet {
+                mtu 1500;
+                address 104.44.12.159/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2a01:111:2000:1::dea/126;
+            }
+        }
+    }
+    ae10 {
+        description "routing-instance trcps - Peer Microsoft 1x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Microsoft AS8075 1x10G LAG | I2-S55690";
+            family inet {
+                mtu 1500;
+                address 104.44.12.157/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2a01:111:2000:1::de6/126;
+            }
+        }
+    }
+    ae11 {
+        description "BACKBONE: DALL-KANS LAG | I2-DALL-KANS-LAG-185424";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DALL-KANS | I2-DALL-KANS-VLAN-185541";
+            vlan-id 4079;
+            family inet {
+                mtu 9170;
+                address 162.252.70.142/31;
+            }
+            family inet6 {
+                mtu 9170;
+                address 2001:468:fc:68::1/64;
+            }
+            family mpls {
+                mtu 9170;
+            }
+        }
+    }
+    ae12 {
+        description "BACKBONE: DALL-HOUS LAG | I2-DALL-HOUS-LAG-185849";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DALL-HOUS | I2-DALL-HOUS-VLAN-185855";
+            vlan-id 4079;
+            family inet {
+                mtu 9170;
+                address 162.252.70.134/31;
+            }
+            family inet6 {
+                mtu 9170;
+                address 2001:468:fc:64::1/64;
+            }
+            family mpls {
+                mtu 9170;
+            }
+        }
+    }
+    ae13 {
+        description "routing-instance trcps - Peer Amazon 1x10G LAG [PENDING][18002:144]";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Amazon AS16509 1x10G LAG | I2-S556609 [PENDING][18002:144]";
+            family inet {
+                mtu 1500;
+                address 52.46.166.21/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:107:4008:2c8::2/64;
+            }
+        }
+    }
+    ae14 {
+        description "routing-instance trcps - Peer Amazon 1x10G LAG [PENDING][18002:144]";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Amazon AS16509 1x10G LAG | I2-S556609 [PENDING][18002:144]";
+            family inet {
+                mtu 1500;
+                address 52.46.166.23/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:107:4008:2c9::2/64;
+            }
+        }
+    }
+    ae15 {
+        description "BACKBONE: DALL-DALL3 LAG | I2-DALL-DALL3-LAG-186816";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DALL-DALL3 | I2-DALL-DALL3-VLAN-186817";
+            vlan-id 4079;
+            family inet {
+                mtu 9170;
+                address 162.252.70.157/31;
+            }
+            family inet6 {
+                mtu 9170;
+                address 2001:468:fc:6d::2/64;
+            }
+            family mpls {
+                mtu 9170;
+            }
+        }
+    }
+}

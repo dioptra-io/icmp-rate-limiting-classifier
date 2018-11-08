@@ -1,0 +1,854 @@
+interfaces {
+    et-1/0/0 {
+        description "[ae1] HOUH-HOUS | I2-HOUH-HOUS-100GE-09174";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    ge-1/2/0 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/1 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/2 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/3 {
+        description "I2-S06738 DCN dcn-sw.hous ge-0/2/22 | I2-HOUS-HOUS-GIGE-06814";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 553 {
+            description "I2-S06738 DCN HOUS-KANS | I2-HOUS-KANS-LSP-06757";
+            encapsulation vlan-ccc;
+            vlan-id 553;
+            family ccc;
+        }
+        unit 554 {
+            description "I2-S06738 DCN HOUS-LOSA | I2-HOUS-LOSA-LSP-06758";
+            encapsulation vlan-ccc;
+            vlan-id 554;
+            family ccc;
+        }
+        unit 2702 {
+            description "AL2S ATLA-HOUS OOB";
+            vlan-id 2702;
+            family inet {
+                mtu 1500;
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.114/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.115;
+                        priority 20;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2705 {
+            description "AL2S HOUS-LOSA OOB";
+            vlan-id 2705;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.185/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.187;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2706 {
+            description "AL2S HOUS-KANS OOB";
+            vlan-id 2706;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.97/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.99;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2707 {
+            description "AL2S HOUS-ATLA OOB #2";
+            vlan-id 2707;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.24.194/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.24.195;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2709 {
+            description "AL2S ATLA-HOUS OOB #3";
+            vlan-id 2709;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.24.221/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.24.220;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+    }
+    ge-1/2/4 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/5 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/6 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/7 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/8 {
+        description "AVAILABLE 1GE, T OPTIC | [NO-MONITOR]";
+    }
+    ge-1/2/9 {
+        description "AVAILABLE 1GE, SX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/0 {
+        description "[RE]Faces AT&T for LONI Layer-II Bridge | I2-HOUS-HOUS-GIGE-05884";
+        mtu 9192;
+        encapsulation ethernet-ccc;
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 0 {
+            description "Layer-II Bridge for Tulane University | I2-S71410 | I2-HOUS-HOUS-VLAN-58026";
+        }
+    }
+    ge-1/3/1 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/2 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/3 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/4 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/5 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/6 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/7 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/8 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-1/3/9 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/0/0 {
+        description "to LAN.HOUS port D1";
+        vlan-tagging;
+        mtu 9180;
+        encapsulation flexible-ethernet-services;
+        unit 10 {
+            description "Racklan #3 Backup Gateway";
+            vlan-id 10;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                filter {
+                    output racklan-access;
+                }
+                address 64.57.24.97/27;
+            }
+        }
+        unit 11 {
+            description "[RE]Observatory 10G";
+            vlan-id 11;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                filter {
+                    output obs-out;
+                }
+                address 64.57.16.129/28;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                filter {
+                    output obs-out6;
+                }
+                address 2001:468:3:11::1/64;
+                address 2001:468:3:11::16:129/64;
+            }
+        }
+        unit 12 {
+            description "[RE]Observatory 1G";
+            vlan-id 12;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                filter {
+                    output obs-out;
+                }
+                address 64.57.16.161/28;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                filter {
+                    output obs-out6;
+                }
+                address 2001:468:3:12::1/64;
+                address 2001:468:3:12::16:161/64;
+            }
+        }
+        unit 20 {
+            description "[RE]HOUS VINI Mgmt";
+            vlan-id 20;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.18.201/29;
+            }
+        }
+        unit 21 {
+            description "[RE]HOUS VINI Data";
+            vlan-id 21;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.18.33/28;
+            }
+        }
+        unit 80 {
+            description "[RE]HOUS 100x100 Inband";
+            vlan-id 80;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.23.73/29;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                address 2001:468:3:30::1/64;
+                address 2001:468:3:30::23:73/64;
+            }
+        }
+        unit 81 {
+            description "[RE]HOUS 100x100 Mgmt";
+            vlan-id 81;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.23.105/29;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                address 2001:468:3:31::1/64;
+                address 2001:468:3:31::23:105/64;
+            }
+        }
+        unit 95 {
+        }
+    }
+    xe-5/0/1 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "[NETPLUS] I2-S10326 Aastra Clearspan SIP | I2-HOUS-HOUS-GIGE-08387";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 80 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]SIP Public";
+            vlan-id 80;
+            family inet {
+                mtu 9000;
+                address 64.57.22.209/28;
+            }
+        }
+        unit 81 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]SIP Public 2";
+            vlan-id 81;
+            family inet {
+                mtu 9000;
+                address 64.57.22.177/28;
+            }
+        }
+        unit 85 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]SIP Application Servers";
+            vlan-id 85;
+            family inet {
+                rpf-check;
+                mtu 1500;
+                filter {
+                    input SIP-APPSERV-IN;
+                    output SIP-APPSERV-OUT;
+                }
+                address 64.57.22.233/29;
+            }
+        }
+        unit 90 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]SIP Private";
+            vlan-id 90;
+            family inet {
+                mtu 9000;
+                address 192.168.2.1/24;
+            }
+        }
+        unit 1000 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Level3 SIP Trunk (wholesale:I2_VoIP_VPN_01)";
+            vlan-id 1000;
+            family inet {
+                mtu 1500;
+                address 64.57.28.90/30;
+            }
+        }
+        unit 1001 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Level3 SIP Trunk (enterprise:I2_VoIP_VPN_02)";
+            vlan-id 1001;
+            family inet {
+                mtu 1500;
+                address 64.57.28.150/30;
+            }
+        }
+    }
+    xe-5/0/2 {
+        description "[VS-SRV] vs-srv port em4";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/0/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    et-5/1/0 {
+        description "[ae2] DALL-HOUS | I2-DALL-HOUS-100GE-185848";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-5/2/0 {
+        description "[VS-SW] vs-sw, port 2";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/2/1 {
+        description "[VS-SW] vs-sw, port 3";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/2/2 {
+        description "[VS-SW] vs-sw, port 4";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/2/3 {
+        description "[VS-SW] vs-sw, port 5";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    et-5/3/0 {
+        description "I2-S188429 MissiON | I2-HOUS-JCSN-100GE-187848";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 1265 {
+            description OESS-L2VPN-364261;
+            encapsulation vlan-ccc;
+            vlan-id 1265;
+            output-vlan-map swap;
+        }
+        unit 2006 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Mississippi Optical Network (MissiON) | I2-S06927";
+            vlan-id 2006;
+            family inet {
+                address 173.235.100.13/31;
+            }
+            family inet6 {
+                address 2607:f4a0:5010:6::2/64;
+            }
+        }
+        unit 2007 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] mission AS396926 | I2-S55747";
+            vlan-id 2007;
+            family inet {
+                mtu 1500;
+                address 173.235.100.15/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2607:f4a0:5010:7::2/64;
+            }
+        }
+        unit 3000 {
+            description OESS-L2VPN-364301;
+            encapsulation vlan-ccc;
+            vlan-id 3000;
+            output-vlan-map swap;
+        }
+    }
+    xe-7/0/0 {
+        description "[ae3] DALL3-HOUS | I2-DALL3-HOUS-10GE-186815";
+        gigether-options {
+            802.3ad ae3;
+        }
+    }
+    xe-7/0/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/0/2 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/0/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    et-7/1/0 {
+        description "[ae2] DALL-HOUS | I2-DALL-HOUS-100GE-186970";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-7/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/2 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    et-7/3/0 {
+        description "I2-S188392 FLR | I2-HOUS-PENS-100GE-188391 [PENDING][18808:144]";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 65 {
+            description OESS-L2CCC-368171;
+            encapsulation vlan-ccc;
+            vlan-id 65;
+            output-vlan-map swap;
+        }
+        unit 66 {
+            description OESS-L2CCC-368151;
+            encapsulation vlan-ccc;
+            vlan-id 66;
+            output-vlan-map swap;
+        }
+        unit 103 {
+            description OESS-L2CCC-368141;
+            encapsulation vlan-ccc;
+            vlan-id 103;
+            output-vlan-map swap;
+        }
+        unit 224 {
+            description OESS-L2CCC-368161;
+            encapsulation vlan-ccc;
+            vlan-id 224;
+            output-vlan-map swap;
+        }
+        unit 1781 {
+            description "[RE] FLR AS11096 | I2-S12519 [PENDING][18808:144]";
+            vlan-id 1781;
+            family inet {
+                mtu 9000;
+                address 108.59.25.43/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2607:f5d8:2:d103::2/64;
+            }
+        }
+        unit 1782 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] flr AS11096 | I2-S186244 [PENDING][18808:144]";
+            vlan-id 1782;
+            family inet {
+                mtu 1500;
+                address 198.71.47.70/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:270b::1/126;
+            }
+        }
+        unit 1783 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] FLR [snapp_private] | I2-S185640 [PENDING][18808:144]";
+            vlan-id 1783;
+            family inet {
+                mtu 9000;
+                address 163.253.4.44/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:fb:1b::1/126;
+            }
+        }
+    }
+    inactive: ge-10/0/0 {
+        description lan.hous.net.internet2.edu:A23;
+        vlan-tagging;
+        mtu 9180;
+        unit 10 {
+            description "Racklan #3 Backup Gateway";
+            vlan-id 10;
+            family inet {
+                mtu 9000;
+                filter {
+                    output racklan-access;
+                }
+                address 64.57.24.97/27;
+            }
+        }
+        unit 12 {
+            description "[RE]Observatory 1G";
+            vlan-id 12;
+            family inet {
+                mtu 9000;
+                filter {
+                    output obs-out;
+                }
+                address 64.57.16.161/28;
+            }
+            family inet6 {
+                mtu 9000;
+                filter {
+                    output obs-out6;
+                }
+                address 2001:468:3:12::1/64;
+                address 2001:468:3:12::16:161/64;
+            }
+        }
+    }
+    inactive: ge-10/0/1 {
+    }
+    inactive: ge-10/0/2 {
+    }
+    inactive: ge-10/0/3 {
+        description "I2-S06738 DCN dcn-sw.hous ge-0/0/22 | I2-HOUS-HOUS-GIGE-06814";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 553 {
+            description "I2-S06738 DCN HOUS-KANS | I2-HOUS-KANS-LSP-06757";
+            encapsulation vlan-ccc;
+            vlan-id 553;
+            family ccc;
+        }
+        unit 554 {
+            description "I2-S06738 DCN HOUS-LOSA | I2-HOUS-LOSA-LSP-06758";
+            encapsulation vlan-ccc;
+            vlan-id 554;
+            family ccc;
+        }
+        inactive: unit 2702 {
+            description "AL2S ATLA-HOUS OOB";
+            vlan-id 2702;
+            family inet {
+                mtu 1500;
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.114/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.115;
+                        priority 20;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2705 {
+            description "AL2S HOUS-LOSA OOB";
+            vlan-id 2705;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.185/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.187;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2706 {
+            description "AL2S HOUS-KANS OOB";
+            vlan-id 2706;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.97/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.99;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        inactive: unit 2707 {
+            description "AL2S HOUS-ATLA OOB #2";
+            vlan-id 2707;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.24.194/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.24.195;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        inactive: unit 2709 {
+            description "AL2S ATLA-HOUS OOB #3";
+            vlan-id 2709;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.24.221/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.24.220;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+    }
+    inactive: ge-10/0/4 {
+        description "[RE]of.hous, Gi0/1 | I2-HOUS-HOUS-GIGE-08849";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 3003 {
+            apply-groups-except [ INTERFACE-BACKBONE INTERFACE-CONNECTOR ];
+            description "[RE]NMS-oexp (standford 100x100 interconnect) to WASH";
+            encapsulation vlan-ccc;
+            vlan-id 3003;
+        }
+        unit 3004 {
+            apply-groups-except [ INTERFACE-BACKBONE INTERFACE-CONNECTOR ];
+            description "[RE]NMS-oexp (standford 100x100 interconnect) to LOSA";
+            encapsulation vlan-ccc;
+            vlan-id 3004;
+        }
+        unit 3006 {
+            apply-groups-except [ INTERFACE-BACKBONE INTERFACE-CONNECTOR ];
+            description "[RE]NMS-oexp (standford 100x100 interconnect) to NEWY";
+            encapsulation vlan-ccc;
+            vlan-id 3006;
+        }
+    }
+    inactive: ge-10/0/5 {
+        description "of.hous, Gi0/2 via fiber patch I2-HOUS-HOUS-FIBR-6088";
+        mtu 9170;
+        encapsulation ethernet-ccc;
+        unit 0 {
+            description "[RE]OF LSP BACKBONE: ATLA-HOUS | I2-ATLA-HOUS-LSP-5984";
+            family ccc;
+        }
+    }
+    inactive: ge-10/0/6 {
+        description "of.hous, Gi0/3 via fiber patch I2-HOUS-HOUS-FIBR-6089";
+        mtu 9170;
+        encapsulation ethernet-ccc;
+        unit 0 {
+            description "[RE]OF LSP BACKBONE: HOUS-LOSA | I2-HOUS-LOSA-LSP-5985";
+            family ccc;
+        }
+    }
+    inactive: ge-10/0/7 {
+    }
+    inactive: ge-10/0/8 {
+    }
+    inactive: ge-10/1/0 {
+        description "[RE]Faces AT&T for LONI Layer-II Bridge | I2-HOUS-HOUS-GIGE-05884";
+        mtu 9192;
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 0 {
+            family bridge {
+                interface-mode access;
+                vlan-id 620;
+            }
+        }
+    }
+    inactive: ge-10/1/1 {
+        description "[RE]I2-HOUS-KANS-LSP-05981 Protogeni C23";
+        encapsulation ethernet-ccc;
+        unit 0 {
+            family ccc;
+        }
+    }
+    inactive: ge-10/1/2 {
+        description "[RE]I2-ATLA-HOUS-LSP-05978 Protogeni C22";
+        encapsulation ethernet-ccc;
+        unit 0 {
+            family ccc;
+        }
+    }
+    inactive: ge-10/1/3 {
+        description "[RE]I2-HOUS-LOSA-LSP-05979 Protogeni C24";
+        encapsulation ethernet-ccc;
+        unit 0 {
+            family ccc;
+        }
+    }
+    inactive: ge-10/1/4 {
+        description "[RE]Protogeni Port C21 (ION)";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    et-10/2/0 {
+        description "[ae1] HOUH-HOUS | I2-HOUH-HOUS-100GE-09379";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    ae1 {
+        description "BACKBONE: HOUH-HOUS | I2-HOUH-HOUS-LAG-185799";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 401 {
+            description "HOUS Performance Assurance Host";
+            vlan-id 401;
+            family inet;
+        }
+        unit 3060 {
+            description "Layer-II Bridge for Tulane University | I2-S71410 | I2-HOUS-HOUS-VLAN-58026";
+            encapsulation vlan-ccc;
+            vlan-id 3060;
+            input-vlan-map pop;
+            output-vlan-map push;
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: HOUH-HOUS | I2-HOUH-HOUS-VLAN-185800";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.17/31;
+            }
+            family inet6 {
+                address 2001:468:fc:3a::1/64;
+            }
+        }
+    }
+    ae2 {
+        description "BACKBONE: DALL-HOUS LAG | I2-DALL-HOUS-LAG-185849";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DALL-HOUS | I2-DALL-HOUS-VLAN-185855";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.135/31;
+            }
+            family inet6 {
+                address 2001:468:fc:64::2/64;
+            }
+        }
+    }
+    ae3 {
+        description "BACKBONE: DALL3-HOUS LAG | I2-DALL3-HOUS-LAG-186818";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DALL3-HOUS | I2-DALL3-HOUS-VLAN-186819";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.161/31;
+            }
+            family inet6 {
+                address 2001:468:fc:6e::2/64;
+            }
+        }
+    }
+}

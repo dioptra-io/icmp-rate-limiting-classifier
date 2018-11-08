@@ -1,0 +1,312 @@
+interfaces {
+    xe-0/0/0 {
+        description "[ae1] PAIX-SUNN | I2-PAIX-SUNN-10GE-05846";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-0/1/0 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "routing-instance trcps - CENIC/CalREN #1 | I2-PAIX-PAIX-10GE-184789";
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] CENIC/CalREN AS2152 #1 via direct";
+            family inet {
+                mtu 1500;
+                filter {
+                    input-list [ cenic-filter-in connector-in ];
+                }
+                address 64.57.21.4/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2401::1/64;
+            }
+        }
+    }
+    xe-0/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-0/3/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-1/0/0 {
+        description "[ae1] PAIX-SUNN | I2-PAIX-SUNN-10GE-25750";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-1/1/0 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "routing-instance trcps - CENIC/CalREN #2 | I2-PAIX-PAIX-10GE-184790";
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] CENIC/CalREN AS2152 #2 via direct";
+            family inet {
+                mtu 1500;
+                address 64.57.21.6/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2402::1/64;
+            }
+        }
+    }
+    xe-1/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-1/3/0 {
+        description "[ae0] Equinix SV8 IXP (17352202) 10GE Link #1 | I2-PAIX-PAIX-10GE-55613";
+        gigether-options {
+            802.3ad ae0;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+            ignore-l3-incompletes;
+        }
+    }
+    xe-2/0/0 {
+        description "routing-instance trcps - [ae2] Fastly LAG | I2-PAIX-PAIX-10GE-185872";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-2/1/0 {
+        description "[ae0] Equinix SV8 IXP (17352204) 10GE Link #2 | I2-PAIX-PAIX-10GE-55614";
+        gigether-options {
+            802.3ad ae0;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+            ignore-l3-incompletes;
+        }
+    }
+    xe-2/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | PP:123567:19/20 [6354:121] [NO-MONITOR]";
+    }
+    xe-7/0/0 {
+        description "trcps Google PNI";
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Google AS15169";
+            family inet {
+                mtu 1500;
+                address 162.252.69.168/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1008::1/126;
+            }
+        }
+    }
+    xe-7/1/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/0 {
+        description "[ae1] PAIX-SUNN | I2-PAIX-SUNN-10GE-69828";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-7/3/0 {
+        description "[ae1] PAIX-SUNN | I2-PAIX-SUNN-10GE-69829";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    ge-9/0/0 {
+        description "SERVICENOW | I2-S52146 | I2-PAIX-PAIX-GIGE-52892";
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] SERVICENOW | I2-S52146 | I2-PAIX-PAIX-GIGE-52892";
+            family inet {
+                mtu 1500;
+                address 64.57.28.30/31;
+            }
+        }
+    }
+    ge-9/0/1 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/0/2 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/0/3 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/0/4 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/0/5 {
+        description "sw.paix, C11";
+        vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        mac 00:26:88:c8:00:52;
+        unit 3 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]PAIX Palo Alto Multicast VLAN (10G)";
+            vlan-id 3;
+            family inet {
+                mtu 1500;
+                address 198.32.177.189/24;
+            }
+        }
+        unit 10 {
+            description "PAIX Racklan";
+            vlan-id 10;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 1500;
+                filter {
+                    output racklan-access;
+                }
+                address 64.57.28.129/28;
+            }
+        }
+    }
+    ge-9/0/6 {
+        description "AVAILABLE 1GE, LX OPTIC, Previously BOX [10378:144] | [NO-MONITOR]";
+    }
+    ge-9/0/7 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/0/8 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/0/9 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/1/0 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/1/2 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/1/3 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/1/4 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/1/5 {
+        description "Blue Jeans Network";
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Blue Jeans Network";
+            family inet {
+                address 198.71.45.158/31;
+            }
+            family inet6 {
+                address 2001:468:15:8000::/127;
+            }
+        }
+    }
+    ge-9/1/7 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+        speed 100m;
+        link-mode full-duplex;
+    }
+    ge-9/1/8 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    ge-9/1/9 {
+        description "AVAILABLE 1GE, LX OPTIC | [NO-MONITOR]";
+    }
+    xe-9/2/0 {
+        description "trcps Comcast AS7922 PNI [snapp_private]";
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Comcast AS7922 [snapp_private]";
+            family inet {
+                mtu 1500;
+                address 66.208.233.122/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:559::38a/126;
+            }
+        }
+    }
+    xe-9/3/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    ae0 {
+        description "[ae0] Equinix SV8 IXP 2x10GE LAG | I2-PAIX-PAIX-LAG-55615";
+        vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        mac 00:23:9c:d5:a7:c0;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 6 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "vrf trcps - [trcpsixp] Equinix SV8 IXP (2234240)";
+            vlan-id 6;
+            family inet {
+                mtu 1500;
+                address 198.32.176.128/24;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:504:d::1:1164:2/64;
+            }
+        }
+    }
+    ae1 {
+        apply-groups INTERFACE-BACKBONE;
+        description "BACKBONE: PAIX-SUNN 4x10GE | I2-PAIX-SUNN-LAG-69830";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 10 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: PAIX-SUNN R&E VLAN via LAG | I2-PAIX-SUNN-VLAN-70166";
+            vlan-id 10;
+            family inet {
+                address 198.71.46.8/31;
+            }
+            family inet6 {
+                address 2001:468:10:2::1/64;
+            }
+        }
+    }
+    ae2 {
+        description "routing-instance trcps - Peer Fastly 1x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Fastly AS54113 1x10G LAG | I2-S184189";
+            family inet {
+                mtu 1500;
+                address 103.244.50.77/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:011a:c000:0166:fa57::1/127;
+            }
+        }
+    }
+}

@@ -1,0 +1,332 @@
+interfaces {
+    et-3/0/0 {
+        description "I2-S54545 NOX | I2-ALBA-ALBA-100GE-54544";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 114 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] Northern Crossroads | I2-S12532";
+            vlan-id 114;
+            family inet {
+                address 192.5.89.254/30;
+            }
+            family inet6 {
+                address 2001:468:2300:c::2/64;
+            }
+        }
+        unit 124 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] NOX AS10578 | I2-S55788";
+            vlan-id 124;
+            family inet {
+                mtu 1500;
+                address 64.57.20.18/31;
+            }
+            family inet6;
+        }
+        unit 125 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] NOX AS10578 v6-only | I2-S55788";
+            vlan-id 125;
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2108::1/64;
+            }
+        }
+        unit 3502 {
+            description OESS-L2VPN-311541;
+            encapsulation vlan-ccc;
+            vlan-id 3502;
+            output-vlan-map swap;
+        }
+        unit 3504 {
+            description OESS-L2VPN-311561;
+            encapsulation vlan-ccc;
+            vlan-id 3504;
+            output-vlan-map swap;
+        }
+        unit 3631 {
+            description OESS-L2VPN-343561;
+            encapsulation vlan-ccc;
+            vlan-id 3631;
+            output-vlan-map swap;
+        }
+        unit 3636 {
+            description OESS-L2CCC-344541;
+            encapsulation vlan-ccc;
+            vlan-id 3636;
+            output-vlan-map swap;
+        }
+        unit 3638 {
+            description OESS-L2VPN-342991;
+            encapsulation vlan-ccc;
+            vlan-id 3638;
+            output-vlan-map swap;
+        }
+        unit 3639 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-oshean] via NOX | I2-S185865";
+            vlan-id 3639;
+            family inet {
+                address 163.253.7.14/31;
+            }
+        }
+    }
+    et-4/0/0 {
+        description "BACKBONE: ALBA-CLEV | I2-ALBA-CLEV-100GE-07735";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ALBA-CLEV | I2-ALBA-CLEV-VLAN-70580";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.92/31;
+            }
+            family inet6 {
+                address 2001:468:fc:58::1/64;
+            }
+        }
+    }
+    xe-5/0/0 {
+        description "pas-tst.alba, em1";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 121 {
+            description OESS-L2CCC-308801;
+            encapsulation vlan-ccc;
+            vlan-id 121;
+            output-vlan-map swap;
+        }
+        unit 705 {
+            description OESS-L2CCC-308811;
+            encapsulation vlan-ccc;
+            vlan-id 705;
+            output-vlan-map swap;
+        }
+        unit 2902 {
+            description OESS-L2CCC-308851;
+            encapsulation vlan-ccc;
+            vlan-id 2902;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/1 {
+        description "pas-tst.alba, em2";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "ALBA Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.66/31;
+            }
+        }
+    }
+    xe-5/0/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/0/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/2 {
+        description "I2-S11606 UVM | I2-ALBA-ALBA-10GE-11617";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 1080 {
+            apply-groups INTERFACE-CONNECTOR;
+            enable;
+            description "[RE] UVM | I2-S12861";
+            vlan-id 1080;
+            family inet {
+                mtu 9000;
+                address 132.198.255.162/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2620:104:e000:ab::2/64;
+            }
+        }
+        unit 1082 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] uvm AS1351 | I2-S5567";
+            vlan-id 1082;
+            family inet {
+                mtu 1500;
+                address 198.71.47.169/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2168::1/64;
+            }
+        }
+        unit 1161 {
+            description OESS-L2VPLS-313051;
+            encapsulation vlan-vpls;
+            vlan-id 1161;
+            output-vlan-map swap;
+        }
+        unit 1756 {
+            description OESS-L2VPN-363181;
+            encapsulation vlan-ccc;
+            vlan-id 1756;
+            output-vlan-map swap;
+        }
+        unit 1781 {
+            description OESS-L2VPN-363161;
+            encapsulation vlan-ccc;
+            vlan-id 1781;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/2/3 {
+        description "I2-S11609 UNH | I2-ALBA-ALBA-10GE-11621";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 1270 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] UNH | I2-S55071";
+            vlan-id 1270;
+            family inet {
+                address 158.136.8.25/30;
+            }
+        }
+        unit 1271 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] UNH | I2-S55789";
+            vlan-id 1271;
+            family inet {
+                mtu 1500;
+                address 158.136.8.29/30;
+            }
+        }
+    }
+    xe-5/3/0 {
+        description "I2-S11610 DART | I2-ALBA-ALBA-10GE-11619";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 1090 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] Dartmouth | I2-S12862";
+            vlan-id 1090;
+            family inet {
+                mtu 9000;
+                address 129.170.9.241/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2604:5f00:ffff:ffff::1/64;
+            }
+        }
+        unit 1091 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] dartmouth AS10755 | I2-S55668";
+            vlan-id 1091;
+            family inet {
+                mtu 1500;
+                address 198.71.47.173/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2169::1/64;
+            }
+        }
+        unit 1161 {
+            description OESS-L2VPLS-313051;
+            encapsulation vlan-vpls;
+            vlan-id 1161;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/3/1 {
+        description "I2-S11608 UMS | I2-ALBA-ALBA-10GE-11620";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 110 {
+            apply-groups INTERFACE-CONNECTOR;
+            enable;
+            description "[RE] UMS | I2-S53461";
+            vlan-id 110;
+            family inet {
+                mtu 9000;
+                address 130.111.0.85/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2610:48:0:a::2/126;
+            }
+        }
+        unit 120 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] UMS AS557 | I2-S55781";
+            vlan-id 120;
+            family inet {
+                mtu 1500;
+                address 130.111.0.87/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2610:48:0:a::6/126;
+            }
+        }
+        unit 2153 {
+            description OESS-L2VPN-313001;
+            encapsulation vlan-ccc;
+            vlan-id 2153;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/3/2 {
+        description "I2-S11607 UVM | I2-ALBA-ALBA-10GE-11618";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/3/3 {
+        description "I2-S11611 DART | I2-ALBA-ALBA-10GE-11622";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+    }
+    et-7/0/0 {
+        description "BACKBONE: ALBA-BOST | I2-ALBA-BOST-100GE-09210";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ALBA-BOST | I2-ALBA-BOST-VLAN-70581";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.96/31;
+            }
+            family inet6 {
+                address 2001:468:fc:59::1/64;
+            }
+        }
+    }
+    et-8/0/0 {
+        description "AVAILABLE 100GE, LR10 OPTIC | [NO-MONITOR]";
+        disable;
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+    }
+}

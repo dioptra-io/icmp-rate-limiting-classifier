@@ -2,16 +2,14 @@ import glob
 import math
 import os
 
-from IPython import display
-from matplotlib import cm
-from matplotlib import gridspec
-from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
+# import seaborn as sns
 from sklearn import metrics
 import tensorflow as tf
 from tensorflow.python.data import Dataset
+from plot_metrics import plot_metrics
+
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
@@ -204,25 +202,28 @@ def train_nn_classification_model(
     accuracy = metrics.accuracy_score(validation_targets, final_predictions)
     print("Final accuracy (on validation data): %0.3f" % accuracy)
 
-    # Output a graph of loss metrics over periods.
-    plt.ylabel("LogLoss")
-    plt.xlabel("Periods")
-    plt.title("LogLoss vs. Periods")
-    plt.plot(training_errors, label="training")
-    plt.plot(validation_errors, label="validation")
-    plt.legend()
-    plt.show()
+    # # Output a graph of loss metrics over periods.
+    # plt.ylabel("LogLoss")
+    # plt.xlabel("Periods")
+    # plt.title("LogLoss vs. Periods")
+    # plt.plot(training_errors, label="training")
+    # plt.plot(validation_errors, label="validation")
+    # plt.legend()
+    # plt.show()
+    #
+    # # Output a plot of the confusion matrix.
+    # cm = metrics.confusion_matrix(validation_targets, final_predictions)
+    # # Normalize the confusion matrix by row (i.e by the number of samples
+    # # in each class).
+    # cm_normalized = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
+    # ax = sns.heatmap(cm_normalized, cmap="bone_r")
+    # ax.set_aspect(1)
+    # plt.title("Confusion matrix")
+    # plt.ylabel("True label")
+    # plt.xlabel("Predicted label")
+    # plt.show()
 
-    # Output a plot of the confusion matrix.
-    cm = metrics.confusion_matrix(validation_targets, final_predictions)
-    # Normalize the confusion matrix by row (i.e by the number of samples
-    # in each class).
-    cm_normalized = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
-    ax = sns.heatmap(cm_normalized, cmap="bone_r")
-    ax.set_aspect(1)
-    plt.title("Confusion matrix")
-    plt.ylabel("True label")
-    plt.xlabel("Predicted label")
-    plt.show()
+    plot_metrics(training_errors, validation_errors, validation_targets, final_predictions)
+
 
     return classifier

@@ -1,0 +1,251 @@
+interfaces {
+    et-4/0/0 {
+        description "BACKBONE: HOUH-JCSN | I2-HOUH-JCSN-100GE-10783";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: HOUH-JCSN | I2-HOUH-JCSN-VLAN-70247";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.45/31;
+            }
+            family inet6 {
+                address 2001:468:fc:47::2/64;
+            }
+        }
+    }
+    xe-5/0/0 {
+        description "pas-tst.jcsn, em1";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 185 {
+            description OESS-L2CCC-309531;
+            encapsulation vlan-ccc;
+            vlan-id 185;
+            output-vlan-map swap;
+        }
+        unit 193 {
+            description OESS-L2CCC-309541;
+            encapsulation vlan-ccc;
+            vlan-id 193;
+            output-vlan-map swap;
+        }
+        unit 818 {
+            description OESS-L2CCC-309501;
+            encapsulation vlan-ccc;
+            vlan-id 818;
+            output-vlan-map swap;
+        }
+        unit 820 {
+            description OESS-L2CCC-309021;
+            encapsulation vlan-ccc;
+            vlan-id 820;
+            output-vlan-map swap;
+        }
+        unit 3179 {
+            description OESS-L2CCC-309381;
+            encapsulation vlan-ccc;
+            vlan-id 3179;
+            output-vlan-map swap;
+        }
+        unit 3181 {
+            description OESS-L2CCC-309261;
+            encapsulation vlan-ccc;
+            vlan-id 3181;
+            output-vlan-map swap;
+        }
+        unit 3182 {
+            description OESS-L2CCC-309011;
+            encapsulation vlan-ccc;
+            vlan-id 3182;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/1 {
+        description "pas-tst.jcsn, em2";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "JCSN Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.45.132/31;
+            }
+        }
+    }
+    xe-5/0/2 {
+        description "I2-S53642 USDA | I2-JCSN-JCSN-10GE-53643";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 300 {
+            description OESS-L2VPN-316111;
+            encapsulation vlan-ccc;
+            vlan-id 300;
+            output-vlan-map swap;
+        }
+        unit 350 {
+            description OESS-L2VPN-316071;
+            encapsulation vlan-ccc;
+            vlan-id 350;
+            output-vlan-map swap;
+        }
+        unit 450 {
+            description OESS-L2VPN-316161;
+            encapsulation vlan-ccc;
+            vlan-id 450;
+            output-vlan-map swap;
+        }
+        unit 650 {
+            description OESS-L2VPN-316151;
+            encapsulation vlan-ccc;
+            vlan-id 650;
+            output-vlan-map swap;
+        }
+        unit 700 {
+            description OESS-L2VPN-316031;
+            encapsulation vlan-ccc;
+            vlan-id 700;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/3 {
+        description "I2-S71049 MissiON | I2-JCSN-JCSN-10GE-71054";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 900 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Mississippi Optical Network (MissiON) R&E vlan | I2-S06928";
+            vlan-id 900;
+            family inet {
+                address 205.233.255.33/31;
+            }
+            family inet6 {
+                address 2001:468:ff:0340::1/64;
+            }
+        }
+        unit 902 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] mission AS54234";
+            vlan-id 902;
+            family inet {
+                mtu 1500;
+                address 64.57.29.193/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2654::1/64;
+            }
+        }
+        unit 911 {
+            description OESS-L2VPN-317851;
+            encapsulation vlan-ccc;
+            vlan-id 911;
+            output-vlan-map swap;
+        }
+        unit 3000 {
+            description OESS-L2VPN-364301;
+            encapsulation vlan-ccc;
+            vlan-id 3000;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/1/0 {
+        description "I2-S71053 MissiON | I2-JCSN-JCSN-10GE-71055";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 910 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Mississippi Optical Network (MissiON) | I2-S06927";
+            vlan-id 910;
+            family inet {
+                address 205.233.255.37/31;
+            }
+            family inet6 {
+                address 2001:468:ff:140::1/64;
+            }
+        }
+        unit 912 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] mission AS54234 | I2-S55747";
+            vlan-id 912;
+            family inet {
+                mtu 1500;
+                address 64.57.29.189/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2254::1/64;
+            }
+        }
+    }
+    xe-5/1/1 {
+        description "I2-S71053 MissiON | I2-JCSN-JCSN-10GE-187826";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 1264 {
+            description OESS-L2VPN-339601;
+            encapsulation vlan-ccc;
+            vlan-id 1264;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/1/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/0/0 {
+        description "BACKBONE: ATLA-JCSN | I2-ATLA-JCSN-100GE-10784";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-JCSN | I2-ATLA-JCSN-VLAN-70248";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.47/31;
+            }
+            family inet6 {
+                address 2001:468:fc:48::2/64;
+            }
+        }
+    }
+}

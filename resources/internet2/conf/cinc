@@ -1,0 +1,170 @@
+interfaces {
+    et-4/0/0 {
+        description "BACKBONE: CINC-INDI | I2-CINC-INDI-100GE-51692";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: CINC-INDI | I2-CINC-INDI-VLAN-70295";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.86/31;
+            }
+            family inet6 {
+                address 2001:468:fc:55::1/64;
+            }
+        }
+    }
+    xe-5/0/0 {
+        description "pas-tst.cinc, em1";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 161 {
+            description OESS-L2CCC-309161;
+            encapsulation vlan-ccc;
+            vlan-id 161;
+            output-vlan-map swap;
+        }
+        unit 286 {
+            description OESS-L2CCC-308951;
+            encapsulation vlan-ccc;
+            vlan-id 286;
+            output-vlan-map swap;
+        }
+        unit 666 {
+            description OESS-L2VPN-318371;
+            encapsulation vlan-ccc;
+            vlan-id 666;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/1 {
+        description "pas-tst.cinc, em2";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "CINC Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.198/31;
+            }
+        }
+    }
+    xe-5/0/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/0/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/0/0 {
+        description "BACKBONE: CINC-LOUI | I2-CINC-LOUI-100GE-54197";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: CINC-LOUI | I2-CINC-LOUI-VLAN-70329";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.88/31;
+            }
+            family inet6 {
+                address 2001:468:fc:56::1/64;
+            }
+        }
+    }
+    et-8/0/0 {
+        description "I2-S53376 OARnet | I2-CINC-CINC-100GE-53378";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 100 {
+            description OESS-L2VPN-311771;
+            encapsulation vlan-ccc;
+            vlan-id 100;
+            output-vlan-map swap;
+        }
+        unit 101 {
+            description OESS-L2VPN-311741;
+            encapsulation vlan-ccc;
+            vlan-id 101;
+            output-vlan-map swap;
+        }
+        unit 1241 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]OARnet mcast-only peering vlan";
+            vlan-id 1241;
+            family inet {
+                mtu 9000;
+                address 198.71.46.223/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:2300:a::2/64;
+            }
+        }
+        unit 1242 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]OARnet | I2-S12534";
+            vlan-id 1242;
+            family inet {
+                mtu 9000;
+                address 198.71.46.1/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:2300:b::2/64;
+            }
+        }
+        unit 1243 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] OARnet | I2-S55784";
+            vlan-id 1243;
+            family inet {
+                mtu 1500;
+                address 64.57.29.65/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f001::2/64;
+            }
+        }
+    }
+}

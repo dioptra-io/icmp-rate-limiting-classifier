@@ -7,7 +7,7 @@ from sklearn.cluster import DBSCAN
 from sklearn import metrics
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.preprocessing import StandardScaler
-
+from mpl_toolkits.mplot3d import Axes3D
 
 def normalize_feature(points):
     points = points / points.max()
@@ -28,8 +28,9 @@ def DBSCAN_impl(points, feature_columns):
     X = np.array(X)
     # X = X.fit_transform(X)
     # #############################################################################
+    # When ground truth is not available, label the data with clustering algorithm
     # Compute DBSCAN
-    db = DBSCAN(eps=0.05, min_samples=15).fit(X)
+    db = DBSCAN(eps=0.03, min_samples=20).fit(X)
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
     core_samples_mask[db.core_sample_indices_] = True
     labels = db.labels_
@@ -51,7 +52,8 @@ def DBSCAN_impl(points, feature_columns):
     print dict(zip(unique, counts))
     # #############################################################################
     # Plot result
-
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
     # Black removed and is used for noise instead.
     unique_labels = set(labels)
     colors = [plt.cm.Spectral(each)
@@ -64,14 +66,15 @@ def DBSCAN_impl(points, feature_columns):
         class_member_mask = (labels == k)
 
         xy = X[class_member_mask & core_samples_mask]
-        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                 markeredgecolor='k', markersize=14)
+        ax.scatter(xs=xy[:, 0], ys=xy[:, 1], zs=xy[:, 2], marker = 'o', color=tuple(col),
+                 s=6)
 
         xy = X[class_member_mask & ~core_samples_mask]
-        plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=tuple(col),
-                 markeredgecolor='k', markersize=6)
-    plt.xlabel("c_c_dpr_lr_9000")
-    plt.ylabel("w_c_dpr_lr_0_9000")
+        ax.scatter(xs=xy[:, 0], ys=xy[:, 1], zs=xy[:, 2], marker = 'o', color=tuple(col),
+                 s=6)
+    ax.set_xlabel(feature_columns[0])
+    ax.set_ylabel(feature_columns[1])
+    ax.set_zlabel(feature_columns[2])
     plt.title('Estimated number of clusters: %d' % n_clusters_)
     plt.show()
 

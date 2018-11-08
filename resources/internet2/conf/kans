@@ -1,0 +1,1179 @@
+interfaces {
+    et-2/0/2 {
+        description "I2-S09158 GPN (KANS) | I2-KANS-KANS-100GE-09157";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 110 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Great Plains Network (GPN) | I2-S04658";
+            vlan-id 110;
+            family inet {
+                mtu 9000;
+                address 164.113.255.254/30;
+            }
+            family inet6 {
+                address 2001:468:ff:741::1/64;
+                address 2001:468:ff:1341::1/64;
+            }
+        }
+        unit 112 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] GPN DDoS Scrubbing [snapp_private] | I2-S71569";
+            vlan-id 112;
+            family inet {
+                address 163.253.4.22/31;
+            }
+            family inet6 {
+                address 2001:468:fb:13::1/126;
+            }
+        }
+        unit 115 {
+            description OESS-L2VPN-317771;
+            encapsulation vlan-ccc;
+            vlan-id 115;
+            output-vlan-map swap;
+        }
+        unit 122 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]KanREN via AL2S/KANS | I2-S12087";
+            vlan-id 122;
+            family inet {
+                mtu 9000;
+                address 64.57.28.177/30;
+            }
+            family inet6 {
+                address 2001:468:ff:1342::1/64;
+            }
+        }
+        unit 145 {
+            description OESS-L2VPN-317741;
+            encapsulation vlan-ccc;
+            vlan-id 145;
+            output-vlan-map swap;
+        }
+        unit 200 {
+            description OESS-L2VPN-317881;
+            encapsulation vlan-ccc;
+            vlan-id 200;
+            output-vlan-map swap;
+        }
+        unit 201 {
+            description OESS-L2VPN-317891;
+            encapsulation vlan-ccc;
+            vlan-id 201;
+            output-vlan-map swap;
+        }
+        unit 300 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] KanREN DDoS Scrubbing via GPN [snapp_private] | I2-S12087";
+            vlan-id 300;
+            family inet {
+                mtu 9000;
+                address 163.253.4.16/31;
+            }
+            family inet6 {
+                address 2001:468:fb:10::1/126;
+            }
+        }
+        unit 350 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-gpn-ozarks] College of the Ozarks via GPN | I2-S187343";
+            vlan-id 350;
+            family inet {
+                address 163.253.7.92/31;
+            }
+            family inet6 {
+                address 2001:468:fd:5::1/64;
+            }
+        }
+        unit 402 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "GPN LHCone testpoint | [NO-MONITOR]";
+            vlan-id 402;
+            family inet {
+                mtu 9000;
+                address 64.57.30.214/31;
+            }
+        }
+        unit 430 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] UMN-GigaPOP via AL2S/KANS | I2-S11970";
+            vlan-id 430;
+            family inet {
+                mtu 9000;
+                address 146.57.253.58/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:1900:17::2/64;
+            }
+        }
+        unit 492 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] gpn AS11317";
+            vlan-id 492;
+            family inet {
+                mtu 1500;
+                address 64.57.21.253/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2111::1/64;
+            }
+        }
+        unit 505 {
+            apply-groups-except [ INTERFACE-BACKBONE INTERFACE-CONNECTOR ];
+            description "[trcpscust] kanren AS2495";
+            vlan-id 505;
+            inactive: input-vlan-map {
+                swap;
+                vlan-id 505;
+            }
+            family inet {
+                mtu 1500;
+                address 64.57.21.201/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2112::1/64;
+            }
+        }
+        unit 627 {
+            description OESS-L2VPN-368111;
+            encapsulation vlan-ccc;
+            vlan-id 627;
+            output-vlan-map swap;
+        }
+        unit 681 {
+            description OESS-L2VPN-317691;
+            encapsulation vlan-ccc;
+            vlan-id 681;
+            output-vlan-map swap;
+        }
+        unit 682 {
+            description OESS-L2VPN-317681;
+            encapsulation vlan-ccc;
+            vlan-id 682;
+            output-vlan-map swap;
+        }
+        unit 710 {
+            description OESS-L2VPN-317731;
+            encapsulation vlan-ccc;
+            vlan-id 710;
+            output-vlan-map swap;
+        }
+        unit 742 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] MOREnet DDoS Scrubbing via GPN [snapp_private] | I2-S71573";
+            vlan-id 742;
+            family inet {
+                address 163.253.4.26/31;
+            }
+            family inet6 {
+                address 2001:468:fb:15::1/126;
+            }
+        }
+        unit 800 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] University of Missouri [NO-MONITOR][16228:144]";
+            vlan-id 800;
+            family inet6 {
+                mtu 9000;
+                address 2001:468:ff:440::1/64;
+            }
+        }
+        unit 953 {
+            description OESS-L2VPLS-341261;
+            encapsulation vlan-vpls;
+            vlan-id 953;
+            output-vlan-map swap;
+        }
+        unit 954 {
+            description OESS-L2VPLS-316131;
+            encapsulation vlan-vpls;
+            vlan-id 954;
+            output-vlan-map swap;
+        }
+        unit 955 {
+            description OESS-L2VPLS-359381;
+            encapsulation vlan-vpls;
+            vlan-id 955;
+            output-vlan-map swap;
+        }
+        unit 1401 {
+            description OESS-L2VPN-364051;
+            encapsulation vlan-ccc;
+            vlan-id 1401;
+            output-vlan-map swap;
+        }
+        unit 1496 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] SDBR via GPN [snapp_private] | I2-S71767";
+            vlan-id 1496;
+            family inet {
+                mtu 9000;
+                address 163.253.4.29/30;
+            }
+            family inet6 {
+                address 2001:468:fb:16::1/126;
+            }
+        }
+        unit 1750 {
+            description OESS-L2VPN-317921;
+            encapsulation vlan-ccc;
+            vlan-id 1750;
+            output-vlan-map swap;
+        }
+        unit 1751 {
+            description OESS-L2VPN-311701;
+            encapsulation vlan-ccc;
+            vlan-id 1751;
+            output-vlan-map swap;
+        }
+        unit 1752 {
+            description OESS-L2VPN-317571;
+            encapsulation vlan-ccc;
+            vlan-id 1752;
+            output-vlan-map swap;
+        }
+        unit 1753 {
+            description OESS-L2VPN-318021;
+            encapsulation vlan-ccc;
+            vlan-id 1753;
+            output-vlan-map swap;
+        }
+        unit 1754 {
+            description OESS-L2VPN-317551;
+            encapsulation vlan-ccc;
+            vlan-id 1754;
+            output-vlan-map swap;
+        }
+        unit 2011 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] University of Wisconsin System Network (Madison) via GPN | I2-S51597";
+            vlan-id 2011;
+            family inet {
+                mtu 9000;
+                address 198.71.46.6/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:4:203::2/127;
+            }
+        }
+        unit 2013 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] UW SysNet AS3128 | I2-S55777";
+            vlan-id 2013;
+            family inet {
+                mtu 1500;
+                address 64.57.20.30/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2305::2/127;
+            }
+        }
+        unit 2362 {
+            description OESS-L2VPN-317631;
+            encapsulation vlan-ccc;
+            vlan-id 2362;
+            output-vlan-map swap;
+        }
+        unit 2913 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] UNL DDoS Scrubbing via GPN [snapp_private] | I2-S71754";
+            vlan-id 2913;
+            family inet {
+                mtu 9000;
+                address 163.253.4.20/31;
+            }
+            family inet6 {
+                address 2001:468:fb:12::1/126;
+            }
+        }
+        unit 3050 {
+            description OESS-L2VPN-315361;
+            encapsulation vlan-ccc;
+            vlan-id 3050;
+            output-vlan-map swap;
+        }
+        unit 3540 {
+            description OESS-L2VPN-313561;
+            encapsulation vlan-ccc;
+            vlan-id 3540;
+            output-vlan-map swap;
+        }
+        unit 3551 {
+            description OESS-L2VPN-316451;
+            encapsulation vlan-ccc;
+            vlan-id 3551;
+            output-vlan-map swap;
+        }
+        unit 3554 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][LHCONE] UNL via GPN | I2-S08236";
+            vlan-id 3554;
+            family inet {
+                mtu 9000;
+                address 64.57.30.145/30;
+            }
+        }
+        unit 3932 {
+            description OESS-L2VPN-317671;
+            encapsulation vlan-ccc;
+            vlan-id 3932;
+            output-vlan-map swap;
+        }
+    }
+    et-2/0/5 {
+        description "[dtn-pas] dtn-pas.kans";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        gigether-options {
+            fec fec91;
+        }
+        unit 100 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[osg] dtn-pas.kans";
+            vlan-id 100;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 163.253.71.1/30;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                address 2001:468:2807::1/126;
+            }
+        }
+    }
+    et-2/1/2 {
+        description "I2-S54217 USDA | I2-KANS-KANS-100GE-54216";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 100 {
+            description OESS-L2VPN-316041;
+            encapsulation vlan-ccc;
+            vlan-id 100;
+            output-vlan-map swap;
+        }
+        unit 150 {
+            description OESS-L2VPLS-316051;
+            encapsulation vlan-vpls;
+            vlan-id 150;
+            output-vlan-map swap;
+        }
+        unit 350 {
+            description OESS-L2VPN-316071;
+            encapsulation vlan-ccc;
+            vlan-id 350;
+            output-vlan-map swap;
+        }
+        unit 550 {
+            description OESS-L2VPN-316061;
+            encapsulation vlan-ccc;
+            vlan-id 550;
+            output-vlan-map swap;
+        }
+        unit 800 {
+            description OESS-L2VPN-315991;
+            encapsulation vlan-ccc;
+            vlan-id 800;
+            output-vlan-map swap;
+        }
+        unit 953 {
+            description OESS-L2VPLS-341261;
+            encapsulation vlan-vpls;
+            vlan-id 953;
+            output-vlan-map swap;
+        }
+        unit 954 {
+            description OESS-L2VPLS-316131;
+            encapsulation vlan-vpls;
+            vlan-id 954;
+            output-vlan-map swap;
+        }
+        unit 955 {
+            description OESS-L2VPLS-359381;
+            encapsulation vlan-vpls;
+            vlan-id 955;
+            output-vlan-map swap;
+        }
+        unit 2459 {
+            description OESS-L2VPN-316141;
+            encapsulation vlan-ccc;
+            vlan-id 2459;
+            output-vlan-map swap;
+        }
+        unit 2601 {
+            description OESS-L2VPN-316171;
+            encapsulation vlan-ccc;
+            vlan-id 2601;
+            output-vlan-map swap;
+        }
+    }
+    et-2/1/5 {
+        description "[ae4] DALL-KANS | I2-DALL-KANS-100GE-185420";
+        gigether-options {
+            802.3ad ae4;
+        }
+    }
+    xe-3/0/0 {
+        description "AVAILABLE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-3/0/1 {
+        description "AVAILABLE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-3/0/2 {
+        description "AVAILABLE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-3/0/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    et-3/1/0 {
+        description "[ae3] CHIC-KANS | I2-CHIC-KANS-100GE-07745";
+        gigether-options {
+            802.3ad ae3;
+        }
+    }
+    xe-3/2/0 {
+        description "AVAILABLE patched to opt2.kans ETH10G-2-27-3 | [NO-MONITOR]";
+        disable;
+    }
+    xe-3/2/1 {
+        description "AVAILABLE patched to opt.kans ETH10G-1-17-4 | [NO-MONITOR]";
+        disable;
+    }
+    xe-3/2/2 {
+        description lan.kans.net.internet2.edu:B3;
+        vlan-tagging;
+        mtu 9180;
+        encapsulation flexible-ethernet-services;
+        unit 11 {
+            description "[RE]KANS Observatory vlan";
+            vlan-id 11;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                filter {
+                    output obs-out;
+                }
+                address 64.57.16.193/28;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                filter {
+                    output obs-out6;
+                }
+                address 2001:468:4:11::1/64;
+                address 2001:468:4:11::16:193/64;
+            }
+        }
+        unit 20 {
+            description "[RE]KANS VINI Mgmt";
+            vlan-id 20;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.18.209/29;
+            }
+        }
+        unit 21 {
+            description "[RE]WASH VINI Data";
+            vlan-id 21;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.18.49/28;
+            }
+        }
+        unit 30 {
+            description "[RE]KANS SPP Port 8";
+            vlan-id 30;
+            family inet {
+                mtu 9000;
+                address 64.57.23.177/30 {
+                    arp 64.57.23.178 mac 00:00:5e:03:aa:08;
+                }
+            }
+        }
+        unit 31 {
+            description "[RE]KANS SPP Port 9";
+            vlan-id 31;
+            family inet {
+                mtu 9000;
+                address 64.57.23.181/30 {
+                    arp 64.57.23.182 mac 00:00:5e:03:aa:09;
+                }
+            }
+        }
+        unit 32 {
+            description "[RE]KANS SPP Port 10";
+            vlan-id 32;
+            family inet {
+                mtu 9000;
+                address 64.57.23.185/30 {
+                    arp 64.57.23.186 mac 00:00:5e:03:aa:0a;
+                }
+            }
+        }
+        unit 40 {
+            description "[RE]KANS GENI Mgmt network";
+            vlan-id 40;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.23.129/28;
+            }
+        }
+        unit 50 {
+            description "[RE]ISIS collector";
+            vlan-id 50;
+            family iso {
+                mtu 1497;
+            }
+        }
+        unit 95 {
+        }
+        unit 96 {
+            description "SDN-Overlay Public MGMT Network";
+            vlan-id 96;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 1500;
+                address 64.57.22.129/27;
+            }
+        }
+    }
+    xe-3/2/3 {
+        description "[VS-SRV] vs-srv port em4";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    et-3/3/0 {
+        description "[ae5] KANS-SALT | I2-KANS-SALT-100GE-186277";
+        gigether-options {
+            802.3ad ae5;
+        }
+    }
+    xe-4/0/0 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/0/1 {
+        description "I2-S51702 USDA | I2-KANS-KANS-10GE-51701";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 150 {
+            description OESS-L2VPLS-316051;
+            encapsulation vlan-vpls;
+            vlan-id 150;
+            output-vlan-map swap;
+        }
+        unit 200 {
+            description OESS-L2VPN-316091;
+            encapsulation vlan-ccc;
+            vlan-id 200;
+            output-vlan-map swap;
+        }
+        unit 250 {
+            description OESS-L2VPN-316121;
+            encapsulation vlan-ccc;
+            vlan-id 250;
+            output-vlan-map swap;
+        }
+        unit 600 {
+            description OESS-L2VPN-316011;
+            encapsulation vlan-ccc;
+            vlan-id 600;
+            output-vlan-map swap;
+        }
+        unit 650 {
+            description OESS-L2VPN-316151;
+            encapsulation vlan-ccc;
+            vlan-id 650;
+            output-vlan-map swap;
+        }
+    }
+    xe-4/0/2 {
+        description "[VS-SW] vs-sw, port 4";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 204 {
+            description OESS-L2VPN-326961;
+            encapsulation vlan-ccc;
+            vlan-id 204;
+            output-vlan-map swap;
+        }
+        unit 605 {
+            description OESS-L2VPN-326881;
+            encapsulation vlan-ccc;
+            vlan-id 605;
+            output-vlan-map swap;
+        }
+        unit 705 {
+            description OESS-L2VPN-326901;
+            encapsulation vlan-ccc;
+            vlan-id 705;
+            output-vlan-map swap;
+        }
+    }
+    xe-4/0/3 {
+        description "[VS-SW] vs-sw, port 2";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    et-4/1/0 {
+        description "BACKBONE: DENV-KANS | I2-DENV-KANS-100GE-07746";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DENV-KANS | I2-DENV-KANS-VLAN-69873";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.11/31;
+            }
+            family inet6 {
+                address 2001:468:fc:37::2/64;
+            }
+        }
+    }
+    xe-4/2/0 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/2/1 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/2/2 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/2/3 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    et-4/3/0 {
+        description "[ae5] KANS-SALT | I2-KANS-SALT-100GE-185591";
+        gigether-options {
+            802.3ad ae5;
+        }
+    }
+    xe-7/0/0 {
+        description "pas-tst.kans em1 [NO-MONITOR]";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 104 {
+            description OESS-L2VPN-308231;
+            encapsulation vlan-ccc;
+            vlan-id 104;
+            output-vlan-map swap;
+        }
+        unit 107 {
+            description OESS-L2VPN-308291;
+            encapsulation vlan-ccc;
+            vlan-id 107;
+            output-vlan-map swap;
+        }
+        unit 112 {
+            description OESS-L2VPN-308621;
+            encapsulation vlan-ccc;
+            vlan-id 112;
+            output-vlan-map swap;
+        }
+        unit 265 {
+            description OESS-L2CCC-308101;
+            encapsulation vlan-ccc;
+            vlan-id 265;
+            output-vlan-map swap;
+        }
+        unit 291 {
+            description OESS-L2CCC-309561;
+            encapsulation vlan-ccc;
+            vlan-id 291;
+            output-vlan-map swap;
+        }
+        unit 364 {
+            description OESS-L2CCC-309801;
+            encapsulation vlan-ccc;
+            vlan-id 364;
+            output-vlan-map swap;
+        }
+        unit 603 {
+            description OESS-L2VPN-308301;
+            encapsulation vlan-ccc;
+            vlan-id 603;
+            output-vlan-map swap;
+        }
+        unit 604 {
+            description OESS-L2VPN-308611;
+            encapsulation vlan-ccc;
+            vlan-id 604;
+            output-vlan-map swap;
+        }
+        unit 1711 {
+            description OESS-L2CCC-309401;
+            encapsulation vlan-ccc;
+            vlan-id 1711;
+            output-vlan-map swap;
+        }
+        unit 1843 {
+            description OESS-L2CCC-309871;
+            encapsulation vlan-ccc;
+            vlan-id 1843;
+            output-vlan-map swap;
+        }
+        unit 1850 {
+            description OESS-L2CCC-309551;
+            encapsulation vlan-ccc;
+            vlan-id 1850;
+            output-vlan-map swap;
+        }
+        unit 1901 {
+            description "test kans-salt 16494:144";
+            encapsulation vlan-ccc;
+            vlan-id 1901;
+        }
+        unit 2215 {
+            description OESS-L2CCC-309421;
+            encapsulation vlan-ccc;
+            vlan-id 2215;
+            output-vlan-map swap;
+        }
+        unit 2264 {
+            description OESS-L2CCC-309351;
+            encapsulation vlan-ccc;
+            vlan-id 2264;
+            output-vlan-map swap;
+        }
+        unit 3076 {
+            description OESS-L2CCC-309271;
+            encapsulation vlan-ccc;
+            vlan-id 3076;
+            output-vlan-map swap;
+        }
+    }
+    xe-7/0/1 {
+        description "pas-tst.kans em2 [NO-MONITOR]";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "KANS Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.53/31;
+            }
+        }
+        unit 3001 {
+            description OESS-L2VPN-318401;
+            encapsulation vlan-ccc;
+            vlan-id 3001;
+            output-vlan-map swap;
+        }
+    }
+    xe-7/0/2 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    xe-7/0/3 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/1/0 {
+        description "[ae3] CHIC-KANS | I2-CHIC-KANS-100GE-67411";
+        gigether-options {
+            802.3ad ae3;
+        }
+    }
+    xe-7/2/0 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/1 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/2 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/3 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/3/0 {
+        description "BACKBONE: KANS-TULS | I2-KANS-TULS-100GE-07753";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: KANS-TULS | I2-KANS-TULS-VLAN-70249";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.34/31;
+            }
+            family inet6 {
+                address 2001:468:fc:42::1/64;
+            }
+        }
+    }
+    xe-8/0/0 {
+        description "[VS-SW] vs-sw, port 3";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 204 {
+            description OESS-L2VPN-328051;
+            encapsulation vlan-ccc;
+            vlan-id 204;
+            output-vlan-map swap;
+        }
+    }
+    xe-8/0/1 {
+        description "[VS-SW] vs-sw, port 5";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-8/0/2 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    xe-8/0/3 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    et-8/1/0 {
+        description "BACKBONE: KANS-MINN | I2-KANS-MINN-100GE-12675";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: KANS-MINN | I2-KANS-MINN-VLAN-69794";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.108/31;
+            }
+            family inet6 {
+                address 2001:468:fc:2f::1/64;
+            }
+        }
+    }
+    xe-8/2/0 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    xe-8/2/1 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    xe-8/2/2 {
+        description "AVAILABLE, 10GE LR OPTIC | [NO-MONITOR]";
+    }
+    xe-8/2/3 {
+        description "AVAILABLE, 10GE NO OPTIC | [NO-MONITOR]";
+    }
+    et-8/3/0 {
+        description "RESERVED, DALL-KANS 100GE, LR10 OPTIC | [NO-MONITOR]";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    et-10/0/0 {
+        description "[ae3] CHIC-KANS | I2-CHIC-KANS-100GE-184512";
+        gigether-options {
+            802.3ad ae3;
+        }
+    }
+    ge-10/2/0 {
+        description lan.kans.net.internet2.edu:A23;
+        vlan-tagging;
+        unit 10 {
+            description "RackLan #3 Master Gateway";
+            vlan-id 10;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                filter {
+                    output racklan-access;
+                }
+                address 64.57.24.33/27;
+            }
+        }
+        unit 12 {
+            description "KANS Obs 1Gig (temp)";
+            vlan-id 12;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                filter {
+                    output obs-out;
+                }
+                address 64.57.16.225/28;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                filter {
+                    output obs-out6;
+                }
+                address 2001:468:4:12::1/64;
+                address 2001:468:4:12::16:225/64;
+            }
+        }
+    }
+    ge-10/2/1 {
+        description "AVAILABLE, 1GE SX OPTIC | [NO-MONITOR]";
+    }
+    ge-10/2/2 {
+        description "AVAILABLE, 1GE SX OPTIC | [NO-MONITOR]";
+    }
+    ge-10/2/3 {
+        description "AVAILABLE, 1GE SX OPTIC | [NO-MONITOR]";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    ge-10/2/4 {
+        description "AVAILABLE, 1GE NO OPTIC | [NO-MONITOR]";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    ge-10/2/5 {
+        description "I2-S06738 DCN dcn-sw.kans ge-0/0/22 | I2-KANS-KANS-GIGE-06815";
+        vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 544 {
+            description "I2-S06738 DCN CHIC-KANS | I2-CHIC-KANS-LSP-06755";
+            encapsulation vlan-ccc;
+            vlan-id 544;
+            family ccc;
+        }
+        unit 546 {
+            description "I2-S06738 DCN ATLA-KANS | I2-ATLA-KANS-LSP-06753";
+            encapsulation vlan-ccc;
+            vlan-id 546;
+            family ccc;
+        }
+        unit 549 {
+            description "I2-S06738 DCN KANS-SALT | I2-KANS-SALT-LSP-06759";
+            encapsulation vlan-ccc;
+            vlan-id 549;
+            family ccc;
+        }
+        unit 553 {
+            description "I2-S06738 DCN HOUS-KANS | I2-HOUS-KANS-LSP-06757";
+            encapsulation vlan-ccc;
+            vlan-id 553;
+            family ccc;
+        }
+        unit 2703 {
+            description "AL2S KANS-SALT OOB";
+            vlan-id 2703;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.169/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.171;
+                        priority 20;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2706 {
+            description "AL2S HOUS-KANS OOB";
+            vlan-id 2706;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.98/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.99;
+                        priority 20;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+    }
+    ge-10/2/6 {
+        description "AVAILABLE, 1GE LX10 OPTIC | [NO-MONITOR]";
+    }
+    ge-10/2/7 {
+        description "AVAILABLE, 1GE LX10 OPTIC | [NO-MONITOR]";
+    }
+    ge-10/2/8 {
+        description "AVAILABLE, 1GE LX10 OPTIC | [NO-MONITOR]";
+    }
+    ge-10/2/9 {
+        description "AVAILABLE, 1GE LX10 OPTIC | [NO-MONITOR]";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    ge-10/3/0 {
+        description "AVAILABLE SFP-LX10 [NO-MONITOR]";
+    }
+    ge-10/3/1 {
+        description "[TRANSIT] Commodity Internet via Level(3) | I2-S06900 | I2-KANS-KANS-GIGE-06902";
+        mtu 1570;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            family inet {
+                mtu 1500;
+                address 4.53.32.126/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:1900:2100::1292/126;
+            }
+        }
+    }
+    ge-10/3/2 {
+        description "Internet2 TSG switch";
+        vlan-tagging;
+        mtu 9134;
+        encapsulation flexible-ethernet-services;
+        unit 31 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][TRANSIT] Internet2 General Services - Kansas City";
+            vlan-id 31;
+            family inet {
+                mtu 9000;
+                address 64.57.22.97/28;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:ef01:fffe::1/64;
+            }
+        }
+        inactive: unit 32 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][TRANSIT] Eduroam - Kansas City";
+            vlan-id 32;
+            family inet {
+                mtu 9000;
+                address 64.57.22.77/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:ef01:3::1/64;
+            }
+        }
+    }
+    ge-10/3/3 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/4 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/5 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/6 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/7 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/8 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/9 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ae3 {
+        description "BACKBONE: CHIC-KANS LAG | I2-CHIC-KANS-LAG-184513";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: CHIC-KANS | I2-CHIC-KANS-VLAN-184514";
+            vlan-id 4079;
+            family inet {
+                mtu 9170;
+                address 162.252.70.141/31;
+            }
+            family inet6 {
+                mtu 9170;
+                address 2001:468:fc:67::2/64;
+            }
+            family mpls {
+                mtu 9170;
+            }
+        }
+    }
+    ae4 {
+        description "BACKBONE: DALL-KANS LAG | I2-DALL-KANS-LAG-185424";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: DALL-KANS | I2-DALL-KANS-VLAN-185541";
+            vlan-id 4079;
+            family inet {
+                mtu 9170;
+                address 162.252.70.143/31;
+            }
+            family inet6 {
+                mtu 9170;
+                address 2001:468:fc:68::2/64;
+            }
+            family mpls {
+                mtu 9170;
+            }
+        }
+    }
+    ae5 {
+        description "BACKBONE: KANS-SALT LAG | I2-KANS-SALT-LAG-185594";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: KANS-SALT | I2-KANS-SALT-VLAN-185595";
+            vlan-id 4079;
+            family inet {
+                mtu 9170;
+                address 162.252.70.144/31;
+            }
+            family inet6 {
+                mtu 9170;
+                address 2001:468:fc:69::1/64;
+            }
+            family mpls {
+                mtu 9170;
+            }
+        }
+    }
+}

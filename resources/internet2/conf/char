@@ -1,0 +1,113 @@
+interfaces {
+    et-4/0/0 {
+        description "BACKBONE: CHAR-RALE | I2-CHAR-RALE-100GE-10633";
+        enable;
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: CHAR-RALE | I2-CHAR-RALE-VLAN-70592";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.122/31;
+            }
+            family inet6 {
+                address 2001:468:fc:5f::1/64;
+            }
+        }
+    }
+    xe-5/0/0 {
+        description "pas-tst.char, em1";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 183 {
+            description OESS-L2CCC-309031;
+            encapsulation vlan-ccc;
+            vlan-id 183;
+            output-vlan-map swap;
+        }
+        unit 191 {
+            description OESS-L2CCC-309041;
+            encapsulation vlan-ccc;
+            vlan-id 191;
+            output-vlan-map swap;
+        }
+        unit 707 {
+            description OESS-L2CCC-309941;
+            encapsulation vlan-ccc;
+            vlan-id 707;
+            output-vlan-map swap;
+        }
+        unit 816 {
+            description OESS-L2CCC-309491;
+            encapsulation vlan-ccc;
+            vlan-id 816;
+            output-vlan-map swap;
+        }
+        unit 820 {
+            description OESS-L2CCC-309021;
+            encapsulation vlan-ccc;
+            vlan-id 820;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/1 {
+        description "pas-tst.char, em2";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "CHAR Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.180/31;
+            }
+        }
+    }
+    et-7/0/0 {
+        description "I2-S13644 MCNC | I2-CHAR-CHAR-100GE-13647";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 585 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] MCNC / NCREN | I2-S55639";
+            vlan-id 585;
+            family inet {
+                address 198.71.47.217/30;
+            }
+            family inet6 {
+                address 2001:468:ff00::1/64;
+            }
+        }
+        unit 612 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] MCNC R&E | I2-S12527";
+            vlan-id 612;
+            family inet {
+                address 198.71.46.169/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:1:201::1/64;
+            }
+        }
+    }
+    et-8/0/0 {
+        description "BACKBONE: ATLA-CHAR | I2-ATLA-CHAR-100GE-07738";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-CHAR | I2-ATLA-CHAR-VLAN-70593";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.125/31;
+            }
+            family inet6 {
+                address 2001:468:fc:60::2/64;
+            }
+        }
+    }
+}

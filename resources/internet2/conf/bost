@@ -1,0 +1,215 @@
+interfaces {
+    et-4/0/0 {
+        description "BACKBONE: BOST-HART2 | I2-BOST-HART2-100GE-09211";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 1700 {
+            description "test bost-newy32aoa 20932:144";
+            encapsulation vlan-ccc;
+            vlan-id 1700;
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: BOST-HART2 | I2-BOST-HART2-VLAN-70582";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.98/31;
+            }
+            family inet6 {
+                address 2001:468:fc:5a::1/64;
+            }
+        }
+    }
+    xe-5/0/0 {
+        description "pas-tst.bost, em1";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 216 {
+            description OESS-L2VPN-309651;
+            encapsulation vlan-ccc;
+            vlan-id 216;
+            output-vlan-map swap;
+        }
+        unit 1700 {
+            description "test bost-newy32aoa 20932:144";
+            encapsulation vlan-ccc;
+            vlan-id 1700;
+        }
+        unit 3485 {
+            description OESS-L2CCC-309191;
+            encapsulation vlan-ccc;
+            vlan-id 3485;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/0/1 {
+        description "pas-tst.bost, em2";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "BOST Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.178/31;
+            }
+        }
+    }
+    xe-5/0/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-5/0/3 {
+        description "I2-S51122 Biogen | I2-BOST-BOST-10GE-51123";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        unit 101 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] Biogenisis AS27311 | I2-S55783";
+            vlan-id 101;
+            family inet {
+                mtu 1500;
+                address 64.57.20.140/31;
+            }
+        }
+        unit 103 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Biogenisis | I2-S51219";
+            vlan-id 103;
+            family inet {
+                mtu 9000;
+                address 198.71.45.160/31;
+            }
+        }
+        unit 1000 {
+            description OESS-L2VPN-315791;
+            encapsulation vlan-ccc;
+            vlan-id 1000;
+            output-vlan-map swap;
+        }
+        unit 1004 {
+            description OESS-L2VPN-315721;
+            encapsulation vlan-ccc;
+            vlan-id 1004;
+            output-vlan-map swap;
+        }
+        unit 1005 {
+            description OESS-L2VPN-315731;
+            encapsulation vlan-ccc;
+            vlan-id 1005;
+            output-vlan-map swap;
+        }
+        unit 1007 {
+            description OESS-L2VPN-315691;
+            encapsulation vlan-ccc;
+            vlan-id 1007;
+            output-vlan-map swap;
+        }
+        unit 1008 {
+            description OESS-L2VPN-315701;
+            encapsulation vlan-ccc;
+            vlan-id 1008;
+            output-vlan-map swap;
+        }
+        unit 1010 {
+            description OESS-L2VPN-315711;
+            encapsulation vlan-ccc;
+            vlan-id 1010;
+            output-vlan-map swap;
+        }
+        unit 1011 {
+            description OESS-L2VPN-315771;
+            encapsulation vlan-ccc;
+            vlan-id 1011;
+            output-vlan-map swap;
+        }
+        unit 1012 {
+            description OESS-L2VPN-315761;
+            encapsulation vlan-ccc;
+            vlan-id 1012;
+            output-vlan-map swap;
+        }
+        unit 1013 {
+            description OESS-L2VPN-315781;
+            encapsulation vlan-ccc;
+            vlan-id 1013;
+            output-vlan-map swap;
+        }
+        unit 1014 {
+            description OESS-L2VPN-315741;
+            encapsulation vlan-ccc;
+            vlan-id 1014;
+            output-vlan-map swap;
+        }
+        unit 1015 {
+            description OESS-L2VPN-315751;
+            encapsulation vlan-ccc;
+            vlan-id 1015;
+            output-vlan-map swap;
+        }
+        unit 1017 {
+            description OESS-L2VPN-315801;
+            encapsulation vlan-ccc;
+            vlan-id 1017;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/1/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/1/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/0 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/0/0 {
+        description "BACKBONE: ALBA-BOST | I2-ALBA-BOST-100GE-09210";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ALBA-BOST | I2-ALBA-BOST-VLAN-70581";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.97/31;
+            }
+            family inet6 {
+                address 2001:468:fc:59::2/64;
+            }
+        }
+    }
+    et-8/0/0 {
+        description "AVAILABLE 100G, LR4 OPTIC | [NO-MONITOR]";
+    }
+}

@@ -1,0 +1,1530 @@
+interfaces {
+    xe-3/0/0 {
+        description "AVAILABLE 10GE,LR OPTIC | [NO-MONITOR]";
+    }
+    xe-3/0/1 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "Indiana Gigapop via Internet2 DWS | I2-INDI-ATLA-10GE-04182 | I2-S12522 | [NO-MONITOR] 17536:144";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 117 {
+            apply-groups-except [ INTERFACE-BACKBONE INTERFACE-CONNECTOR ];
+            description "[RE] Layer-II Bridge for NOAA Mgmt | I2-ATLA-ATLA-VLAN-57734";
+            encapsulation vlan-ccc;
+            vlan-id 117;
+        }
+    }
+    xe-3/0/2 {
+        description "Observatory 10G via lan.atla:B2";
+        vlan-tagging;
+        mtu 9180;
+        encapsulation flexible-ethernet-services;
+        unit 10 {
+            description "Atlanta Racklan";
+            vlan-id 10;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                filter {
+                    output racklan-access;
+                }
+                address 64.57.25.158/27;
+            }
+        }
+        unit 11 {
+            description "ATLA Observatory vlan";
+            vlan-id 11;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                filter {
+                    output obs-out;
+                }
+                address 64.57.16.65/28;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                filter {
+                    output obs-out6;
+                }
+                address 2001:468:1:11::1/64;
+            }
+        }
+        unit 20 {
+            description "[RE]ATLA VINI Mgmt";
+            vlan-id 20;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.18.185/29;
+            }
+        }
+        unit 21 {
+            description "[RE]ATLA VINI Data";
+            vlan-id 21;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                address 64.57.18.1/28;
+            }
+        }
+        unit 90 {
+        }
+    }
+    xe-3/0/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    et-3/1/0 {
+        description "I2-S09117 C-Light | I2-ATLA-ATLA-100GE-09116";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 461 {
+            description OESS-L2CCC-315341;
+            encapsulation vlan-ccc;
+            vlan-id 461;
+            output-vlan-map swap;
+        }
+        unit 761 {
+            description OESS-L2VPLS-311471;
+            encapsulation vlan-vpls;
+            vlan-id 761;
+            output-vlan-map swap;
+        }
+        unit 906 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE]Clemson/C-Light IPv4 R&E via AL2S";
+            vlan-id 906;
+            family inet {
+                address 130.127.3.142/30;
+            }
+        }
+        unit 2222 {
+            description OESS-L2CCC-317081;
+            encapsulation vlan-ccc;
+            vlan-id 2222;
+            output-vlan-map swap;
+        }
+        unit 2240 {
+            description OESS-L2CCC-317141;
+            encapsulation vlan-ccc;
+            vlan-id 2240;
+            output-vlan-map swap;
+        }
+        unit 2253 {
+            description OESS-L2CCC-317161;
+            encapsulation vlan-ccc;
+            vlan-id 2253;
+            output-vlan-map swap;
+        }
+        unit 2275 {
+            description OESS-L2CCC-317071;
+            encapsulation vlan-ccc;
+            vlan-id 2275;
+            output-vlan-map swap;
+        }
+        unit 2280 {
+            description OESS-L2CCC-317171;
+            encapsulation vlan-ccc;
+            vlan-id 2280;
+            output-vlan-map swap;
+        }
+        unit 2290 {
+            description OESS-L2CCC-317061;
+            encapsulation vlan-ccc;
+            vlan-id 2290;
+            output-vlan-map swap;
+        }
+        unit 2318 {
+            description OESS-L2CCC-317131;
+            encapsulation vlan-ccc;
+            vlan-id 2318;
+            output-vlan-map swap;
+        }
+        unit 2320 {
+            description OESS-L2CCC-317121;
+            encapsulation vlan-ccc;
+            vlan-id 2320;
+            output-vlan-map swap;
+        }
+        unit 2338 {
+            description OESS-L2CCC-317111;
+            encapsulation vlan-ccc;
+            vlan-id 2338;
+            output-vlan-map swap;
+        }
+        unit 2379 {
+            description OESS-L2CCC-317151;
+            encapsulation vlan-ccc;
+            vlan-id 2379;
+            output-vlan-map swap;
+        }
+        unit 2387 {
+            description OESS-L2CCC-317091;
+            encapsulation vlan-ccc;
+            vlan-id 2387;
+            output-vlan-map swap;
+        }
+        unit 2389 {
+            description OESS-L2VPN-337521;
+            encapsulation vlan-ccc;
+            vlan-id 2389;
+            output-vlan-map swap;
+        }
+        unit 2395 {
+            description OESS-L2CCC-317101;
+            encapsulation vlan-ccc;
+            vlan-id 2395;
+            output-vlan-map swap;
+        }
+        unit 2610 {
+            description OESS-L2VPLS-323331;
+            encapsulation vlan-vpls;
+            vlan-id 2610;
+            output-vlan-map swap;
+        }
+        unit 2650 {
+            description OESS-L2VPN-311881;
+            encapsulation vlan-ccc;
+            vlan-id 2650;
+            output-vlan-map swap;
+        }
+        unit 2651 {
+            description OESS-L2VPN-310951;
+            encapsulation vlan-ccc;
+            vlan-id 2651;
+            output-vlan-map swap;
+        }
+        unit 2652 {
+            description OESS-L2VPN-314831;
+            encapsulation vlan-ccc;
+            vlan-id 2652;
+            output-vlan-map swap;
+        }
+        unit 2653 {
+            description OESS-L2VPN-317511;
+            encapsulation vlan-ccc;
+            vlan-id 2653;
+            output-vlan-map swap;
+        }
+        unit 2654 {
+            description OESS-L2VPN-362451;
+            encapsulation vlan-ccc;
+            vlan-id 2654;
+            output-vlan-map swap;
+        }
+        unit 2655 {
+            description OESS-L2VPN-326371;
+            encapsulation vlan-ccc;
+            vlan-id 2655;
+            output-vlan-map swap;
+        }
+        unit 2656 {
+            description OESS-L2VPN-344691;
+            encapsulation vlan-ccc;
+            vlan-id 2656;
+            output-vlan-map swap;
+        }
+        unit 2657 {
+            description OESS-L2VPN-362521;
+            encapsulation vlan-ccc;
+            vlan-id 2657;
+            output-vlan-map swap;
+        }
+        unit 2658 {
+            description OESS-L2VPN-362861;
+            encapsulation vlan-ccc;
+            vlan-id 2658;
+            output-vlan-map swap;
+        }
+        unit 2659 {
+            description OESS-L2VPN-366051;
+            encapsulation vlan-ccc;
+            vlan-id 2659;
+            output-vlan-map swap;
+        }
+        unit 3065 {
+            description OESS-L2VPN-313651;
+            encapsulation vlan-ccc;
+            vlan-id 3065;
+            output-vlan-map swap;
+        }
+        unit 3070 {
+            description OESS-L2VPN-311821;
+            encapsulation vlan-ccc;
+            vlan-id 3070;
+            output-vlan-map swap;
+        }
+        unit 3071 {
+            description OESS-L2VPN-311861;
+            encapsulation vlan-ccc;
+            vlan-id 3071;
+            output-vlan-map swap;
+        }
+        unit 3080 {
+            description OESS-L2VPN-315861;
+            encapsulation vlan-ccc;
+            vlan-id 3080;
+            output-vlan-map swap;
+        }
+        unit 3220 {
+            description OESS-L2VPN-313761;
+            encapsulation vlan-ccc;
+            vlan-id 3220;
+            output-vlan-map swap;
+        }
+        unit 3221 {
+            description OESS-L2VPN-313601;
+            encapsulation vlan-ccc;
+            vlan-id 3221;
+            output-vlan-map swap;
+        }
+        unit 3222 {
+            description OESS-L2VPN-313701;
+            encapsulation vlan-ccc;
+            vlan-id 3222;
+            output-vlan-map swap;
+        }
+        unit 3223 {
+            description OESS-L2VPN-313751;
+            encapsulation vlan-ccc;
+            vlan-id 3223;
+            output-vlan-map swap;
+        }
+        unit 3225 {
+            description OESS-L2VPN-313711;
+            encapsulation vlan-ccc;
+            vlan-id 3225;
+            output-vlan-map swap;
+        }
+        unit 3226 {
+            description OESS-L2VPN-313741;
+            encapsulation vlan-ccc;
+            vlan-id 3226;
+            output-vlan-map swap;
+        }
+        unit 3227 {
+            description OESS-L2VPN-317521;
+            encapsulation vlan-ccc;
+            vlan-id 3227;
+            output-vlan-map swap;
+        }
+        unit 3250 {
+            description OESS-L2VPLS-318251;
+            encapsulation vlan-vpls;
+            vlan-id 3250;
+            output-vlan-map swap;
+        }
+        unit 4080 {
+            description OESS-L2VPN-317261;
+            encapsulation vlan-ccc;
+            vlan-id 4080;
+            output-vlan-map swap;
+        }
+        unit 4083 {
+            description OESS-L2VPLS-311481;
+            encapsulation vlan-vpls;
+            vlan-id 4083;
+            output-vlan-map swap;
+        }
+        unit 4084 {
+            description OESS-L2VPLS-311491;
+            encapsulation vlan-vpls;
+            vlan-id 4084;
+            output-vlan-map swap;
+        }
+        unit 4085 {
+            description OESS-L2VPLS-311501;
+            encapsulation vlan-vpls;
+            vlan-id 4085;
+            output-vlan-map swap;
+        }
+        unit 4087 {
+            description OESS-L2VPLS-311511;
+            encapsulation vlan-vpls;
+            vlan-id 4087;
+            output-vlan-map swap;
+        }
+    }
+    xe-3/2/0 {
+        description "AVAILABLE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-3/2/1 {
+        description "pas-tst.atla em1 | [NO-MONITOR]";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 100 {
+            description OESS-L2VPN-308181;
+            encapsulation vlan-ccc;
+            vlan-id 100;
+            output-vlan-map swap;
+        }
+        unit 102 {
+            description OESS-L2VPN-308191;
+            encapsulation vlan-ccc;
+            vlan-id 102;
+            output-vlan-map swap;
+        }
+        unit 103 {
+            description OESS-L2VPN-308161;
+            encapsulation vlan-ccc;
+            vlan-id 103;
+            output-vlan-map swap;
+        }
+        unit 226 {
+            description OESS-L2CCC-308891;
+            encapsulation vlan-ccc;
+            vlan-id 226;
+            output-vlan-map swap;
+        }
+        unit 233 {
+            description OESS-L2CCC-308901;
+            encapsulation vlan-ccc;
+            vlan-id 233;
+            output-vlan-map swap;
+        }
+        unit 234 {
+            description OESS-L2CCC-308911;
+            encapsulation vlan-ccc;
+            vlan-id 234;
+            output-vlan-map swap;
+        }
+        unit 235 {
+            description OESS-L2CCC-308961;
+            encapsulation vlan-ccc;
+            vlan-id 235;
+            output-vlan-map swap;
+        }
+        unit 236 {
+            description OESS-L2CCC-308971;
+            encapsulation vlan-ccc;
+            vlan-id 236;
+            output-vlan-map swap;
+        }
+        unit 286 {
+            description OESS-L2CCC-308951;
+            encapsulation vlan-ccc;
+            vlan-id 286;
+            output-vlan-map swap;
+        }
+        unit 290 {
+            description OESS-L2CCC-308821;
+            encapsulation vlan-ccc;
+            vlan-id 290;
+            output-vlan-map swap;
+        }
+        unit 291 {
+            description OESS-L2CCC-308831;
+            encapsulation vlan-ccc;
+            vlan-id 291;
+            output-vlan-map swap;
+        }
+        unit 292 {
+            description OESS-L2CCC-308841;
+            encapsulation vlan-ccc;
+            vlan-id 292;
+            output-vlan-map swap;
+        }
+        unit 293 {
+            description OESS-L2CCC-309001;
+            encapsulation vlan-ccc;
+            vlan-id 293;
+            output-vlan-map swap;
+        }
+        unit 294 {
+            description OESS-L2CCC-308991;
+            encapsulation vlan-ccc;
+            vlan-id 294;
+            output-vlan-map swap;
+        }
+        unit 501 {
+            description OESS-L2VPN-310021;
+            encapsulation vlan-ccc;
+            vlan-id 501;
+            output-vlan-map swap;
+        }
+        unit 602 {
+            description OESS-L2VPN-308631;
+            encapsulation vlan-ccc;
+            vlan-id 602;
+            output-vlan-map swap;
+        }
+        unit 605 {
+            description OESS-L2VPN-308221;
+            encapsulation vlan-ccc;
+            vlan-id 605;
+            output-vlan-map swap;
+        }
+        unit 1600 {
+            description OESS-L2CCC-327721;
+            encapsulation vlan-ccc;
+            vlan-id 1600;
+            output-vlan-map swap;
+        }
+        unit 1603 {
+            description OESS-L2CCC-327771;
+            encapsulation vlan-ccc;
+            vlan-id 1603;
+            output-vlan-map swap;
+        }
+        unit 1741 {
+            description OESS-L2CCC-309471;
+            encapsulation vlan-ccc;
+            vlan-id 1741;
+            output-vlan-map swap;
+        }
+        unit 2874 {
+            description OESS-L2CCC-308941;
+            encapsulation vlan-ccc;
+            vlan-id 2874;
+            output-vlan-map swap;
+        }
+        unit 2904 {
+            description OESS-L2CCC-308171;
+            encapsulation vlan-ccc;
+            vlan-id 2904;
+            output-vlan-map swap;
+        }
+        unit 2905 {
+            description OESS-L2CCC-308981;
+            encapsulation vlan-ccc;
+            vlan-id 2905;
+            output-vlan-map swap;
+        }
+        unit 2975 {
+            description OESS-L2CCC-309741;
+            encapsulation vlan-ccc;
+            vlan-id 2975;
+            output-vlan-map swap;
+        }
+        unit 3722 {
+            description OESS-L2CCC-308731;
+            encapsulation vlan-ccc;
+            vlan-id 3722;
+            output-vlan-map swap;
+        }
+        unit 3726 {
+            description OESS-L2CCC-308721;
+            encapsulation vlan-ccc;
+            vlan-id 3726;
+            output-vlan-map swap;
+        }
+    }
+    xe-3/2/2 {
+        description "pas-tst.atla em2 | [NO-MONITOR]";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 400 {
+            description "ATLA Performance Assurance Host";
+            vlan-id 400;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                address 198.71.46.65/31;
+            }
+        }
+    }
+    xe-3/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC [NO-MONITOR]";
+    }
+    et-3/3/0 {
+        description "BACKBONE: ATLA-JACK | I2-ATLA-JACK-100GE-07739";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-JACK | I2-ATLA-JACK-VLAN-70246";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.42/31;
+            }
+            family inet6 {
+                address 2001:468:fc:46::1/64;
+            }
+        }
+    }
+    xe-4/0/0 {
+        description "AVAILABLE 10GE,LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/0/1 {
+        description "[VS-SW] vs-sw, port 3";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 301 {
+            description OESS-L2VPLS-323331;
+            encapsulation vlan-vpls;
+            vlan-id 301;
+            output-vlan-map swap;
+        }
+        unit 500 {
+            description OESS-L2VPN-341901;
+            encapsulation vlan-ccc;
+            vlan-id 500;
+            output-vlan-map swap;
+        }
+    }
+    xe-4/0/2 {
+        description "[VS-SW] vs-sw, port 2";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 201 {
+            description OESS-L2VPN-310161;
+            encapsulation vlan-ccc;
+            vlan-id 201;
+            output-vlan-map swap;
+        }
+        unit 202 {
+            description OESS-L2VPN-310171;
+            encapsulation vlan-ccc;
+            vlan-id 202;
+            output-vlan-map swap;
+        }
+    }
+    et-4/1/0 {
+        description "BACKBONE: ATLA-CHAR | I2-ATLA-CHAR-100GE-07738";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-CHAR | I2-ATLA-CHAR-VLAN-70593";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.124/31;
+            }
+            family inet6 {
+                address 2001:468:fc:60::1/64;
+            }
+        }
+    }
+    xe-4/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/2/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/2/2 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-4/2/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    et-4/3/0 {
+        description "I2-S11441 SOX | I2-ATLA-ATLA-100GE-11442";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 28 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] University of Virginia DDoS Scrubbing [snapp_private] | I2-S187226";
+            vlan-id 28;
+            family inet {
+                address 163.253.4.82/31;
+            }
+        }
+        unit 66 {
+            description OESS-L2CCC-368151;
+            encapsulation vlan-ccc;
+            vlan-id 66;
+            output-vlan-map swap;
+        }
+        unit 98 {
+            description OESS-L2VPN-313411;
+            encapsulation vlan-ccc;
+            vlan-id 98;
+            output-vlan-map swap;
+        }
+        unit 101 {
+            description OESS-L2VPN-341891;
+            encapsulation vlan-ccc;
+            vlan-id 101;
+            output-vlan-map swap;
+        }
+        unit 150 {
+            description OESS-L2VPN-312971;
+            encapsulation vlan-ccc;
+            vlan-id 150;
+            output-vlan-map swap;
+        }
+        unit 183 {
+            description OESS-L2VPN-313421;
+            encapsulation vlan-ccc;
+            vlan-id 183;
+            output-vlan-map swap;
+        }
+        unit 184 {
+            description OESS-L2VPN-313511;
+            encapsulation vlan-ccc;
+            vlan-id 184;
+            output-vlan-map swap;
+        }
+        unit 188 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] SoX via AL2S/ATLA | I2-S11797";
+            vlan-id 188;
+            family inet {
+                mtu 9000;
+                address 143.215.193.2/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2607:f7b8:1f02:c102::1/64;
+            }
+        }
+        unit 189 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] sox AS10490 | I2-S55652";
+            vlan-id 189;
+            family inet {
+                mtu 1500;
+                address 198.71.47.165/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2267::1/64;
+            }
+        }
+        unit 200 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-gatech] GaTech via SOX | I2-S185898";
+            vlan-id 200;
+            family inet {
+                address 163.253.7.28/31;
+            }
+            family inet6 {
+                address 2001:468:fd:7::1/126;
+            }
+        }
+        unit 201 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-gatech] GaTech via SOX | I2-S185898";
+            vlan-id 201;
+            family inet {
+                address 163.253.7.30/31;
+            }
+            family inet6 {
+                address 2001:468:fd:8::1/126;
+            }
+        }
+        unit 203 {
+            description OESS-L2VPN-313871;
+            encapsulation vlan-ccc;
+            vlan-id 203;
+            output-vlan-map swap;
+        }
+        unit 220 {
+            description OESS-L2VPN-313861;
+            encapsulation vlan-ccc;
+            vlan-id 220;
+            output-vlan-map swap;
+        }
+        unit 320 {
+            description OESS-L2VPN-311011;
+            encapsulation vlan-ccc;
+            vlan-id 320;
+            output-vlan-map swap;
+        }
+        unit 322 {
+            description OESS-L2VPN-312171;
+            encapsulation vlan-ccc;
+            vlan-id 322;
+            output-vlan-map swap;
+        }
+        unit 323 {
+            description OESS-L2VPN-313471;
+            encapsulation vlan-ccc;
+            vlan-id 323;
+            output-vlan-map swap;
+        }
+        unit 324 {
+            description OESS-L2VPN-313481;
+            encapsulation vlan-ccc;
+            vlan-id 324;
+            output-vlan-map swap;
+        }
+        unit 325 {
+            description OESS-L2VPN-311021;
+            encapsulation vlan-ccc;
+            vlan-id 325;
+            output-vlan-map swap;
+        }
+        unit 326 {
+            description OESS-L2VPN-313491;
+            encapsulation vlan-ccc;
+            vlan-id 326;
+            output-vlan-map swap;
+        }
+        unit 327 {
+            description OESS-L2VPN-313501;
+            encapsulation vlan-ccc;
+            vlan-id 327;
+            output-vlan-map swap;
+        }
+        unit 328 {
+            description OESS-L2VPN-313461;
+            encapsulation vlan-ccc;
+            vlan-id 328;
+            output-vlan-map swap;
+        }
+        unit 330 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-xsede] XSEDE via NICS | I2-S185764";
+            vlan-id 330;
+            family inet {
+                address 163.253.7.112/31;
+            }
+            family inet6 {
+                address 2001:468:fd:a::1/126;
+            }
+        }
+        unit 339 {
+            description OESS-L2VPN-313221;
+            encapsulation vlan-ccc;
+            vlan-id 339;
+            output-vlan-map swap;
+        }
+        unit 400 {
+            description OESS-L2VPN-313851;
+            encapsulation vlan-ccc;
+            vlan-id 400;
+            output-vlan-map swap;
+        }
+        unit 414 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] Virginia Tech DDoS Scrubbing [snapp_private] | I2-S187079";
+            vlan-id 414;
+            family inet {
+                address 163.253.4.62/31;
+            }
+            family inet6 {
+                address 2001:468:fb:5::/127;
+            }
+        }
+        unit 457 {
+            description OESS-L2VPN-312521;
+            encapsulation vlan-ccc;
+            vlan-id 457;
+            output-vlan-map swap;
+        }
+        unit 528 {
+            description OESS-L2VPN-344421;
+            encapsulation vlan-ccc;
+            vlan-id 528;
+            output-vlan-map swap;
+        }
+        unit 529 {
+            description OESS-L2VPN-344081;
+            encapsulation vlan-ccc;
+            vlan-id 529;
+            output-vlan-map swap;
+        }
+        unit 566 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-sox-auburn] Auburn MS Express | I2-S187552";
+            vlan-id 566;
+            family inet {
+                address 163.253.7.18/31;
+            }
+        }
+        unit 601 {
+            description OESS-L2VPN-313391;
+            encapsulation vlan-ccc;
+            vlan-id 601;
+            output-vlan-map swap;
+        }
+        unit 602 {
+            description OESS-L2VPN-313401;
+            encapsulation vlan-ccc;
+            vlan-id 602;
+            output-vlan-map swap;
+        }
+        unit 611 {
+            description OESS-L2VPN-313211;
+            encapsulation vlan-ccc;
+            vlan-id 611;
+            output-vlan-map swap;
+        }
+        unit 612 {
+            description OESS-L2VPN-313321;
+            encapsulation vlan-ccc;
+            vlan-id 612;
+            output-vlan-map swap;
+        }
+        unit 614 {
+            description OESS-L2VPN-313301;
+            encapsulation vlan-ccc;
+            vlan-id 614;
+            output-vlan-map swap;
+        }
+        unit 615 {
+            description OESS-L2VPN-313201;
+            encapsulation vlan-ccc;
+            vlan-id 615;
+            output-vlan-map swap;
+        }
+        unit 617 {
+            description OESS-L2VPN-313261;
+            encapsulation vlan-ccc;
+            vlan-id 617;
+            output-vlan-map swap;
+        }
+        unit 666 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] SOX DDoS Scrubbing [snapp_private] | I2-S185323";
+            vlan-id 666;
+            family inet {
+                address 163.253.4.40/31;
+            }
+            family inet6 {
+                address 2001:468:fb:19::1/126;
+            }
+        }
+        unit 668 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] Georgia Tech via SOX [snapp_private] | I2-185843";
+            vlan-id 668;
+            family inet {
+                address 163.253.4.52/31;
+            }
+            family inet6 {
+                address 2001:468:fb:1f::1/126;
+            }
+        }
+        unit 769 {
+            description OESS-L2VPN-322421;
+            encapsulation vlan-ccc;
+            vlan-id 769;
+            output-vlan-map swap;
+        }
+        unit 833 {
+            description OESS-L2VPN-312731;
+            encapsulation vlan-ccc;
+            vlan-id 833;
+            output-vlan-map swap;
+        }
+        unit 900 {
+            description OESS-L2VPN-311131;
+            encapsulation vlan-ccc;
+            vlan-id 900;
+            output-vlan-map swap;
+        }
+        unit 1104 {
+            description OESS-L2VPN-313431;
+            encapsulation vlan-ccc;
+            vlan-id 1104;
+            output-vlan-map swap;
+        }
+        unit 1218 {
+            description OESS-L2CCC-360881;
+            encapsulation vlan-ccc;
+            vlan-id 1218;
+            output-vlan-map swap;
+        }
+        unit 1260 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] FLR AS11096 via SOX | I2-S12519";
+            vlan-id 1260;
+            family inet {
+                mtu 9000;
+                address 108.59.26.9/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2607:f5d8:2:e100::2/64;
+            }
+        }
+        unit 1261 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] FLR AS11096 via SOX | I2-S55761";
+            vlan-id 1261;
+            family inet {
+                mtu 1500;
+                address 198.71.47.64/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2708::1/64;
+            }
+        }
+        unit 1303 {
+            description OESS-L2VPN-312681;
+            encapsulation vlan-ccc;
+            vlan-id 1303;
+            output-vlan-map swap;
+        }
+        unit 1313 {
+            description OESS-L2VPN-312711;
+            encapsulation vlan-ccc;
+            vlan-id 1313;
+            output-vlan-map swap;
+        }
+        unit 1318 {
+            description OESS-L2VPN-312691;
+            encapsulation vlan-ccc;
+            vlan-id 1318;
+            output-vlan-map swap;
+        }
+        unit 1320 {
+            description OESS-L2VPN-312931;
+            encapsulation vlan-ccc;
+            vlan-id 1320;
+            output-vlan-map swap;
+        }
+        unit 1331 {
+            description OESS-L2VPN-312701;
+            encapsulation vlan-ccc;
+            vlan-id 1331;
+            output-vlan-map swap;
+        }
+        unit 1345 {
+            description OESS-L2VPN-340281;
+            encapsulation vlan-ccc;
+            vlan-id 1345;
+            output-vlan-map swap;
+        }
+        unit 1346 {
+            description OESS-L2VPN-340301;
+            encapsulation vlan-ccc;
+            vlan-id 1346;
+            output-vlan-map swap;
+        }
+        unit 1347 {
+            description OESS-L2VPN-340311;
+            encapsulation vlan-ccc;
+            vlan-id 1347;
+            output-vlan-map swap;
+        }
+        unit 1701 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-flr-polk] Polk via FLR/SOX | I2-S187300";
+            vlan-id 1701;
+            family inet {
+                address 163.253.7.68/31;
+            }
+        }
+        unit 1800 {
+            description OESS-L2VPN-312741;
+            encapsulation vlan-ccc;
+            vlan-id 1800;
+            output-vlan-map swap;
+        }
+        unit 1884 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[i2cloud-flr-umiami] University of Miami via FLR/SOX | I2-S187329";
+            vlan-id 1884;
+            family inet {
+                address 163.253.7.82/31;
+            }
+        }
+        unit 2300 {
+            description OESS-L2VPN-313241;
+            encapsulation vlan-ccc;
+            vlan-id 2300;
+            output-vlan-map swap;
+        }
+        unit 2308 {
+            description OESS-L2VPN-313251;
+            encapsulation vlan-ccc;
+            vlan-id 2308;
+            output-vlan-map swap;
+        }
+        unit 2315 {
+            description OESS-L2VPN-313331;
+            encapsulation vlan-ccc;
+            vlan-id 2315;
+            output-vlan-map swap;
+        }
+        unit 2316 {
+            description OESS-L2VPN-313341;
+            encapsulation vlan-ccc;
+            vlan-id 2316;
+            output-vlan-map swap;
+        }
+        unit 2465 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] Old Dominion University DDoS Scrubbing [snapp_private] | I2-S187082";
+            vlan-id 2465;
+            family inet {
+                address 163.253.4.66/31;
+            }
+            family inet6 {
+                address 2001:468:fb:7::/127;
+            }
+        }
+        unit 2466 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] College of William and Mary DDoS Scrubbing [snapp_private] | I2-S187085";
+            vlan-id 2466;
+            family inet {
+                address 163.253.4.70/31;
+            }
+            family inet6 {
+                address 2001:468:fb:9::/127;
+            }
+        }
+        unit 2502 {
+            description OESS-L2VPN-345851;
+            encapsulation vlan-ccc;
+            vlan-id 2502;
+            output-vlan-map swap;
+        }
+        unit 2700 {
+            description OESS-L2VPN-348761;
+            encapsulation vlan-ccc;
+            vlan-id 2700;
+            output-vlan-map swap;
+        }
+        unit 3538 {
+            description OESS-L2VPN-313371;
+            encapsulation vlan-ccc;
+            vlan-id 3538;
+            output-vlan-map swap;
+        }
+    }
+    et-5/0/0 {
+        description "[ae2] ATLA-CHIC | I2-ATLA-CHIC-100GE-186221";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-7/0/0 {
+        description "[VS-SW] vs-sw, port 4";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 204 {
+            description OESS-L2VPN-326951;
+            encapsulation vlan-ccc;
+            vlan-id 204;
+            output-vlan-map swap;
+        }
+        unit 205 {
+            description OESS-L2VPN-326911;
+            encapsulation vlan-ccc;
+            vlan-id 205;
+            output-vlan-map swap;
+        }
+        unit 301 {
+            description OESS-L2VPN-322251;
+            encapsulation vlan-ccc;
+            vlan-id 301;
+            output-vlan-map swap;
+        }
+        unit 302 {
+            description OESS-L2VPN-322241;
+            encapsulation vlan-ccc;
+            vlan-id 302;
+            output-vlan-map swap;
+        }
+        unit 304 {
+            description OESS-L2VPN-326971;
+            encapsulation vlan-ccc;
+            vlan-id 304;
+            output-vlan-map swap;
+        }
+        unit 405 {
+            description OESS-L2VPN-326931;
+            encapsulation vlan-ccc;
+            vlan-id 405;
+            output-vlan-map swap;
+        }
+        unit 504 {
+            description OESS-L2VPN-327001;
+            encapsulation vlan-ccc;
+            vlan-id 504;
+            output-vlan-map swap;
+        }
+    }
+    xe-7/0/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/0/2 {
+        description "[VS-SRV] vs-srv port em4";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-7/0/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/1/0 {
+        description "BACKBONE: ATLA-LOUI | I2-ATLA-LOUI-100GE-07740";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-LOUI | I2-ATLA-LOUI-VLAN-70330";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.90/31;
+            }
+            family inet6 {
+                address 2001:468:fc:57::1/64;
+            }
+        }
+    }
+    xe-7/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-7/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-7/3/0 {
+        description "[ae1] ATLA-WASH | I2-ATLA-WASH-100GE-54536";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-8/0/0 {
+        description "[VS-SW] vs-sw, port 5";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    xe-8/0/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-8/0/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-8/0/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-8/1/0 {
+        description "BACKBONE: ATLA-JCSN | I2-ATLA-JCSN-100GE-10784";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-JCSN | I2-ATLA-JCSN-VLAN-70248";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.46/31;
+            }
+            family inet6 {
+                address 2001:468:fc:48::1/64;
+            }
+        }
+    }
+    xe-8/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-8/2/1 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-8/2/2 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-8/2/3 {
+        description "AVAILABLE 10GE, NO OPTIC | [NO-MONITOR]";
+    }
+    et-8/3/0 {
+        description "[ae2] ATLA-CHIC | I2-ATLA-CHIC-100GE-185868";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    et-9/0/0 {
+        description "[ae1] ATLA-WASH | I2-ATLA-WASH-100GE-71062";
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    et-10/0/0 {
+        description "I2-S188430 MissiON | I2-ATLA-ATLM-100GE-188200";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 2008 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] Mississippi Optical Network (MissiON) | I2-S06927";
+            vlan-id 2008;
+            family inet {
+                address 173.235.100.17/31;
+            }
+            family inet6 {
+                address 2607:f4a0:5010:8::2/64;
+            }
+        }
+        unit 2009 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] mission AS396926 | I2-S55747";
+            vlan-id 2009;
+            family inet {
+                mtu 1500;
+                address 173.235.100.19/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2607:f4a0:5010:9::2/64;
+            }
+        }
+    }
+    ge-10/2/0 {
+        description "1G Observatory via lan.atla.net.internet2.edu:A23";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 12 {
+            description "Observatory 1 Gig";
+            vlan-id 12;
+            family inet {
+                rpf-check fail-filter i2-internal;
+                mtu 9000;
+                filter {
+                    output obs-out;
+                }
+                address 64.57.16.97/28;
+            }
+            family inet6 {
+                rpf-check fail-filter i2-internal6;
+                mtu 9000;
+                filter {
+                    output obs-out6;
+                }
+                address 2001:468:1:12::1/64;
+                address 2001:468:1:12::16:97/64;
+            }
+        }
+        unit 545 {
+            description "I2-S06738 DCN ATLA-CHIC | I2-ATLA-CHIC-LSP-06751";
+            encapsulation vlan-ccc;
+            vlan-id 545;
+            family ccc;
+        }
+        unit 546 {
+            description "I2-S06738 DCN ATLA-KANS | I2-ATLA-KANS-LSP-06753";
+            encapsulation vlan-ccc;
+            vlan-id 546;
+            family ccc;
+        }
+        unit 547 {
+            description "I2-S06738 DCN ATLA-WASH | I2-ATLA-WASH-LSP-06752";
+            encapsulation vlan-ccc;
+            vlan-id 547;
+            family ccc;
+        }
+        unit 2701 {
+            description "AL2S ATLA-WASH OOB";
+            vlan-id 2701;
+            family inet {
+                mtu 1500;
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.161/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.163;
+                        priority 30;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2702 {
+            description "AL2S ATLA-HOUS OOB";
+            vlan-id 2702;
+            family inet {
+                mtu 1500;
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.113/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.115;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2707 {
+            description "AL2S ATLA-HOUS OOB #2";
+            vlan-id 2707;
+            family inet {
+                mtu 1500;
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.24.193/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.24.195;
+                        priority 10;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2709 {
+            description "AL2S ATLA-HOUS OOB #3 via NASH";
+            vlan-id 2709;
+            family inet {
+                mtu 1500;
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.24.222/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.24.220;
+                        priority 15;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 2712 {
+            description "AL2S ATLA-CHIC OOB";
+            vlan-id 2712;
+            family inet {
+                filter {
+                    output al2s-oob-out;
+                }
+                address 64.57.25.105/29 {
+                    vrrp-group 10 {
+                        virtual-address 64.57.25.107;
+                        priority 20;
+                        advertise-interval 3;
+                        accept-data;
+                    }
+                }
+            }
+        }
+    }
+    ge-10/2/1 {
+        description "AVAILABLE | [NO-MONITOR]";
+    }
+    ge-10/2/2 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+    }
+    ge-10/2/3 {
+        description "Layer-II Bridge for NOAA Mgmt | I2-ATLA-ATLA-GIGE-05899";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 118 {
+            description OESS-L2VPN-319831;
+            encapsulation vlan-ccc;
+            vlan-id 118;
+            output-vlan-map swap;
+        }
+    }
+    ge-10/2/4 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+    }
+    ge-10/2/5 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+    }
+    ge-10/2/6 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+    }
+    ge-10/2/7 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    ge-10/2/8 {
+        description "AVAILABLE 1GE, SFP-T OPTIC [NO-MONITOR]";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    ge-10/3/0 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+    }
+    ge-10/3/1 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+    }
+    ge-10/3/2 {
+        description "AVAILABLE 1GE, NO OPTIC [NO-MONITOR]";
+        vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+    }
+    ge-10/3/3 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/4 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/5 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/6 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/7 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/8 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/9 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ae1 {
+        description "BACKBONE: ATLA-WASH | I2-ATLA-WASH-LAG-185229";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-WASH | I2-ATLA-WASH-VLAN-185230";
+            vlan-id 4079;
+            family inet {
+                address 198.71.45.6/31;
+            }
+            family inet6 {
+                address 2001:468:ff:110::1/64;
+            }
+        }
+    }
+    ae2 {
+        description "BACKBONE: ATLA-CHIC | I2-ATLA-CHIC-LAG-185869";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4070 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ATLA-CHIC | I2-ATLA-CHIC-VLAN-185870";
+            vlan-id 4070;
+            family inet {
+                address 198.71.45.61/31;
+            }
+            family inet6 {
+                address 2001:468:ff:104::2/64;
+            }
+        }
+    }
+}

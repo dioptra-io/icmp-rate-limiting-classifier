@@ -1,0 +1,1741 @@
+interfaces {
+    xe-0/0/0 {
+        description "routing-instance trcps - [ae7] google 3x10 LAG";
+        gigether-options {
+            802.3ad ae7;
+        }
+    }
+    xe-0/0/1 {
+        description "routing-instance trcps - [ae8] google 3x10 LAG";
+        gigether-options {
+            802.3ad ae8;
+        }
+    }
+    xe-0/0/2 {
+        description "routing-instance trcps - [ae23] Amazon LAG | I2-ASHB-ASHB-FIBR-184223";
+        gigether-options {
+            802.3ad ae23;
+        }
+    }
+    xe-0/0/3 {
+        description "routing-instance trcps - [ae24] Amazon LAG | I2-ASHB-ASHB-FIBR-184224";
+        gigether-options {
+            802.3ad ae24;
+        }
+    }
+    xe-0/1/0 {
+        description "[ae17] ZenEdge - PNI - Link #1 | I2-ASHB-ASHB-10GE-71731";
+        gigether-options {
+            802.3ad ae17;
+        }
+    }
+    xe-0/1/1 {
+        description "[ae17] ZenEdge - PNI - Link #2 | I2-ASHB-ASHB-10GE-71732";
+        gigether-options {
+            802.3ad ae17;
+        }
+    }
+    xe-0/1/2 {
+        description "I2-S185901 CEN | I2-ASHB-ASHB-10GE-185900";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 1701 {
+            description OESS-L2VPN-346631;
+            encapsulation vlan-ccc;
+            vlan-id 1701;
+            output-vlan-map swap;
+        }
+    }
+    xe-0/1/3 {
+        description "RESERVED Apple | I2-ASHB-ASHB-10GE-187965 [PENDING][21052:144]";
+    }
+    xe-0/2/0 {
+        description "routing-instance trcps - [ae25] Highwinds LAG | I2-ASHB-ASHB-10GE-187967";
+        gigether-options {
+            802.3ad ae25;
+        }
+    }
+    xe-0/2/1 {
+        description "[ae29] Google GCI zone 2 | I2-ASHB-ASHB-10GE-188139 [PENDING][21282:144]";
+        gigether-options {
+            802.3ad ae29;
+        }
+    }
+    xe-0/2/2 {
+        description "[NETPLUS][ae21] Oracle via Direct Connection | I2-S182397 | I2-ASHB-ASHB-10GE-182383";
+        gigether-options {
+            802.3ad ae21;
+        }
+    }
+    xe-0/2/3 {
+        description "routing-instance trcps - [ae18] Fastly LAG | I2-ASHB-ASHB-FIBR-184225";
+        gigether-options {
+            802.3ad ae18;
+        }
+    }
+    xe-0/3/0 {
+        description "Microsoft Express Route Secondary | I2-ASHB-ASHB-10GE-184191";
+        per-unit-scheduler;
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 3 {
+            description OESS-L2VPN-343001;
+            encapsulation vlan-ccc;
+            vlan-id 3;
+            output-vlan-map swap;
+        }
+        unit 4 {
+            description OESS-L2VPLS-342971;
+            encapsulation vlan-vpls;
+            vlan-id 4;
+            output-vlan-map swap;
+        }
+        unit 5 {
+            description "[i2cloud-gatech] GaTech MS Express| I2-S185898";
+            vlan-tags outer 5 inner 101;
+            family inet {
+                mtu 1500;
+                address 163.253.7.37/30;
+            }
+        }
+        unit 6 {
+            description "[i2cloud-oshean] OSHEAN MS Express| I2-S185865";
+            vlan-tags outer 6 inner 101;
+            family inet {
+                mtu 1500;
+                address 163.253.7.25/30;
+            }
+        }
+        unit 7 {
+            description "[i2cloud-flr-polk] Polk State College MS Express | I2-S187300";
+            vlan-tags outer 7 inner 100;
+            family inet {
+                mtu 1500;
+                address 163.253.7.77/30;
+            }
+        }
+        unit 8 {
+            description OESS-L2CCC-344541;
+            encapsulation vlan-ccc;
+            vlan-id 8;
+            output-vlan-map swap;
+        }
+        unit 9 {
+            description OESS-L2VPN-344421;
+            encapsulation vlan-ccc;
+            vlan-id 9;
+            output-vlan-map swap;
+        }
+        unit 10 {
+            description "[i2cloud-sox-auburn] Auburn MS Express | I2-S187552";
+            vlan-tags outer 10 inner 101;
+            family inet {
+                mtu 1500;
+                address 163.253.7.97/30;
+            }
+        }
+        unit 11 {
+            description "[i2cloud-suncorridor] Sun Corridor MS Express| I2-S186861";
+            vlan-tags outer 11 inner 100;
+            family inet {
+                mtu 1500;
+                address 163.253.7.49/30;
+            }
+        }
+        unit 12 {
+            description OESS-L2CCC-360881;
+            encapsulation vlan-ccc;
+            vlan-id 12;
+            output-vlan-map swap;
+        }
+        unit 13 {
+            description "[i2cloud-flr-umiami] i2cloud-flr-umiami State College MS Express | I2-S187329";
+            vlan-tags outer 13 inner 100;
+            family inet {
+                mtu 1500;
+                address 163.253.7.89/30;
+            }
+        }
+        unit 2101 {
+            vlan-tags outer 2 inner 101;
+            family inet {
+                mtu 1500;
+                address 163.253.7.5/30;
+            }
+        }
+    }
+    xe-0/3/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-0/3/2 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-0/3/3 {
+        description "routing-instance trcps - Charter[snapp_private]";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] charter AS20115 [snapp_private] | I2-S55661";
+            family inet {
+                mtu 1500;
+                address 96.34.148.6/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:506:100:f006::2/126;
+            }
+        }
+    }
+    et-1/0/0 {
+        description "[ae2] ASHB-ASHB | I2-ASHB-ASHB-100GE-55223";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    xe-2/0/0 {
+        description "[NETPLUS][ae14] Amazon | I2-S57964 | I2-ASHB-ASHB-10GE-57960";
+        gigether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-2/0/1 {
+        description "[NETPLUS][ae14] Amazon | I2-S57964 | I2-ASHB-ASHB-10GE-57961";
+        gigether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-2/0/2 {
+        description "[NETPLUS][ae14] Amazon | I2-S57964 | I2-ASHB-ASHB-10GE-57962";
+        gigether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-2/0/3 {
+        description "[NETPLUS][ae14] Amazon | I2-S57964 | I2-ASHB-ASHB-10GE-57963";
+        gigether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-2/1/0 {
+        description "[NETPLUS][ae4] Microsoft via Direct Connection #2 | I2-S54342 | I2-ASHB-ASHB-10GE-57991";
+        gigether-options {
+            802.3ad ae4;
+        }
+    }
+    xe-2/1/1 {
+        description "[NETPLUS][ae4] Microsoft via Direct Connection #2 | I2-S54342 | I2-ASHB-ASHB-10GE-57992";
+        gigether-options {
+            802.3ad ae4;
+        }
+    }
+    xe-2/1/2 {
+        description "[NETPLUS][ae16] Dropbox | I2-S67290 | I2-ASHB-ASHB-10GE-68014";
+        gigether-options {
+            802.3ad ae16;
+        }
+    }
+    xe-2/1/3 {
+        description "[NETPLUS][ae16] Dropbox | I2-S67290 | I2-ASHB-ASHB-10GE-68015";
+        gigether-options {
+            802.3ad ae16;
+        }
+    }
+    xe-2/2/0 {
+        description "routing-instance trcps - [ae12] Facebook LAG | I2-S55657";
+        gigether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-2/2/2 {
+        description "routing-instance trcps - [ae11] Facebook LAG | I2-S55657";
+        gigether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-2/2/3 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "I2-S06178 BOX.COM Cloud Services 10G PNI #1 | I2-ASHB-ASHB-10GE-70152";
+        unit 0 {
+            description "[RE][NETPLUS] I2-S06178 BOX.COM Cloud Services 10G PNI #1";
+            family inet {
+                mtu 1500;
+                filter {
+                    input flow-sample;
+                    output interface-out;
+                }
+                address 107.152.26.127/31;
+            }
+        }
+    }
+    xe-2/3/0 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "I2-S06178 BOX.COM Cloud Services 10G PNI #2 | I2-ASHB-ASHB-10GE-70153";
+        unit 0 {
+            description "[RE][NETPLUS] I2-S06178 BOX.COM Cloud Services 10G PNI #2";
+            family inet {
+                mtu 1500;
+                filter {
+                    input flow-sample;
+                    output interface-out;
+                }
+                address 107.152.26.125/31;
+            }
+        }
+    }
+    xe-2/3/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-2/3/2 {
+        description "routing-instance trcps - [ae25] Highwinds LAG | I2-ASHB-ASHB-FIBR-184192";
+        gigether-options {
+            802.3ad ae25;
+        }
+    }
+    xe-2/3/3 {
+        description "I2-S185882 OSHEAN | I2-ASHB-ASHB-10GE-185888";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        unit 800 {
+            description OESS-L2VPN-343521;
+            encapsulation vlan-ccc;
+            vlan-id 800;
+            output-vlan-map swap;
+        }
+    }
+    xe-3/0/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-3/0/1 {
+        description "routing-instance trcps - Netflix #2 (18198903)";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Netflix AS2906 | I2-S55658";
+            family inet {
+                mtu 1500;
+                address 108.175.34.41/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:10c:7002:40::2/126;
+            }
+        }
+    }
+    xe-3/0/2 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-3/0/3 {
+        description "routing-instance trcps - [ae11] Facebook LAG | I2-ASHB-ASHB-10GE-185256";
+        gigether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-3/1/0 {
+        description "routing-instance trcps - [ae5] apple AS714 LAG 2x10GE, Link #2";
+        gigether-options {
+            802.3ad ae5;
+        }
+    }
+    xe-3/1/1 {
+        description "routing-instance trcps - [ae6] Edgecast 2x10 LAG | I2-S55666";
+        gigether-options {
+            802.3ad ae6;
+        }
+    }
+    xe-3/1/2 {
+        description "routing-instance trcps - [ae9] Akamai LAG | I2-S55656";
+        gigether-options {
+            802.3ad ae9;
+        }
+    }
+    xe-3/1/3 {
+        description "routing-instance trcps - Yahoo #1";
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] yahoo AS10310 | I2-S55678";
+            family inet {
+                mtu 1500;
+                address 162.252.69.157/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1005::1/64;
+            }
+        }
+    }
+    xe-3/2/0 {
+        description "routing-instance trcps - [ae7] google 3x10 LAG";
+        gigether-options {
+            802.3ad ae7;
+        }
+    }
+    xe-3/2/1 {
+        description "routing-instance trcps - [ae6] Edgecast 2x10 LAG | I2-S55666";
+        gigether-options {
+            802.3ad ae6;
+        }
+    }
+    xe-3/2/2 {
+        description "routing-instance trcps - [ae10] apple AS714 LAG #2 2x10GE, Link #3";
+        gigether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-3/2/3 {
+        description "routing-instance trcps - [ae10] apple AS714 LAG #2 2x10GE, Link #4";
+        gigether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-3/3/0 {
+        description "routing-instance trcps - [ae8] google 3x10 LAG";
+        gigether-options {
+            802.3ad ae8;
+        }
+    }
+    xe-3/3/1 {
+        description "routing-instance trcps - [ae8] google 3x10 LAG";
+        enable;
+        gigether-options {
+            802.3ad ae8;
+        }
+    }
+    xe-3/3/2 {
+        description "routing-instance trcps - [ae23] Amazon LAG";
+        gigether-options {
+            802.3ad ae23;
+        }
+    }
+    xe-3/3/3 {
+        description "routing-instance trcps - [ae12] Facebook LAG | I2-ASHB-ASHB-10GE-185257";
+        gigether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-5/0/0 {
+        description "routing-instance trcps - Cox";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] cox AS22773 | I2-S55675";
+            family inet {
+                mtu 1500;
+                address 68.105.31.223/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:578:20:2100::4:1/127;
+            }
+        }
+    }
+    xe-5/0/1 {
+        description "[NETPLUS][ae13] Microsoft via Direct Connection | I2-S54342 | I2-ASHB-ASHB-10GE-54376";
+        gigether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-5/0/2 {
+        description "routing-instance trcps - [ae26] ChinaTel LAG | I2-ASHB-ASHB-10GE-185255";
+        gigether-options {
+            802.3ad ae26;
+        }
+    }
+    xe-5/0/3 {
+        description "routing-instance trcps - Netflix";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] netflix AS2906 | I2-S55658";
+            family inet {
+                mtu 1500;
+                address 108.175.34.30/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:10c:7003:407a:3f54::2/126;
+            }
+        }
+    }
+    xe-5/1/0 {
+        description "routing-instance trcps - [ae24] Amazon LAG";
+        gigether-options {
+            802.3ad ae24;
+        }
+    }
+    xe-5/1/1 {
+        description "routing-instance trcps - [ae9] Akamai LAG | I2-S55656";
+        gigether-options {
+            802.3ad ae9;
+        }
+    }
+    xe-5/1/2 {
+        description "routing-instance trcps - NORDUnet testing [snapp_private]";
+        vlan-tagging;
+        mtu 9192;
+        unit 200 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpscust] nordunet AS2603 testing [snapp_private] | I2-S55665";
+            vlan-id 200;
+            family inet {
+                mtu 1500;
+                address 64.57.21.53/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2241::1/64;
+            }
+        }
+    }
+    xe-5/1/3 {
+        description "routing-instance trcps - Limelight";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] limelight AS22822 | I2-S55659";
+            family inet {
+                mtu 1500;
+                address 64.57.20.13/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:120f::1/64;
+            }
+        }
+    }
+    xe-5/2/0 {
+        description "RESERVED AWS Direct Connect 10GE, LR OPTIC [PENDING][18196:144]";
+        flexible-vlan-tagging;
+        mtu 1522;
+        encapsulation flexible-ethernet-services;
+        unit 101 {
+            description "AWS Direct Connect";
+            vlan-id 101;
+            family inet {
+                mtu 1500;
+                address 169.254.255.2/30;
+            }
+        }
+        unit 104 {
+            vlan-id 104;
+            family inet {
+                mtu 1500;
+                address 169.254.255.18/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2600:1ffd:1100:12b0:0:f:33fe:6596/125;
+            }
+        }
+        unit 106 {
+            description "[i2cloud-btaa-uchic] University of Chicago via BTAA | I2-S187694";
+            vlan-id 106;
+            family inet {
+                mtu 1500;
+                address 169.254.255.6/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2600:1ffd:1100:12b0:0:3:7cbf:8056/125;
+            }
+        }
+        unit 107 {
+            description "[i2cloud-gatech] GATECH | I2-S185898";
+            vlan-id 107;
+            family inet {
+                mtu 1500;
+                address 169.254.255.26/30;
+            }
+        }
+        unit 108 {
+            description "[i2cloud-gpn-ozarks] College of the Ozarks via GPN | I2-S187343";
+            vlan-id 108;
+            family inet {
+                mtu 1500;
+                address 169.254.255.34/30;
+            }
+        }
+        unit 1001 {
+            description OESS-L2VPN-367031;
+            encapsulation vlan-ccc;
+            vlan-id 1001;
+            output-vlan-map swap;
+        }
+        unit 1004 {
+            description OESS-L2VPN-367041;
+            encapsulation vlan-ccc;
+            vlan-id 1004;
+            output-vlan-map swap;
+        }
+        unit 1005 {
+            description OESS-L2VPN-367641;
+            encapsulation vlan-ccc;
+            vlan-id 1005;
+            output-vlan-map swap;
+        }
+        unit 3701 {
+            description OESS-L2VPN-362481;
+            encapsulation vlan-ccc;
+            vlan-id 3701;
+            output-vlan-map swap;
+        }
+    }
+    xe-5/2/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-5/2/2 {
+        description "routing-instance trcps - [ae7] google 3x10 LAG";
+        gigether-options {
+            802.3ad ae7;
+        }
+    }
+    xe-5/2/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-5/3/0 {
+        description "[NETPLUS][ae15] Amazon | I2-ASHB-ASHB-10GE-10848";
+        gigether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-5/3/1 {
+        description "[NETPLUS][ae15] Amazon | I2-ASHB-ASHB-10GE-10849";
+        gigether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-5/3/2 {
+        description "[NETPLUS][ae13] Microsoft via DIRECT | I2-S54342 | I2-ASHB-ASHB-10GE-54377";
+        gigether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-5/3/3 {
+        description "routing-instance trcps - [ae11] Facebook LAG (20053381-Z) | I2-S55657";
+        gigether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-7/0/0 {
+        description "routing-instance trcps - [ae28] Highwinds LAG | I2-ASHB-ASHB-10GE-187966 [PENDING][19139:144]";
+        gigether-options {
+            802.3ad ae28;
+        }
+    }
+    xe-7/0/1 {
+        description "routing-instance trcps - Zayo AS6461 [snapp_private]";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Zayo AS6461 [snapp_private] | I2-S55662";
+            family inet {
+                mtu 1500;
+                address 64.57.20.105/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1209::1/64;
+            }
+        }
+    }
+    xe-7/0/2 {
+        description "routing-instance trcps - [ae3] Equinix Ashburn Public LAG 3x10GE Link #1";
+        gigether-options {
+            802.3ad ae3;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+        }
+    }
+    xe-7/0/3 {
+        description "routing-instance trcps - [ae3] Equinix Ashburn Public LAG 3x10GE Link #2";
+        gigether-options {
+            802.3ad ae3;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+        }
+    }
+    xe-7/1/0 {
+        description "[ae27] Code42 | I2-ASHB-ASHB-10GE-186261";
+        gigether-options {
+            802.3ad ae27;
+        }
+    }
+    xe-7/1/1 {
+        description "routing-instance trcps - [ae5] apple AS714 LAG 2x10GE, Link #1";
+        gigether-options {
+            802.3ad ae5;
+        }
+    }
+    xe-7/1/2 {
+        description "routing-instance trcps - TWCable [snapp_private]";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] twcable AS7843 [snapp_private] | I2-S55677";
+            family inet {
+                mtu 1500;
+                address 107.14.16.82/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:1998::8:0:0:0:9f/127;
+            }
+        }
+    }
+    xe-7/1/3 {
+        description "[NETPLUS][ae22] Oracle via Direct Connection | I2-S182397 | I2-ASHB-ASHB-10GE-182384";
+        gigether-options {
+            802.3ad ae22;
+        }
+    }
+    xe-7/2/0 {
+        description "routing-instance trcps - [ae1] ny0:xe-3/2/0 LAG 3x10GE Link #2 | I2-ASHB-EQNY-10GE-55482 [NO-MONITOR]";
+        disable;
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-7/2/1 {
+        description "routing-instance trcps - [ae1] ny0:xe-1/1/0 LAG 3x10GE Link #3 | I2-ASHB-EQNY-10GE-57350 [NO-MONITOR]";
+        disable;
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-7/2/2 {
+        description "routing-instance trcps - [ae1] ny0:xe-0/0/0 LAG 3x10GE Link #1 | I2-ASHB-EQNY-10GE-55487 [NO-MONITOR]";
+        disable;
+        gigether-options {
+            802.3ad ae1;
+        }
+    }
+    xe-7/2/3 {
+        description "routing-instance trcps - [ae3] Equinix Ashburn Public LAG 3x10GE Link #3";
+        gigether-options {
+            802.3ad ae3;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+        }
+    }
+    xe-7/3/0 {
+        description "routing-instance trcps - Comcast [snapp_private]";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] comcast AS7922 [snapp_private] | I2-S55676";
+            family inet {
+                mtu 1500;
+                address 75.149.228.82/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:559:0:36::2/126;
+            }
+        }
+    }
+    xe-7/3/1 {
+        description "[NETPLUS][ae15] Amazon | I2-ASHB-ASHB-10GE-09118";
+        gigether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-7/3/2 {
+        description "[NETPLUS][ae15] Amazon | I2-ASHB-ASHB-10GE-09119";
+        gigether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-7/3/3 {
+        description "routing-instance trcps - [ae12] Facebook LAG (20053379-Z) | I2-S55657";
+        gigether-options {
+            802.3ad ae12;
+        }
+    }
+    et-8/0/2 {
+        description "[ae20] ASHB-CLEV | I2-ASHB-CLEV-100GE-185713";
+        gigether-options {
+            802.3ad ae20;
+        }
+    }
+    et-8/0/5 {
+        description "[ae2] ASHB-ASHB | I2-ASHB-ASHB-100GE-70556";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    et-8/1/2 {
+        description "[ae20] ASHB-CLEV | I2-ASHB-CLEV-100GE-185703";
+        gigether-options {
+            802.3ad ae20;
+        }
+    }
+    et-8/1/5 {
+        description "AVAILABLE 100GE, QSFP28 LR4 OPTIC | [NO-MONITOR]";
+    }
+    et-9/0/0 {
+        description "[ae2] ASHB-ASHB | I2-ASHB-ASHB-100GE-55818";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    et-10/0/0 {
+        description "[ae2] ASHB-ASHB | I2-ASHB-ASHB-100GE-12116";
+        gigether-options {
+            802.3ad ae2;
+        }
+    }
+    ge-10/2/0 {
+        description "routing-instance trcps - Hurricane Electric | I2-ASHB-ASHB-FIBR-55497";
+        vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 2 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] hurricane AS6939 | I2-S55679";
+            vlan-id 2;
+            family inet {
+                mtu 1500;
+                address 162.252.69.141/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1003::1/64;
+            }
+        }
+        unit 3 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] hurricane-extended AS6939 | I2-S55679";
+            vlan-id 3;
+            family inet {
+                mtu 1500;
+                address 162.252.69.145/30;
+            }
+        }
+    }
+    ge-10/2/1 {
+        description "AVAILABLE GIGE, LX OPTIC | [NO-MONITOR]";
+        disable;
+    }
+    ge-10/2/2 {
+        description "routing-instance trcps - Equinix Ashburn public multicast";
+        mac 00:23:9c:d5:a5:f7;
+        gigether-options {
+            no-auto-negotiation;
+            ethernet-switch-profile {
+                mac-learn-enable;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpsixp] [mcast] Equinx Ashburn public multicast";
+            family inet {
+                mtu 1500;
+                address 206.223.135.147/25;
+            }
+        }
+    }
+    ge-10/2/3 {
+        description "SERVICENOW | I2-ASHB-ASHB-GIGE-186360 | [PENDING][18874:144]";
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] SERVICENOW | I2-S52146";
+            family inet {
+                mtu 1500;
+                address 163.253.6.22/31;
+            }
+        }
+    }
+    ge-10/2/4 {
+        description "AVAILABLE 1GE, LX OPTIC patched to 75317:17/18 | [NO-MONITOR]";
+    }
+    ge-10/2/5 {
+        description "AVAILABLE 1GE, LX OPTIC patched to 75317:31/32| [NO-MONITOR]";
+        disable;
+    }
+    ge-10/2/6 {
+        description "AVAILABLE GIGE, LX OPTIC: patch to 75317:41/42 | [NO-MONITOR]";
+    }
+    ge-10/2/7 {
+        description "Blue Jeans AS393490 | I2-ASHB-ASHB-FIBR-57638";
+        mtu 9192;
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "Blue Jeans Netplus | I2-S56257";
+            family inet {
+                mtu 1500;
+                address 64.57.28.48/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:e:203::/127;
+            }
+        }
+    }
+    ge-10/2/8 {
+        description "AVAILABLE 1GE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/2/9 {
+        description "oob2.ashb.net.internet2.edu, fa0/1/4 | [NO-MONITOR]";
+        speed 100m;
+    }
+    ge-10/3/0 {
+        description "Internet2 DC Office | I2-ASHB-ASHB-GIGE-185857";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        gigether-options {
+            no-auto-negotiation;
+        }
+        unit 220 {
+            description "[TRANSIT] Internet2 DC Office | I2-ASHB-ASHB-VLAN-185858 | I2-S184147";
+            vlan-id 220;
+            family inet {
+                mtu 1500;
+                address 64.57.22.227/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:ef01:6::2/64;
+            }
+        }
+        unit 221 {
+            description "[RE] Internet2 DC Office | I2-ASHB-ASHB-VLAN-185859 | I2-S184144";
+            vlan-id 221;
+            family inet {
+                mtu 9000;
+                address 198.71.45.203/31;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2001:468:2700:1::2/64;
+            }
+        }
+        unit 222 {
+            description "[trcpscust] Internet2 DC Office | I2-ASHB-ASHB-VLAN-185860 | I2-S184150";
+            vlan-id 222;
+            family inet {
+                mtu 1500;
+                address 64.57.20.3/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:2208::2/64;
+            }
+        }
+    }
+    inactive: lt-10/3/0 {
+        inactive: unit 0 {
+            description "LS tunnel: master-trcps 3/3 | [NO-MONITOR]";
+            encapsulation vlan;
+            vlan-id 1;
+            peer-unit 1;
+            family inet {
+                filter {
+                    input loopback-strict-in;
+                }
+                address 64.57.20.172/31;
+            }
+            family iso;
+        }
+        unit 1 {
+            description "LS tunnel: master-trpcs 3/3";
+            encapsulation vlan;
+            vlan-id 1;
+            peer-unit 0;
+            family inet {
+                address 64.57.20.173/31;
+            }
+            family iso;
+        }
+    }
+    ge-10/3/1 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/2 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/3 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/4 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/5 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/6 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/7 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/8 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    ge-10/3/9 {
+        description "UNAVAILABLE GIGE, NO OPTIC | [NO-MONITOR]";
+    }
+    xe-11/0/0 {
+        description "routing-instance trcps - [ae28] Highwinds LAG | I2-ASHB-ASHB-10GE-187966 [PENDING][19139:144]";
+        gigether-options {
+            802.3ad ae28;
+        }
+    }
+    xe-11/0/1 {
+        description "RESERVED Apple | I2-ASHB-ASHB-10GE-187964 [PENDING][21052:144]";
+    }
+    xe-11/0/2 {
+        description "RESERVED Fastly PNI | [PENDING][21283:144]";
+    }
+    xe-11/0/3 {
+        description "AVAILABLE 10GE, LR OPTIC patched LC-26 | [NO-MONITOR]";
+    }
+    xe-11/1/0 {
+        description "AVAILABLE 10GE, LR OPTIC patched LC-27 | [NO-MONITOR]";
+    }
+    xe-11/1/1 {
+        description "AVAILABLE 10GE, LR OPTIC patched LC-28 | [NO-MONITOR]";
+    }
+    xe-11/1/2 {
+        description "AVAILABLE 10GE, LR OPTIC patched LC-29 | [NO-MONITOR]";
+    }
+    xe-11/1/3 {
+        description "AVAILABLE 10GE, LR OPTIC patched LC-30 | [NO-MONITOR]";
+    }
+    xe-11/2/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-11/2/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-11/2/2 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-11/2/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-11/3/0 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-11/3/1 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-11/3/2 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    xe-11/3/3 {
+        description "AVAILABLE 10GE, LR OPTIC | [NO-MONITOR]";
+    }
+    ae1 {
+        description "routing-instance trcps - ny0 LAG 3x10GE | I2-ASHB-EQNY-LAG-55480 [NO-MONITOR]";
+        disable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-BACKBONE;
+            description "[trcpsbb] ny0:ae2 LAG 2x10GE | I2-ASHB-EQNY-LAG-55480 [NO-MONITOR]";
+            family inet {
+                address 64.57.20.196/31;
+            }
+            family iso;
+            family inet6 {
+                address 2001:468:f000:0f20::1/64;
+            }
+        }
+    }
+    ae2 {
+        description "BACKBONE: ASHB-ASHB | I2-ASHB-ASHB-LAG-185521";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ASHB-ASHB | I2-ASHB-ASHB-VLAN-185525";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.75/31;
+            }
+            family inet6 {
+                address 2001:468:fc:52::2/64;
+            }
+        }
+    }
+    ae3 {
+        description "routing-instance trcps - Equinix Ashburn Public LAG 3x10GE";
+        mtu 9192;
+        mac f4:b5:2f:02:f7:ce;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpsixp] Equinix Ashburn Public LAG 3x10GE";
+            family inet {
+                mtu 1500;
+                address 206.126.236.45/22 {
+                    primary;
+                }
+                address 206.126.236.131/22;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:504:0:2:0:1:1164:1/64 {
+                    primary;
+                }
+                address 2001:504:0:2::1:1537:1/64;
+            }
+        }
+    }
+    ae4 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "Microsoft LAG | I2-ASHB-ASHB-LAG-57993";
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Microsoft 2x10GE LAG | I2-S54342";
+            family inet {
+                address 198.71.45.180/31;
+            }
+            family inet6 {
+                address 2001:468:e:202::1/64;
+            }
+        }
+    }
+    ae5 {
+        description "routing-instance trcps - Apple AS714 LAG 2x10GE";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] apple AS714 LAG 2x10G | I2-S55655";
+            family inet {
+                mtu 9000;
+                address 17.1.144.2/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2620:149:bb:9010::2/126;
+            }
+        }
+    }
+    ae6 {
+        description "routing-instance trcps - Peer Edgecast 2x10G LAG | 6118:121";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Edgecast AS15133 LAG 2x10G | I2-S55666";
+            family inet {
+                mtu 1500;
+                address 198.71.47.248/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:100d::1/64;
+            }
+        }
+    }
+    ae7 {
+        description "routing-instance trcps - Peer google 3x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] google AS15169 3x10G LAG | I2-S55748";
+            family inet {
+                mtu 1500;
+                address 162.252.69.132/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1000::1/64;
+            }
+        }
+    }
+    ae8 {
+        description "routing-instance trcps - Peer google 3x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] google AS15169 3x10G LAG #2 | I2-S55748";
+            family inet {
+                mtu 1500;
+                address 72.14.217.17/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:4860:1:1:0:2b9c:0:16/126;
+            }
+        }
+    }
+    ae9 {
+        description "routing-instance trcps - Peer Akamai 2x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Akamai AS20940 2x10G LAG  | I2-S55656";
+            family inet {
+                mtu 1500;
+                address 64.57.20.9/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1215::1/64;
+            }
+        }
+    }
+    ae10 {
+        description "routing-instance trcps - Apple AS714 LAG 2x10GE";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] apple AS714 LAG #2 2x10G | I2-S55655";
+            family inet {
+                mtu 9000;
+                address 17.1.144.86/30;
+            }
+            family inet6 {
+                mtu 9000;
+                address 2620:149:bb:9020::52/126;
+            }
+        }
+    }
+    ae11 {
+        description "routing-instance trcps - Peer facebook 3x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] facebook AS32934 3x10G LAG | I2-S55657";
+            family inet {
+                mtu 1500;
+                address 103.4.97.145/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:0:1cff:dead:beee::227/127;
+            }
+        }
+    }
+    ae12 {
+        description "routing-instance trcps - Peer facebook 3x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] facebook AS32934 3x10G LAG | I2-S55657";
+            family inet {
+                mtu 1500;
+                address 103.4.97.231/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:0:1cff:dead:beee::297/127;
+            }
+        }
+    }
+    ae13 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "Microsoft LAG | I2-ASHB-ASHB-LAG-55368";
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Microsoft 2x10GE LAG | I2-S54342";
+            family inet {
+                mtu 1500;
+                address 198.200.130.75/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2a01:111:2000:1::916/126;
+            }
+        }
+    }
+    ae14 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "Amazon LAG | I2-ASHB-ASHB-LAG-57959";
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Amazon | I2-S57964";
+            family inet {
+                mtu 1500;
+                address 64.57.30.2/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:e::2/127;
+            }
+        }
+    }
+    ae15 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "Amazon LAG | I2-ASHB-ASHB-LAG-57976";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Amazon | I2-S57977";
+            family inet {
+                mtu 1500;
+                filter {
+                    input connector-in;
+                }
+                address 64.57.30.38/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:e:201::2/64;
+            }
+        }
+    }
+    ae16 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "DropBox LAG | I2-ASHB-ASHB-LAG-68016";
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] DropBox | I2-S67290";
+            family inet {
+                mtu 1500;
+                address 162.125.15.37/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:100:6000:5::1/127;
+            }
+        }
+    }
+    ae17 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "ZenEdge LAG 2x10GE | I2-ASHB-ASHB-LAG-71733";
+        flexible-vlan-tagging;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 108 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[scrubbing] ZenEdge scrubbing [snapp_private] | I2-S71729";
+            vlan-id 108;
+            family inet {
+                mtu 9000;
+                address 205.147.92.11/31;
+            }
+            family inet6 {
+                address 2620:127:2004:1000::1:2/112;
+            }
+        }
+        unit 109 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE] ZenEdge interface | I2-S71728";
+            vlan-id 109;
+            family inet {
+                mtu 9000;
+                address 205.147.92.13/31;
+            }
+            family inet6 {
+                address 2620:127:2004:1000::2:2/112;
+            }
+        }
+        unit 110 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] ZenEdge AS393679 | I2-S71730";
+            vlan-id 110;
+            family inet {
+                mtu 1500;
+                address 205.147.92.15/31;
+            }
+            family inet6 {
+                address 2620:127:2004:1000::3:2/112;
+            }
+        }
+    }
+    ae18 {
+        description "routing-instance trcps - Peer Fastly 1x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Fastly AS54113 1x10G LAG | I2-S184189";
+            family inet {
+                mtu 1500;
+                address 199.27.73.217/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2620:011a:c000:0108:fa57::1/127;
+            }
+        }
+    }
+    inactive: ae19 {
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 1905 {
+            vlan-id 1905;
+            family inet {
+                address 162.252.70.151/31;
+            }
+        }
+    }
+    ae20 {
+        description "BACKBONE: ASHB-CLEV | I2-ASHB-CLEV-LAG-185704";
+        flexible-vlan-tagging;
+        mtu 9192;
+        encapsulation flexible-ethernet-services;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 100g;
+            lacp {
+                active;
+            }
+        }
+        unit 4079 {
+            apply-groups INTERFACE-BACKBONE;
+            description "BACKBONE: ASHB-CLEV | I2-ASHB-CLEV-VLAN-185703";
+            vlan-id 4079;
+            family inet {
+                address 162.252.70.128/31;
+            }
+            family inet6 {
+                address 2001:468:fc:63::1/64;
+            }
+        }
+    }
+    ae21 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "Oracle 1x10GE LAG | I2-S182397 | I2-ASHB-ASHB-LAG-182387";
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Oracle 1x10GE LAG | I2-S182397";
+            family inet {
+                mtu 1500;
+                address 163.253.6.8/31;
+            }
+        }
+    }
+    ae22 {
+        apply-groups INTERFACE-CONNECTOR;
+        description "Oracle 1x10GE LAG | I2-S182397 | I2-ASHB-ASHB-LAG-182388";
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Oracle 1x10GE LAG | I2-S182397";
+            family inet {
+                mtu 1500;
+                address 163.253.6.10/31;
+            }
+        }
+    }
+    ae23 {
+        description "routing-instance trcps - Peer Amazon 2x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Amazon AS16509 2x10G LAG";
+            family inet {
+                mtu 1500;
+                address 162.252.69.212/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1201::1/126;
+            }
+        }
+    }
+    ae24 {
+        description "routing-instance trcps - Peer Amazon 2x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Amazon AS16509 2x10G LAG";
+            family inet {
+                mtu 1500;
+                address 162.252.69.214/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:468:f000:1202::1/126;
+            }
+        }
+    }
+    ae25 {
+        description "routing-instance trcps - Peer Highwinds 2x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Highwinds AS33438 2x10G LAG | I2-S55768";
+            family inet {
+                mtu 1500;
+                address 209.197.0.53/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:4de0:2109::2/126;
+            }
+        }
+    }
+    ae26 {
+        description "routing-instance trcps - Peer ChinaTel 1x10G LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] ChinaTel AS4134 1x10G LAG | I2-S184189";
+            family inet {
+                mtu 1500;
+                address 218.30.54.57/31;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2605:9d80:8021::2/126;
+            }
+        }
+    }
+    ae27 {
+        description "Code42 LAG";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[RE][NETPLUS] Code42 LAG 1x10G";
+            family inet {
+                mtu 9000;
+                address 163.253.6.20/31;
+            }
+        }
+    }
+    ae28 {
+        description "routing-instance trcps - Peer Highwinds 2x10G LAG [PENDING][19139:144]";
+        enable;
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            description "[trcpspeer] Highwinds AS33438 2x10G LAG | I2-S55768";
+            family inet {
+                mtu 1500;
+                address 209.197.18.90/30;
+            }
+            family inet6 {
+                mtu 1500;
+                address 2001:4de0:2:6::2/64;
+            }
+        }
+    }
+    ae29 {
+        description "Google GCI zone 2 LAG 1x10G | [PENDING][21282:144]";
+        mtu 9192;
+        aggregated-ether-options {
+            minimum-links 1;
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            apply-groups INTERFACE-CONNECTOR;
+            family inet {
+                mtu 1440;
+                address 169.254.184.138/30;
+            }
+        }
+    }
+}
