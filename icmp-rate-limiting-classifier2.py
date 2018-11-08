@@ -89,7 +89,7 @@ def add_columns(df_result, df_feature_columns, candidates, witnesses, rates, pro
     ratio = 8
     ips = copy.deepcopy(candidates)
     ips.extend(witnesses)
-    df_result["changing_behaviour"] = df_result["changing_behaviour"].replace(-1, 20000)
+    # df_result["changing_behaviour"] = df_result["changing_behaviour"].replace(-1, 20000)
     for i in range(0, len(ips)):
         if ips[i] in candidates:
             additional_suffix = "c"
