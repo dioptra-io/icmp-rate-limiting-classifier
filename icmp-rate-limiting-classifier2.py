@@ -19,15 +19,11 @@ from tensorflow.python.data import Dataset
 from Classification import neural_network as nn
 from Classification import adanet_wrap as adanet_
 from Data.preprocess import minmax_scale
-from Validation.midar import extract_midar_routers, get_label, transitive_closure
+from Validation.midar import extract_routers, set_router_labels, transitive_closure
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
 pd.options.display.float_format = '{:.3f}'.format
 #################################################
-
-feature_rate_ind = [1000, 2000, 3000]
-feature_rate_spr = [x * 3 for x in feature_rate_ind]
-feature_rate_dpr = list(feature_rate_spr)
 
 import sys
 import copy
@@ -37,8 +33,8 @@ labels_map = {"P" : 1, "N" : 0, "U": 2}
 
 # raw_columns are the extracted data from CSV
 raw_columns = ["ip_address", "probing_type", "probing_rate", "changing_behaviour", "loss_rate",
-           "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1",
-           "correlation_1", "correlation_2"]
+           "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"]
+           # "correlation_1", "correlation_2"]
 
 # Base columns are the different the base columns for the NN. Rate is added further.
 base_columns = [
@@ -51,7 +47,7 @@ base_columns = [
 def add_suffix(suffix, columns):
     suffixed_columns = []
     for column in columns:
-        suffixed_columns.append(column + "_" + suffix)
+        suffixed_columns.append("".join([column, "_", suffix]))
 
     return suffixed_columns
 
@@ -82,48 +78,112 @@ def parse_correlation(df, row, correlation_columns, candidates, witnesses):
 
     return candidate_candidate_difference_correlation, witness_candidate_difference_correlation
 
+def build_missing_candidates_impl(n_min, n_max, default_columns, skip_fields, probing_type_suffix, probing_type_rates, interface_type_suffix):
+    new_entry = {}
+    for i in range(n_min, n_max):
+        for probing_type, probing_rates in probing_type_rates.iteritems():
+            for probing_rate in probing_rates:
+                for column in default_columns:
+                    if column in skip_fields:
+                        continue
+                    # if default_value_feature.has_key(column):
+                    #     value = default_value_feature[column]
+                    # else:
+                    value = 0.0
+                    new_entry["".join([column,
+                                       "_",
+                                       probing_type_suffix[probing_type],
+                                       interface_type_suffix,
+                                       str(i),
+                                       "_",
+                                       str(probing_rate)])] = value
+        new_entry["".join(["label", interface_type_suffix,  str(i)])] = 0
+    return new_entry
 
-def add_columns(df_result, df_feature_columns, candidates, witnesses, rates, probing_type, probing_type_suffix):
 
-    measurement_time = 5
-    ratio = 8
+def build_missing_candidates(n_candidates,
+                             n_candidates_max,
+                             n_witnesses,
+                             n_witnesses_max,
+                             default_columns,
+                             skip_fields,
+                             probing_type_suffix,
+                             probing_type_rates):
+
+    new_entry = build_missing_candidates_impl(n_candidates, n_candidates_max, default_columns, skip_fields, probing_type_suffix, probing_type_rates, "_c")
+    new_entry.update(build_missing_candidates_impl(n_witnesses, n_witnesses_max, default_columns, skip_fields, probing_type_suffix, probing_type_rates, "_w"))
+    return new_entry
+
+def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_suffix, probing_type_rates):
+
     ips = copy.deepcopy(candidates)
     ips.extend(witnesses)
-    # df_result["changing_behaviour"] = df_result["changing_behaviour"].replace(-1, 20000)
-    for i in range(0, len(ips)):
-        if ips[i] in candidates:
-            additional_suffix = "c"
-        elif ips[i] in witnesses:
-            additional_suffix = "w"
-        # Optimization: perform minimal condition checking
-        prefilter = (df_result["ip_address"] == ips[i]) & (df_result["probing_type"] == probing_type) & (df_result["probing_rate"].isin(rates))
-        df_prefiltered = df_result[prefilter]
-        df_prefiltered = df_prefiltered.drop(["ip_address", "probing_type"], axis=1)
+    df_result["changing_behaviour"] = df_result["changing_behaviour"].replace(-1, 20000)
 
-        for rate in rates:
-            filter_rate = (df_prefiltered["probing_rate"] == rate)
-            # Select only relevant lines
-            df_filtered = df_prefiltered[filter_rate]
-            # if probing_type == "INDIDIVUAL":
-            #     df_filtered["changing_behaviour"] = df_filtered["changing_behaviour"].replace(-1,
-            #                                                                                   rate * measurement_time)
-            # elif probing_type == "GROUPSPR":
-            #     df_filtered["changing_behaviour"] = df_filtered["changing_behaviour"].replace(-1,
-            #                                                                                   rate * measurement_time/len(ips))
-            # elif probing_type == "GROUPDPR":
-            #     df_filtered["changing_behaviour"] = df_filtered["changing_behaviour"].replace(-1,
-            #                                                                                   rate * measurement_time / ratio)
+    #
+    # for i in range(0, len(ips)):
+    #     if ips[i] in candidates:
+    #         additional_suffix = "c"
+    #     elif ips[i] in witnesses:
+    #         additional_suffix = "w"
+    #
+    #
+    #
+    #     # Optimization: perform minimal condition checking
+    #     prefilter = (df_result["ip_address"] == ips[i]) & (df_result["probing_type"] == probing_type) & (df_result["probing_rate"].isin(rates))
+    #     df_prefiltered = df_result[prefilter]
+    #     df_prefiltered = df_prefiltered.drop(["ip_address", "probing_type"], axis=1)
+    #
+    #     for rate in rates:
+    #         filter_rate = (df_prefiltered["probing_rate"] == rate)
+    #         # Select only relevant lines
+    #         df_filtered = df_prefiltered[filter_rate]
+    #
+    #         df_filtered = df_filtered.drop(["probing_rate"], axis=1)
+    #         # df_filtered = df_filtered.reset_index(drop = True)
+    #
+    #         # Change the name of the columns
+    #         columns_new = add_suffix("".join([probing_type_suffix, "_", additional_suffix, str(i), "_", str(rate)]), df_filtered.columns)
+    #         df_filtered.columns = columns_new
+    #
+    #         for column in df_filtered.columns:
+    #             df_feature_columns[column] = df_filtered[column]
 
-            df_filtered = df_filtered.drop(["probing_rate"], axis=1)
-            df_filtered = df_filtered.reset_index(drop = True)
+    # Dict implementation
+    new_entry = {}
 
 
-            # Change the name of the columns
-            columns_new = add_suffix(probing_type_suffix + "_" + additional_suffix + str(i) + "_" + str(rate), df_filtered.columns)
-            df_filtered.columns = columns_new
+    for row in df_result.itertuples():
+        probing_rate = row.probing_rate
 
-            df_feature_columns = pd.concat([df_feature_columns, df_filtered], axis=1)
-    return df_feature_columns
+        ip_address = row.ip_address
+        probing_type = row.probing_type
+
+        if probing_rate not in probing_type_rates[probing_type]:
+            continue
+
+        for i in range(0, len(row._fields)):
+            # Skip some fields
+            if row._fields[i] in skip_fields:
+                continue
+            if ip_address in candidates:
+                additional_suffix = "c"
+                ips = candidates
+            elif ip_address in witnesses:
+                additional_suffix = "w"
+                ips = witnesses
+            new_entry["".join([row._fields[i],
+                               "_",
+                               probing_type_suffix[probing_type],
+                               "_", additional_suffix,
+                               str(ips.index(row.ip_address)),
+                               "_",
+                               str(probing_rate)])] = row[i]
+
+
+        # print row
+
+    return new_entry
 
 def is_broken_witness(df_result, probing_type, rates, witnesses, candidates):
     broken_witness = False
@@ -144,6 +204,14 @@ def is_broken_witness(df_result, probing_type, rates, witnesses, candidates):
                 break
     return broken_witness
 
+
+debug = [
+    [0.880167, 0.821792] ,
+    [0.945033, 0.893095],
+    [0.661235, 0.54353],
+    [0.713343, 0.550308],
+    [0.705057, 0.559178]]
+
 if __name__ == "__main__":
 
     version  = sys.argv[1]
@@ -153,108 +221,189 @@ if __name__ == "__main__":
     elif version == "6":
         results_dir = "/srv/icmp-rl-survey/results/v6/"
 
-    midar_path = "resources/internet2/midar/v4/routers/"
-    ground_truth_routers = extract_midar_routers(midar_path)
+    results_dir = "/srv/icmp-rl-survey/midar/results/"
+    candidates_witness_dir = "/srv/icmp-rl-survey/midar/candidates-witness/"
+    routers_path = "resources/midar/routers/"
+    TN_path = "resources/midar/TN/"
+    ground_truth_routers = extract_routers(routers_path)
+    TN = extract_routers(TN_path)
+    max_interfaces = 12
+
+    pd.options.display.float_format = '{:.5f}'.format
 
     # Probing rates
-    ind_rates = [1000, 2000, 3000]
+    ind_rates = [500, 1000, 2000, 3000]
     spr_and_dpr_rates = [ 3 * x for x in ind_rates]
     # Relevant columns for individual and dpr lines
     ind_and_dpr_columns = [
         "loss_rate",
         "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"
     ]
+    skip_fields = ["Index", "probing_type", "ip_address", "probing_rate", "correlation_1", "correlation_2"]
 
-    df_computed_result = pd.DataFrame()
+    df_computed_result = None
+
+    probing_type_suffix = {"INDIVIDUAL": "ind", "GROUPSPR": "spr", "GROUPDPR": "dpr"}
+    probing_type_rates = {"INDIVIDUAL": ind_rates, "GROUPSPR": spr_and_dpr_rates, "GROUPDPR": spr_and_dpr_rates}
 
 
-    i  = 0
+    missing_fields = build_missing_candidates(0, max_interfaces, 0, 1, raw_columns, skip_fields,
+                                              probing_type_suffix, probing_type_rates)
+
+    k  = 0
+    TN = 0
     for result_file in os.listdir(results_dir):
-
+        if os.path.isdir(results_dir + result_file):
+            continue
         new_entry = {}
 
-        i += 1
-        print i
-        # if i == 1:
+        k += 1
+        print k
+        # if k ==1 :
         #     break
         # print result_file
         split_file_name = result_file.split("_")
-        candidates = [split_file_name[1], split_file_name[2]]
-        witnesses = [split_file_name[3]]
+        ip_index = 5
+        candidates = []
+        witnesses = []
+        with open(candidates_witness_dir + result_file) as cw_file:
+            for line in cw_file:
+                line = line.replace(" ", "")
+                fields = line.split(",")
+                if "CANDIDATE" in fields:
+                    candidates.append(fields[ip_index])
+                elif "WITNESS" in fields:
+                    witnesses.append(fields[ip_index])
 
         # 1 point is represented by different dimensions:
-        df_result = pd.read_csv(results_dir+result_file, names = raw_columns,  skipinitialspace=True,)
+        df_result = pd.read_csv(results_dir+result_file,
+                                names = raw_columns,
+                                skipinitialspace=True,
+                                index_col=False,
+                                usecols=[x for x in range(0, 9)])
 
-
-        df_feature_columns = pd.DataFrame()
-        df_feature_columns = add_columns(df_result, df_feature_columns, candidates, witnesses, ind_rates, "INDIVIDUAL", "ind")
-        df_feature_columns = add_columns(df_result, df_feature_columns, candidates, witnesses, spr_and_dpr_rates, "GROUPSPR", "spr")
-        df_feature_columns = add_columns(df_result, df_feature_columns, candidates, witnesses, spr_and_dpr_rates, "GROUPDPR", "dpr")
-
-
-
-        df_feature_columns["measurement_id"] = result_file
-        label = get_label(ground_truth_routers, candidates)
-
-        if label == "P":
-            df_feature_columns["label"] = 1
-        elif label == "N":
-            df_feature_columns["label"] = 0
-            print df_result.to_string()
-        elif label == "U":
-            print "Unable to label: " + result_file
+        # Skip the measurement if all the loss rates are 1.
+        not_usable = (df_result["loss_rate"] == 1).all()
+        if not_usable:
             continue
 
-        """
-            Check manually if the measurement is considered trustable or not according to the witness.
-            i.e if the LR of the witness is greater than the LR of the candidates  
-        """
-        # if is_broken_witness(df_result, "INDIVIDUAL", ind_rates, witnesses, candidates) \
-        #     or is_broken_witness(df_result, "GROUPSPR", spr_and_dpr_rates, witnesses, candidates) \
-        # if is_broken_witness(df_result, "GROUPDPR", spr_and_dpr_rates, witnesses, candidates):
-        #     df_feature_columns["label"] = 2
 
-        df_computed_result = df_computed_result.append(df_feature_columns)
+        new_entry = copy.deepcopy(missing_fields)
+        new_row = build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_suffix, probing_type_rates)
+        label = set_router_labels(new_entry, ground_truth_routers, TN, candidates, witnesses)
+
+        new_entry["measurement_id"] = result_file
+        new_entry.update(new_row)
 
 
+        for i in range(0, len(debug)):
+            if np.isclose(new_entry["loss_rate_dpr_c0_6000"] , debug[i][1], rtol=1e-05, atol=1e-08) \
+                and np.isclose(new_entry["loss_rate_dpr_c0_9000"] , debug[i][0], rtol=1e-05, atol=1e-08):
+                print df_result.to_string()
 
-    for column in df_computed_result.columns:
-        if column.startswith("changing_behaviour"):
-            df_computed_result[column] = minmax_scale(np.array(df_computed_result[column]).reshape(-1,1))
 
-    label = "label"
-    df_computed_result.set_index("measurement_id", inplace=True)
-    df_computed_result.to_csv("resources/test_set", encoding="utf-8")
+        if label == "U":
+            continue
+
+
+        # if label == "P":
+        #     df_feature_columns["label"] = 1
+            # df_filtered_FP = abs(df_feature_columns["loss_rate_dpr_c0_9000"] - df_feature_columns["loss_rate_dpr_c1_9000"])
+            # if df_filtered_FP[0] > 0.4:
+            #     print df_result.to_string()
+        unknown_indicator = new_entry["loss_rate_dpr_c0_9000"]
+        if unknown_indicator == 1.0:
+            # print df_result.to_string()
+            continue
+        # unknown_indicator = new_entry["changing_behaviour_dpr_c0_6000"]
+        # if unknown_indicator == 0.0:
+        #     # print df_result.to_string()
+        #     print "Removed!"
+        #     continue
+
+
+        for i in range(0, len(candidates)):
+            if new_entry["label_c0"] != new_entry["label_c" + str(i)]:
+                TN += 1
+                print "TN: " + str(TN)
+            else:
+
+                if abs(new_entry["loss_rate_dpr_c0_9000"] - new_entry["loss_rate_dpr_c"+ str(i) + "_9000"]) > 0.6 \
+                        and new_entry["loss_rate_dpr_c" + str(i) + "_9000"] < 0.1:
+
+                    for i in range(0, len(candidates)):
+                        new_entry["".join(["label_c", str(i)])] = 0
+                    for i in range(0, len(witnesses)):
+                        new_entry["".join(["label_w", str(i)])] = 0
+                    # print df_result.to_string()
+        # elif label == "N":
+        #     df_feature_columns["label"] = 0
+        #     # print df_result.to_string()
+        # elif label == "U":
+        #     print "Unable to label: " + result_file
+        #     continue
+
+        if df_computed_result is None:
+            df_computed_result = pd.DataFrame(columns=new_entry.keys())
+            df_computed_result.set_index(df_computed_result["measurement_id"])
+
+        df_computed_result.loc[len(df_computed_result)] = new_entry
+
+
+
+
+
+    # label = "label"
+    # df_computed_result.set_index("measurement_id", inplace=True)
+    # df_computed_result.to_csv("resources/test_set", encoding="utf-8")
     df_computed_result = pd.read_csv("resources/test_set", index_col=0)
+    # df_computed_result.set_index("measurement_id", inplace=True)
     #
     # # labeled_df, cluster_n = DBSCAN_impl(computed_df, feature_columns)
     # cluster_n = 3
-    labeled_df = df_computed_result
-    labeled_df = labeled_df.dropna(subset=["label"])
-    labeled_df[label] = labeled_df[label].apply(np.int64)
 
-    true_negatives_df = labeled_df[labeled_df[label] == labels_map["N"]]
-    true_positives_df = labeled_df[labeled_df[label] == labels_map["P"]]
-    true_unknown_df = labeled_df[labeled_df[label] == labels_map["U"]]
-    print "Number of true negatives: " + str(len(true_negatives_df))
-    print "Number of true positives: " + str(len(true_positives_df))
-    print "Number of unknown: " + str(len(true_unknown_df))
+    for column in df_computed_result.columns:
+        if column.startswith("changing_behaviour"):
+            df_computed_result[column] = minmax_scale(np.array(df_computed_result[column]).reshape(-1, 1))
+        if column.startswith("label"):
+            df_computed_result[column] = df_computed_result[column].apply(np.int64)
+
+    labeled_df = df_computed_result
+    labeled_df = labeled_df.reset_index()
+    # labeled_df = labeled_df.dropna(subset=["label"])
+
+
+    # true_negatives_df = labeled_df[labeled_df[label] == labels_map["N"]]
+    # true_positives_df = labeled_df[labeled_df[label] == labels_map["P"]]
+    # true_unknown_df = labeled_df[labeled_df[label] == labels_map["U"]]
+    # print "Number of true negatives: " + str(len(true_negatives_df))
+    # print "Number of true positives: " + str(len(true_positives_df))
+    # print "Number of unknown: " + str(len(true_unknown_df))
 
 
     # Select features
     feature_columns = []
     for column in df_computed_result.columns:
-        if not column.endswith("1000") \
+        if not column.endswith("500") \
+                and not column.endswith("1000") \
+                and not column.endswith("1500") \
                 and not column.endswith("2000") \
                 and not column.startswith("correlation")\
+                and not column.startswith("transition")\
                 :
             feature_columns.append(column)
+
+    labels_column = []
+    for column in df_computed_result.columns:
+        if  column.startswith("label"):
+            labels_column.append(column)
 
     labeled_df = labeled_df.dropna(subset=feature_columns)
 
     # Now train a classifier on the labeled data.
     #
     # Shuffle the data
+    labeled_df = labeled_df.sort_index(axis=1)
     labeled_df = labeled_df.reindex(np.random.permutation(labeled_df.index))
     labeled_df.to_csv("resources/labeled_test_set", encoding='utf-8')
     # Split the training validation and test set
@@ -266,24 +415,25 @@ if __name__ == "__main__":
 
     test_df = labeled_df.iloc[cross_validation_n + training_n + 1:]
 
-    training_targets, training_examples = nn.parse_labels_and_features(training_df, label, feature_columns)
+    training_targets, training_examples = nn.parse_labels_and_features(training_df, labels_column, feature_columns)
     print "Size of the training examples: " + str(training_examples.shape)
 
 
-    validation_targets, validation_examples = nn.parse_labels_and_features(cross_validation_df, label, feature_columns)
+    validation_targets, validation_examples = nn.parse_labels_and_features(cross_validation_df, labels_column, feature_columns)
     print "Size of the training examples: " + str(validation_examples.shape)
 
-    test_targets, test_examples = nn.parse_labels_and_features(test_df, label, feature_columns)
+    test_targets, test_examples = nn.parse_labels_and_features(test_df, labels_column, feature_columns)
     print "Size of the training examples: " + str(test_examples.shape)
 
     classifier = nn.train_nn_classification_model(
-        periods = 10,
-        classes_n = 2, # Positive, Negative
+        periods = 20,
+        n_classes = max_interfaces + 1, # Maximum number of interfaces on a router + witness
         feature_columns = feature_columns,
-        learning_rate=0.05,
+        learning_rate=0.1,
         steps=1000,
         batch_size=30,
-        hidden_units=[20, 20],
+        hidden_units=[labeled_df.shape[1], labeled_df.shape[1]],
+        # hidden_units= [10, 10],
         training_examples=training_examples,
         training_targets=training_targets,
         validation_examples=validation_examples,
@@ -293,10 +443,12 @@ if __name__ == "__main__":
         test_examples, test_targets, batch_size=100)
 
     test_predictions = classifier.predict(input_fn=predict_test_input_fn)
-    test_predictions = np.array([item['class_ids'][0] for item in test_predictions])
+    test_predictions = np.round([item['probabilities'] for item in test_predictions])
 
     accuracy = metrics.accuracy_score(test_targets, test_predictions)
     print("Accuracy on test data: %0.3f" % accuracy)
+    # roc_auc = metrics.roc_auc_score(test_targets, test_predictions)
+    # print("ROC AUC on test data: %0.3f" % roc_auc)
     #
     #
     # # training_examples = tf.convert_to_tensor(training_examples.values, dtype=tf.float64)

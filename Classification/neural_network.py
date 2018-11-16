@@ -4,12 +4,12 @@ import os
 
 import numpy as np
 import pandas as pd
-# import seaborn as sns
+import seaborn as sns
 from sklearn import metrics
 import tensorflow as tf
 from tensorflow.python.data import Dataset
 from plot_metrics import plot_metrics
-
+from matplotlib import pyplot as plt
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
@@ -56,7 +56,7 @@ def create_training_input_fn(features, labels, batch_size, num_epochs=None, shuf
         # shuffle all the data before creating the Dataset object
         idx = np.random.permutation(features.index)
         raw_features = {feature_column : feature_values.reindex(idx) for feature_column, feature_values in features.iteritems()}
-        raw_targets = np.array(labels[idx])
+        raw_targets = np.array(labels.reindex(idx))
 
         ds = Dataset.from_tensor_slices((raw_features, raw_targets))  # warning: 2GB limit
         ds = ds.batch(batch_size).repeat(num_epochs)
@@ -98,7 +98,7 @@ def create_predict_input_fn(features, labels, batch_size):
 
 def train_nn_classification_model(
         periods,
-        classes_n,
+        n_classes,
         feature_columns,
         learning_rate,
         steps,
@@ -151,9 +151,12 @@ def train_nn_classification_model(
     # Create a DNNClassifier object.
     my_optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate)
     my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
-    classifier = tf.estimator.DNNClassifier(
+    multilabel_head = tf.contrib.estimator.multi_label_head(n_classes=n_classes)
+                                                            # loss_reduction = tf.losses.Reduction.SUM_OVER_NONZERO_WEIGHTS)
+
+    classifier = tf.contrib.estimator.DNNEstimator(
+        head = multilabel_head,
         feature_columns=feature_columns,
-        n_classes=classes_n,
         hidden_units=hidden_units,
         optimizer=my_optimizer,
         config=tf.contrib.learn.RunConfig(keep_checkpoint_max=1)
@@ -163,8 +166,11 @@ def train_nn_classification_model(
     # loss metrics.
     print("Training model...")
     print("LogLoss error (on validation data):")
-    training_errors = []
-    validation_errors = []
+    training_log_loss_errors = []
+    validation_log_loss_errors = []
+
+    training_hamming_loss_errors = []
+    validation_hamming_loss_errors = []
     for period in range(0, periods):
         # Train the model, starting from the prior state.
         classifier.train(
@@ -175,43 +181,93 @@ def train_nn_classification_model(
         # Take a break and compute probabilities.
         training_predictions = list(classifier.predict(input_fn=predict_training_input_fn))
         training_probabilities = np.array([item['probabilities'] for item in training_predictions])
-        training_pred_class_id = np.array([item['class_ids'][0] for item in training_predictions])
+        training_pred_labels = np.round([item['probabilities'] for item in training_predictions])
         # training_pred_one_hot = tf.keras.utils.to_categorical(training_pred_class_id, 10)
 
         validation_predictions = list(classifier.predict(input_fn=predict_validation_input_fn))
         validation_probabilities = np.array([item['probabilities'] for item in validation_predictions])
-        validation_pred_class_id = np.array([item['class_ids'][0] for item in validation_predictions])
+        validation_pred_labels= np.round([item['probabilities'] for item in validation_predictions])
+        # validation_pred_class_id = np.array([item['class_ids'][0] for item in validation_predictions])
         # validation_pred_one_hot = tf.keras.utils.to_categorical(validation_pred_class_id, 10)
 
         # Compute training and validation errors.
         training_log_loss = metrics.log_loss(training_targets, training_probabilities)
         validation_log_loss = metrics.log_loss(validation_targets, validation_probabilities)
+
+
+        # training_hamming_loss = metrics.hamming_loss(training_targets, training_pred_labels)
+        # validation_hamming_loss = metrics.hamming_loss(validation_targets, validation_pred_labels)
+
+
+        # print("Training hamming loss period %02d : %0.4f" % (period, training_log_loss))
+        # print("Validation hamming loss period %02d : %0.4f" % (period, validation_log_loss))
+
+
+
         # Occasionally print the current loss.
-        print("  period %02d : %0.4f" % (period, validation_log_loss))
+        print("Training log loss period %02d : %0.4f" % (period, training_log_loss))
+        print("Validation log loss period %02d : %0.4f" % (period, validation_log_loss))
         # Add the loss metrics from this period to our list.
-        training_errors.append(training_log_loss)
-        validation_errors.append(validation_log_loss)
+        training_log_loss_errors.append(training_log_loss)
+        validation_log_loss_errors.append(validation_log_loss)
+
+        bad_training_labels = 0
+        bad_validation_labels = 0
+        # DEBUG Print the labels for which the prediction are incorrect
+        for i in range(0, len(training_pred_labels)):
+            if not np.array_equal(training_pred_labels[i], np.array(training_targets.iloc[i])):
+                bad_training_labels += 1
+                bad_label = training_examples.iloc[i].sort_index()
+                # print training_pred_labels
+                print bad_label["loss_rate_dpr_c0_9000"]
+                print bad_label["loss_rate_dpr_c0_6000"]
+
+        # DEBUG Print the labels for which the prediction are incorrect
+        for i in range(0, len(validation_pred_labels)):
+            if not np.array_equal(validation_pred_labels[i], np.array(validation_targets.iloc[i])):
+                bad_validation_labels += 1
+                bad_label = validation_examples.iloc[i].sort_index()
+                # print validation_pred_labels
+                print bad_label["loss_rate_dpr_c0_9000"]
+                print bad_label["loss_rate_dpr_c0_6000"]
+                # print bad_label
+
+        print "Bad training labels: " + str(bad_training_labels)
+        print "Bad validation labels: " + str(bad_validation_labels)
+
+        # training_hamming_loss_errors.append(training_hamming_loss)
+        # validation_hamming_loss_errors.append(validation_hamming_loss)
     print("Model training finished.")
     # Remove event files to save disk space.
     _ = map(os.remove, glob.glob(os.path.join(classifier.model_dir, 'events.out.tfevents*')))
 
     # Calculate final predictions (not probabilities, as above).
     final_predictions = classifier.predict(input_fn=predict_validation_input_fn)
-    final_predictions = np.array([item['class_ids'][0] for item in final_predictions])
+    final_predictions = np.round([item['probabilities'] for item in final_predictions])
 
     accuracy = metrics.accuracy_score(validation_targets, final_predictions)
     print("Final accuracy (on validation data): %0.3f" % accuracy)
+    # roc_auc = metrics.roc_auc_score(validation_targets, final_predictions)
+    # print("ROC AUC on test data: %0.3f" % roc_auc)
 
-    # # Output a graph of loss metrics over periods.
-    # plt.ylabel("LogLoss")
+    # Output a graph of loss metrics over periods.
+    plt.ylabel("LogLoss")
+    plt.xlabel("Periods")
+    plt.title("LogLoss vs. Periods")
+    plt.plot(training_log_loss_errors, label="training")
+    plt.plot(validation_log_loss_errors, label="validation")
+    plt.legend()
+    plt.show()
+
+    # plt.ylabel("HammingLoss")
     # plt.xlabel("Periods")
     # plt.title("LogLoss vs. Periods")
-    # plt.plot(training_errors, label="training")
-    # plt.plot(validation_errors, label="validation")
+    # plt.plot(training_hamming_loss_errors, label="training")
+    # plt.plot(validation_hamming_loss_errors, label="validation")
     # plt.legend()
     # plt.show()
-    #
-    # # Output a plot of the confusion matrix.
+
+    # Output a plot of the confusion matrix.
     # cm = metrics.confusion_matrix(validation_targets, final_predictions)
     # # Normalize the confusion matrix by row (i.e by the number of samples
     # # in each class).
@@ -223,7 +279,7 @@ def train_nn_classification_model(
     # plt.xlabel("Predicted label")
     # plt.show()
 
-    plot_metrics(training_errors, validation_errors, validation_targets, final_predictions)
+    # plot_metrics(training_errors, validation_errors, validation_targets, final_predictions)
 
 
     return classifier

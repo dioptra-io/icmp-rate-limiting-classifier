@@ -188,14 +188,9 @@ if __name__ == "__main__":
         candidates = [split_file_name[1], split_file_name[2]]
         witnesses = [split_file_name[3]]
 
-        label = get_label(ground_truth_routers, candidates)
+        labels = get_label(ground_truth_routers, candidates, witnesses)
 
-        if label == "U":
-            continue
-        elif label == "P":
-            new_entry["label"] = 1
-        elif label == "N":
-            new_entry["label"] = 0
+
         # 1 point is represented by different dimensions:
         df_result = pd.read_csv(results_dir+result_file, names = columns,  skipinitialspace=True,)
 
