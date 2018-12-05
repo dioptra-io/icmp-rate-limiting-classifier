@@ -15,7 +15,7 @@ if __name__ == "__main__":
         elif 30 <= i < 60:
             O.append(0)
         elif 60 <= i < 100:
-            O.append(1)
+            O.append(2)
 
     O = np.array(O)
     O = O.reshape(len(O), 1)
@@ -35,13 +35,15 @@ if __name__ == "__main__":
         print address
         O = np.array(O)
         O = O.reshape(len(O), 1)
-        X = np.array([i for i in range (0, len(O))])
+        X = np.array([[float(O[i])] for i in range (0, len(O))])
 
         model = hmm.GaussianHMM(n_components=2, covariance_type="diag", n_iter=1000)
 
-        model.fit(O)
+        model.fit(X)
 
-        hidden_states = model.predict(O)
+        hidden_states = model.predict(X)
+
+        print "Equal hidden states and input... " + str(np.array_equal(np.array([X[i][0] for i in range(0, len(X))]), hidden_states))
 
         sum_hd= sum(hidden_states - np.array(observations[address]))
 

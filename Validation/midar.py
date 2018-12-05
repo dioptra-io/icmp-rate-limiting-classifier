@@ -44,6 +44,20 @@ def extract_routers(routers_dir):
                 routers[router_file].append(ip)
     return routers
 
+
+def extract_routers_by_node(routers_dir):
+    all_routers = extract_routers(routers_dir)
+
+    routers_by_node = {}
+    for router_file, router in all_routers.items():
+        node = router_file.split("_")[0]
+        if not routers_by_node.has_key(node):
+            routers_by_node[node] = {}
+        routers_by_node[node][router_file] = router
+    return routers_by_node
+
+
+
 def transitive_closure(routers):
     # Apply transitive closure
     old_len_tc = len(routers)
@@ -75,7 +89,7 @@ def find_router_from_ip(ip, routers):
         if ip in ips:
             return router_name
     return None
-def set_router_labels(df, ground_truth_routers, TN, candidates, witnesses):
+def set_router_labels(df, ground_truth_routers, candidates, witnesses):
 
     # First candidate is router 1
     used_routers = []

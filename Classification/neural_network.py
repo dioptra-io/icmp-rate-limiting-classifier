@@ -217,20 +217,26 @@ def train_nn_classification_model(
         for i in range(0, len(training_pred_labels)):
             if not np.array_equal(training_pred_labels[i], np.array(training_targets.iloc[i])):
                 bad_training_labels += 1
-                bad_label = training_examples.iloc[i].sort_index()
+                true_label = training_examples.iloc[i].sort_index()
+                bad_label = training_pred_labels[i]
                 # print training_pred_labels
-                print bad_label["loss_rate_dpr_c0_9000"]
-                print bad_label["loss_rate_dpr_c0_6000"]
+                print "[" + str(true_label["loss_rate_dpr_c0_9000"]) + ", " + str(true_label["loss_rate_dpr_c0_6000"]) + "]"
+                print true_label.filter(regex="loss_rate_dpr_c([0-9]+)_9000", axis=0)
+                print true_label.filter(regex="label_c([0-9]+)", axis=0)
+                print bad_label
+
 
         # DEBUG Print the labels for which the prediction are incorrect
         for i in range(0, len(validation_pred_labels)):
             if not np.array_equal(validation_pred_labels[i], np.array(validation_targets.iloc[i])):
                 bad_validation_labels += 1
-                bad_label = validation_examples.iloc[i].sort_index()
+                true_label = validation_examples.iloc[i].sort_index()
+                bad_label = validation_pred_labels[i]
                 # print validation_pred_labels
-                print bad_label["loss_rate_dpr_c0_9000"]
-                print bad_label["loss_rate_dpr_c0_6000"]
-                # print bad_label
+                print "[" + str(true_label["loss_rate_dpr_c0_9000"]) + ", " + str(true_label["loss_rate_dpr_c0_6000"]) + "]"
+                print true_label.filter(regex="loss_rate_dpr_c([0-9]+)_9000", axis=0)
+                print true_label.filter(regex="label_c([0-9]+)", axis=0)
+                print bad_label
 
         print "Bad training labels: " + str(bad_training_labels)
         print "Bad validation labels: " + str(bad_validation_labels)

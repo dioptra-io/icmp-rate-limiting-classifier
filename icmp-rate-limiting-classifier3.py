@@ -97,9 +97,7 @@ if __name__ == "__main__":
     pd.options.display.float_format = '{:.5f}'.format
 
     # Probing rates
-    ind_rates = [3000, 4000, 5000]
-    spr_and_dpr_rates = [ int(1.5 * x) for x in ind_rates]
-    max_dpr_rate = max(spr_and_dpr_rates)
+    minimum_probing_rate = 500
 
     skip_fields = ["Index", "probing_type", "ip_address", "probing_rate", "correlation",
                    "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"]
@@ -107,14 +105,13 @@ if __name__ == "__main__":
     df_computed_result = None
 
     probing_type_suffix = {"INDIVIDUAL": "ind", "GROUPSPR": "spr", "GROUPDPR": "dpr"}
-    probing_type_rates = {"INDIVIDUAL": ind_rates, "GROUPSPR": spr_and_dpr_rates, "GROUPDPR": spr_and_dpr_rates}
 
     # raw_columns are the extracted data from CSV
     global_raw_columns = ["ip_address", "probing_type", "probing_rate", "changing_behaviour", "loss_rate",
                    "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"]
 
-    missing_fields = build_missing_candidates(0, max_interfaces, 0, 1, global_raw_columns, skip_fields,
-                                              probing_type_suffix, probing_type_rates)
+    # missing_fields = build_missing_candidates(0, max_interfaces, 0, 1, global_raw_columns, skip_fields,
+    #                                           probing_type_suffix, probing_type_rates)
 
 
     # Debug infos
@@ -197,24 +194,32 @@ if __name__ == "__main__":
             continue
 
         # Measurement contains -1, meaning no change point detection method.
-        change_behaviour_column = df_result["changing_behaviour"]
-        if -1 in change_behaviour_column.values:
-            continue
-        else:
-            k += 1
-            print "CPD: " +str(k)
-        # If the measurement is incomplete
-        if (df_result["probing_type"] == "INDIVIDUAL").all():
-            continue
+        # change_behaviour_column = df_result["changing_behaviour"]
+        # if -1 in change_behaviour_column.values:
+        #     continue
+        # else:
+        #     k += 1
+        #     print "CPD: " +str(k)
+        # # If the measurement is incomplete
+        # if (df_result["probing_type"] == "INDIVIDUAL").all():
+        #     continue
 
-        # candidates, witnesses = sort_ips_by(df_result, candidates, witnesses,
-        #                                     (df_result["probing_rate"] == 9000) & (df_result["probing_type"] == "GROUPDPR"))
 
-        new_entry = copy.deepcopy(missing_fields)
+
+        # new_entry = copy.deepcopy(missing_fields)
+        df_result = df_result[df_result["probing_rate"] != minimum_probing_rate]
+
+        ind_probing_rate = df_result[df_result["probing_type"] == "INDIVIDUAL"]["probing_rate"][0]
+        group_probing_rate = df_result[df_result["probing_type"] == "GROUPSPR"]["probing_rate"][0]
+        # dpr_probing_rate = df_result[df_result["probing_type"] == "GROUPDPR"]["probing_rate"][0]
+        probing_type_rates = {"INDIVIDUAL": ind_probing_rate,
+                              "GROUPSPR": [group_probing_rate],
+                              "GROUPDPR": [group_probing_rate]}
+
 
         new_row = build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_suffix, probing_type_rates)
 
-        correlation_row = parse_correlation(df_result, spr_and_dpr_rates, candidates, witnesses)
+        correlation_row = parse_correlation(df_result, [group_probing_rate], candidates, witnesses)
         new_row.update(correlation_row)
 
         label = set_router_labels(new_entry, ground_truth_routers[node], candidates, witnesses)
@@ -323,12 +328,8 @@ if __name__ == "__main__":
     # Select features
     feature_columns = []
     for column in df_computed_result.columns:
-        if not column.endswith("500") \
-                and not column.endswith("1000") \
-                and not column.endswith("1500") \
-                and not column.endswith("2000") \
-                and not column.startswith("transition") \
-                and not column.startswith("label")            \
+        if  not column.startswith("transition") \
+            and not column.startswith("label")  \
                 :
             feature_columns.append(column)
 
