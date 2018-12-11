@@ -15,6 +15,18 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
 pd.options.display.float_format = '{:.1f}'.format
 
+def print_bad_labels(data_pred_labels, data_targets, data_examples):
+    for i in range(0, len(data_pred_labels)):
+        if not data_pred_labels[i] == data_targets.iloc[i][0]:
+            true_label = data_examples.iloc[i].sort_index()
+            bad_label = data_pred_labels[i]
+            # print validation_pred_labels
+            # print str(true_label["loss_rate_dpr_c0"])
+            print true_label.filter(regex="loss_rate_dpr_c([0-9]+)", axis=0)
+            print true_label.filter(regex="loss_rate_dpr_w([0-9]+)", axis=0)
+            print true_label.filter(regex="label_c([0-9]+)", axis=0)
+
+            print bad_label
 
 def parse_labels_and_features(dataset, label_column, features_columns):
     """Extracts labels and features.
@@ -99,6 +111,7 @@ def create_predict_input_fn(features, labels, batch_size):
 def train_nn_classification_model(
         periods,
         n_classes,
+        is_multilabel,
         feature_columns,
         learning_rate,
         steps,
@@ -150,18 +163,27 @@ def train_nn_classification_model(
 
     # Create a DNNClassifier object.
     my_optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate)
-    my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
-    multilabel_head = tf.contrib.estimator.multi_label_head(n_classes=n_classes)
-                                                            # loss_reduction = tf.losses.Reduction.SUM_OVER_NONZERO_WEIGHTS)
 
-    classifier = tf.contrib.estimator.DNNEstimator(
-        head = multilabel_head,
-        feature_columns=feature_columns,
-        hidden_units=hidden_units,
-        optimizer=my_optimizer,
-        config=tf.contrib.learn.RunConfig(keep_checkpoint_max=1)
-    )
 
+    if is_multilabel:
+        my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
+        multilabel_head = tf.contrib.estimator.multi_label_head(n_classes=n_classes)
+        # loss_reduction = tf.losses.Reduction.SUM_OVER_NONZERO_WEIGHTS)
+        classifier = tf.contrib.estimator.DNNEstimator(
+            head = multilabel_head,
+            feature_columns=feature_columns,
+            hidden_units=hidden_units,
+            optimizer=my_optimizer,
+            config=tf.contrib.learn.RunConfig(keep_checkpoint_max=1)
+        )
+    else:
+        classifier = tf.estimator.DNNClassifier(
+            feature_columns=feature_columns,
+            hidden_units=hidden_units,
+            n_classes=n_classes,
+            optimizer=my_optimizer,
+            config=tf.contrib.learn.RunConfig(keep_checkpoint_max=1)
+        )
     # Train the model, but do so inside a loop so that we can periodically assess
     # loss metrics.
     print("Training model...")
@@ -181,12 +203,19 @@ def train_nn_classification_model(
         # Take a break and compute probabilities.
         training_predictions = list(classifier.predict(input_fn=predict_training_input_fn))
         training_probabilities = np.array([item['probabilities'] for item in training_predictions])
-        training_pred_labels = np.round([item['probabilities'] for item in training_predictions])
+        if is_multilabel:
+            training_pred_labels = np.round([item['probabilities'] for item in training_predictions])
+        else:
+            training_pred_labels = np.array([item['class_ids'][0] for item in training_predictions])
+
         # training_pred_one_hot = tf.keras.utils.to_categorical(training_pred_class_id, 10)
 
         validation_predictions = list(classifier.predict(input_fn=predict_validation_input_fn))
         validation_probabilities = np.array([item['probabilities'] for item in validation_predictions])
-        validation_pred_labels= np.round([item['probabilities'] for item in validation_predictions])
+        if is_multilabel:
+            validation_pred_labels = np.round([item['probabilities'] for item in validation_predictions])
+        else:
+            validation_pred_labels = np.array([item['class_ids'][0] for item in validation_predictions])
         # validation_pred_class_id = np.array([item['class_ids'][0] for item in validation_predictions])
         # validation_pred_one_hot = tf.keras.utils.to_categorical(validation_pred_class_id, 10)
 
@@ -211,36 +240,16 @@ def train_nn_classification_model(
         training_log_loss_errors.append(training_log_loss)
         validation_log_loss_errors.append(validation_log_loss)
 
-        bad_training_labels = 0
-        bad_validation_labels = 0
-        # DEBUG Print the labels for which the prediction are incorrect
-        for i in range(0, len(training_pred_labels)):
-            if not np.array_equal(training_pred_labels[i], np.array(training_targets.iloc[i])):
-                bad_training_labels += 1
-                true_label = training_examples.iloc[i].sort_index()
-                bad_label = training_pred_labels[i]
-                # print training_pred_labels
-                print "[" + str(true_label["loss_rate_dpr_c0_9000"]) + ", " + str(true_label["loss_rate_dpr_c0_6000"]) + "]"
-                print true_label.filter(regex="loss_rate_dpr_c([0-9]+)_9000", axis=0)
-                print true_label.filter(regex="label_c([0-9]+)", axis=0)
-                print bad_label
-
 
         # DEBUG Print the labels for which the prediction are incorrect
-        for i in range(0, len(validation_pred_labels)):
-            if not np.array_equal(validation_pred_labels[i], np.array(validation_targets.iloc[i])):
-                bad_validation_labels += 1
-                true_label = validation_examples.iloc[i].sort_index()
-                bad_label = validation_pred_labels[i]
-                # print validation_pred_labels
-                print "[" + str(true_label["loss_rate_dpr_c0_9000"]) + ", " + str(true_label["loss_rate_dpr_c0_6000"]) + "]"
-                print true_label.filter(regex="loss_rate_dpr_c([0-9]+)_9000", axis=0)
-                print true_label.filter(regex="label_c([0-9]+)", axis=0)
-                print bad_label
-
-        print "Bad training labels: " + str(bad_training_labels)
-        print "Bad validation labels: " + str(bad_validation_labels)
-
+        print "Bad labels on training set: "
+        print_bad_labels(training_pred_labels, training_targets, training_examples)
+        print "Bad labels on validation set: "
+        print_bad_labels(validation_pred_labels, validation_targets, validation_examples)
+        accuracy = metrics.accuracy_score(training_targets, training_pred_labels)
+        print "Accuracy on training set: " + str(accuracy)
+        accuracy = metrics.accuracy_score(validation_targets, validation_pred_labels)
+        print "Accuracy on validation set: " + str(accuracy)
         # training_hamming_loss_errors.append(training_hamming_loss)
         # validation_hamming_loss_errors.append(validation_hamming_loss)
     print("Model training finished.")
@@ -249,8 +258,10 @@ def train_nn_classification_model(
 
     # Calculate final predictions (not probabilities, as above).
     final_predictions = classifier.predict(input_fn=predict_validation_input_fn)
-    final_predictions = np.round([item['probabilities'] for item in final_predictions])
-
+    if is_multilabel:
+        final_predictions = np.round([item['probabilities'] for item in final_predictions])
+    else:
+        final_predictions = np.array([item['class_ids'][0] for item in final_predictions])
     accuracy = metrics.accuracy_score(validation_targets, final_predictions)
     print("Final accuracy (on validation data): %0.3f" % accuracy)
     # roc_auc = metrics.roc_auc_score(validation_targets, final_predictions)

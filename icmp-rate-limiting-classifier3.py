@@ -17,8 +17,10 @@ import tensorflow as tf
 from tensorflow.python.data import Dataset
 # from Cluster.dbscan import kmeans, DBSCAN_impl
 from Classification import neural_network as nn
+from Classification.neural_network import print_bad_labels
 from Classification import adanet_wrap as adanet_
 from Classification import random_forest as rf_
+from Classification.random_forest import print_false_positives
 from Data.preprocess import minmax_scale
 from Validation.midar import extract_routers, set_router_labels, extract_routers_by_node
 tf.logging.set_verbosity(tf.logging.ERROR)
@@ -26,7 +28,7 @@ pd.options.display.max_rows = 25
 pd.options.display.float_format = '{:.3f}'.format
 #################################################
 
-import sys
+import json
 from Data.preprocess import *
 
 labels_map = {"P" : 1, "N" : 0, "U": 2}
@@ -39,65 +41,35 @@ def add_suffix(suffix, columns):
 
     return suffixed_columns
 
+def print_df_labels(df):
+    label = "label_pairwise"
 
-def find_index(e, l):
-    for i in range(0, len(l)):
-        if l[i] == e:
-            return i
-    return None
-
-
-def parse_correlation(df, rates_dpr, candidates, witnesses):
-
-
-    row = {}
-    high_rate_candidate_ip = candidates[0]
-
-    for rate in rates_dpr:
-        df_filter_dpr_rate_high_rate_candidate = df[(df["probing_rate"]== rate) & \
-                                                     (df["ip_address"] == high_rate_candidate_ip) & \
-                                                      (df["probing_type"] ==  "GROUPDPR")]
-
-        for field in df_filter_dpr_rate_high_rate_candidate.keys():
-            if field.startswith("correlation"):
-                correlation_field = df_filter_dpr_rate_high_rate_candidate[field].iloc[0]
-
-                # In case candidates correlation are not in the same order
-                correlation_split = correlation_field.split(":")
-                ip_correlation = correlation_split[0].strip()
-                correlation = correlation_split[1].strip()
-
-
-
-                ip_corr_index = find_index(ip_correlation, candidates)
-                if ip_corr_index is not None:
-                    row["correlation_c" + str(ip_corr_index)] = correlation
-                else:
-                    ip_corr_index = find_index(ip_correlation, witnesses)
-                    if ip_corr_index is not None:
-                        row["correlation_w" + str(ip_corr_index)] = correlation
-
-    return row
+    true_negatives_df = df[df[label] == 0]
+    true_positives_df = df[df[label] == 1]
+    # true_unknown_df = labeled_df[labeled_df[label] == labels_map["U"]]
+    print "Number of true negatives: " + str(len(true_negatives_df))
+    # print "Number of false negatives: " + str(FN)
+    print "Number of true positives: " + str(len(true_positives_df))
 
 
 debug = [
 ]
 
 
-recompute_dataset = False
+recompute_dataset = True
 if __name__ == "__main__":
 
-    version  = sys.argv[1]
-
-    results_dir = "/srv/icmp-rl-survey/midar/survey/batch1/results/"
-    routers_path = "resources/midar/batch1/routers/"
+    version  = "4"
+    measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/lr0.05-0.10/"
+    results_dir = measurement_prefix + "results/"
+    routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
     ground_truth_routers = extract_routers_by_node(routers_path)
     max_interfaces = 2
 
     pd.options.display.float_format = '{:.5f}'.format
 
     # Probing rates
-    minimum_probing_rate = 500
+    minimum_probing_rate = 512
 
     skip_fields = ["Index", "probing_type", "ip_address", "probing_rate", "correlation",
                    "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"]
@@ -120,24 +92,38 @@ if __name__ == "__main__":
     TN = 0
     FN = 0
     n_not_triggered = 0
+    n_not_shared = 0
+    n_witness_too_high = 0
     TN_pairwise = 0
+    n_unusable_witness = 0
     multiple_interfaces_router = {k:0 for k in range(2, max_interfaces +1)}
+
+
+    correlation_distributions = {
+        "correlation_spr" : []
+        , "correlation_dpr": []
+    }
+
+    weak_correlations = []
+    strong_correlations = []
+    correlations = []
 
 
     for result_file in os.listdir(results_dir):
 
-
+        if result_file.startswith("onelab2"):
+            continue
         # Only results file
         if os.path.isdir(results_dir + result_file):
             continue
 
         #################### DEBUG INFOS ################
         total += 1
-        print total
+        print total, result_file
         # if total != 5049:
         #     continue
         if not recompute_dataset:
-            if k == 1:
+            if total == 1:
                 break
         #################################################
 
@@ -149,9 +135,9 @@ if __name__ == "__main__":
         candidates = []
         witnesses = []
         if "TN" in result_file:
-            candidates_witness_dir = "/srv/icmp-rl-survey/midar/survey/batch1/candidates-witness-tn/"
+            candidates_witness_dir = measurement_prefix + "candidates-witness-tn/"
         else:
-            candidates_witness_dir = "/srv/icmp-rl-survey/midar/survey/batch1/candidates-witness/"
+            candidates_witness_dir = measurement_prefix + "candidates-witness/"
         with open(candidates_witness_dir + result_file) as cw_file:
             for line in cw_file:
                 line = line.replace(" ", "")
@@ -169,6 +155,10 @@ if __name__ == "__main__":
             continue
         ###########################################################
 
+        ######################### DEBUG ###########################
+        # if candidates != ["27.68.229.146", "27.68.229.218"]:
+        #     continue
+        ###########################################################
 
         raw_columns = copy.deepcopy(global_raw_columns)
 
@@ -189,35 +179,35 @@ if __name__ == "__main__":
                                 # usecols=[x for x in range(0, 9)])
 
         # Skip the measurement if all the loss rates are 1.
-        not_usable = (df_result["loss_rate"] == 1).all()
+        not_usable = False
+        for candidate in candidates:
+            not_usable |= ((df_result["loss_rate"] == 1) & (df_result["ip_address"] == candidates[1])).all()
         if not_usable:
             continue
 
-        # Measurement contains -1, meaning no change point detection method.
-        # change_behaviour_column = df_result["changing_behaviour"]
-        # if -1 in change_behaviour_column.values:
-        #     continue
-        # else:
-        #     k += 1
-        #     print "CPD: " +str(k)
-        # # If the measurement is incomplete
-        # if (df_result["probing_type"] == "INDIVIDUAL").all():
-        #     continue
+
 
 
 
         # new_entry = copy.deepcopy(missing_fields)
-        df_result = df_result[df_result["probing_rate"] != minimum_probing_rate]
+        df_individual = df_result[df_result["probing_type"] == "INDIVIDUAL"]
+        if not (df_individual["probing_rate"] == minimum_probing_rate).all():
+            df_result = df_result[df_result["probing_rate"] != minimum_probing_rate]
 
-        ind_probing_rate = df_result[df_result["probing_type"] == "INDIVIDUAL"]["probing_rate"][0]
-        group_probing_rate = df_result[df_result["probing_type"] == "GROUPSPR"]["probing_rate"][0]
+
+        ind_probing_rate = df_result[df_result["probing_type"] == "INDIVIDUAL"]["probing_rate"].iloc[0]
+        group_probing_rate = df_result[df_result["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[0]
         # dpr_probing_rate = df_result[df_result["probing_type"] == "GROUPDPR"]["probing_rate"][0]
-        probing_type_rates = {"INDIVIDUAL": ind_probing_rate,
+        probing_type_rates = {"INDIVIDUAL": [ind_probing_rate],
                               "GROUPSPR": [group_probing_rate],
                               "GROUPDPR": [group_probing_rate]}
 
 
-        new_row = build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_suffix, probing_type_rates)
+        new_row = build_new_row(df_result, candidates, witnesses,
+                                skip_fields,
+                                probing_type_suffix,
+                                probing_type_rates,
+                                is_lr_classifier = True)
 
         correlation_row = parse_correlation(df_result, [group_probing_rate], candidates, witnesses)
         new_row.update(correlation_row)
@@ -225,16 +215,8 @@ if __name__ == "__main__":
         label = set_router_labels(new_entry, ground_truth_routers[node], candidates, witnesses)
 
 
-
         if label == "U":
             continue
-
-        # Remove rates where all the interfaces fully respond from the new row.
-        # remove_uninteresting_rate(new_row, ind_rates, "ind", default_full_responsiveness_value)
-        # remove_uninteresting_rate(new_row, ind_rates, "dpr", default_full_responsiveness_value)
-        # remove_uninteresting_rate(new_row, ind_rates, "spr", default_full_responsiveness_value)
-
-
 
         new_entry["measurement_id"] = result_file
         new_entry.update(new_row)
@@ -252,16 +234,59 @@ if __name__ == "__main__":
                 print "TN: " + str(TN)
 
 
-        # Change the label in the case ICMP RL was not triggered during the group phase or the counter is not shared.
-        df_filter_group = df_result[(df_result["probing_type"].isin(["GROUPDPR"])) &  \
-                                    (df_result["ip_address"] != candidates[0]) & \
-                                    (df_result["ip_address"].isin(candidates))]
-        not_triggered =  (df_filter_group["loss_rate"] < 0.03).all()
+
+        '''
+        Excluded from the classifier:
+        
+        '''
+
+
+        # Change the label in the case ICMP RL was not triggered during the group phase on the first candidate.
+        df_dpr = df_result[(df_result["probing_type"].isin(["GROUPDPR"]))]
+
+        df_not_triggered = df_dpr[df_dpr["ip_address"] == candidates[0]]
+        not_triggered = (df_not_triggered["loss_rate"] < 0.02).all()
         if not_triggered:
             n_not_triggered += 1
-            print "Not triggered: " + str(n_not_triggered)
+            continue
+        alias_but_not_shared = False
+        if not not_triggered:
+            for i in range(0, len(candidates)):
+                df_not_shared = df_dpr[df_dpr["ip_address"] == candidates[i]]
+                # Exclude not shared counter from classification:
+                not_shared = (df_not_shared["loss_rate"] < 0.01).all()
+                if not_shared and new_entry["label_c" + str(i)] == 1:
+                    n_not_shared += 1
+                    alias_but_not_shared = True
+                    break
+        if alias_but_not_shared:
+            continue
+
+        # Check if the loss rate of the witness is too high.
+        df_witness_lr = df_dpr[df_dpr["ip_address"] == witnesses[0]]["loss_rate"]
+        minimum_lr = min(df_dpr["loss_rate"])
+
+        # if df_witness_lr.iloc[0] != 1 and df_witness_lr.iloc[0] > minimum_lr and df_witness_lr.iloc[0] > 0.05:
+        if df_witness_lr.iloc[0] == 1:
+            n_unusable_witness += 1
+            continue
+        if df_witness_lr.iloc[0] != 1 and df_witness_lr.iloc[0] > 0.02:
+            n_witness_too_high += 1
             for i in range(0, len(candidates)):
                 new_entry["label_c" + str(i)] = 0
+
+
+        # Check different patterns
+        # correlation_patterns["correlation_spr"].append(correlation_row["correlation_spr_c1"])
+        if float(correlation_row["correlation_c1"]) > 0.99 and new_entry["label_c1"] == 1 and not alias_but_not_shared:
+            strong_correlations.append(result_file)
+
+        if float(correlation_row["correlation_c1"]) < 0.3 and new_entry["label_c1"] == 1 and not alias_but_not_shared:
+            weak_correlations.append(result_file)
+            print "Not correlated but alias and triggered: " + result_file
+        if not alias_but_not_shared and new_entry["label_c1"] == 1:
+            correlations.append(result_file)
+            correlation_distributions["correlation_dpr"].append(correlation_row["correlation_c1"])
 
 
 
@@ -280,15 +305,26 @@ if __name__ == "__main__":
 
 
 
+
         if df_computed_result is None:
             df_computed_result = pd.DataFrame(columns=new_entry.keys())
             df_computed_result.set_index(df_computed_result["measurement_id"])
-
+        if len(new_entry) != df_computed_result.shape[1]:
+            print "Bad measurement file " + result_file
+            continue
         df_computed_result.loc[len(df_computed_result)] = new_entry
 
 
+    if recompute_dataset:
+        with open("resources/correlation_distributions.json", "w") as correlation_distributions_fp:
+            json.dump(correlation_distributions, correlation_distributions_fp)
+        with open("resources/weak_correlations.json", "w") as correlations_fp:
+            json.dump(weak_correlations, correlations_fp)
+        with open("resources/strong_correlations.json", "w") as correlations_fp:
+            json.dump(strong_correlations, correlations_fp)
 
-
+        with open("resources/correlations.json", "w") as correlations_fp:
+            json.dump(correlations, correlations_fp)
 
     # label = "label"
     if recompute_dataset:
@@ -315,13 +351,17 @@ if __name__ == "__main__":
 
         label = "label_pairwise"
 
-        true_negatives_df = labeled_df[labeled_df[label] == 0]
-        true_positives_df = labeled_df[labeled_df[label] == 1]
+        non_alias_df = labeled_df[labeled_df[label] == 0]
+        alias_df = labeled_df[labeled_df[label] == 1]
+        unknown_df = labeled_df[labeled_df[label] == 2]
         # true_unknown_df = labeled_df[labeled_df[label] == labels_map["U"]]
-        print "Number of true negatives: " + str(len(true_negatives_df))
-        print "Number of false negatives: " + str(FN)
-        print "Number of unknown: " + str(n_not_triggered)
-        print "Number of true positives: " + str(len(true_positives_df))
+        print "Number of non alias: " + str(len(non_alias_df))
+        print "Number of unkokwn: " + str(len(unknown_df))
+        print "Number of not triggered: " + str(n_not_triggered)
+        print "Number of not shared: " + str(n_not_shared)
+        print "Number of unusable witness: " + str(n_unusable_witness)
+        print "Number of witness loss rate too high: " + str(n_witness_too_high)
+        print "Number of true positives: " + str(len(alias_df))
 
 
 
@@ -343,6 +383,7 @@ if __name__ == "__main__":
                 labels_column.append(column)
 
     labeled_df = labeled_df.dropna(subset=feature_columns)
+    loss_rate_df = labeled_df[["measurement_id","loss_rate_dpr_c0", "loss_rate_dpr_c1", "loss_rate_dpr_w0"]]
 
     # Now train a classifier on the labeled data.
     #
@@ -361,14 +402,15 @@ if __name__ == "__main__":
 
     training_targets, training_examples = nn.parse_labels_and_features(training_df, labels_column, feature_columns)
     print "Size of the training examples: " + str(training_examples.shape)
-
+    print_df_labels(training_df)
 
     validation_targets, validation_examples = nn.parse_labels_and_features(cross_validation_df, labels_column, feature_columns)
-    print "Size of the training examples: " + str(validation_examples.shape)
+    print "Size of the validation examples: " + str(validation_examples.shape)
+    print_df_labels(cross_validation_df)
 
     test_targets, test_examples = nn.parse_labels_and_features(test_df, labels_column, feature_columns)
-    print "Size of the training examples: " + str(test_examples.shape)
-
+    print "Size of the test examples: " + str(test_examples.shape)
+    print_df_labels(test_df)
 
     ######################## CLASSIFIERS ############################
     use_dnn = False
@@ -378,9 +420,10 @@ if __name__ == "__main__":
     if use_dnn:
         classifier = nn.train_nn_classification_model(
             periods = 20,
-            n_classes = max_interfaces + 1, # Maximum number of interfaces on a router + witness
+            n_classes = 3, # Maximum number of interfaces on a router + witness
+            is_multilabel = not is_pairwise,
             feature_columns = feature_columns,
-            learning_rate=0.1,
+            learning_rate=0.05,
             steps=1000,
             batch_size=30,
             hidden_units=[labeled_df.shape[1], labeled_df.shape[1]],
@@ -394,21 +437,11 @@ if __name__ == "__main__":
             test_examples, test_targets, batch_size=100)
 
         test_predictions = classifier.predict(input_fn=predict_test_input_fn)
-        test_pred_labels = np.round([item['probabilities'] for item in test_predictions])
-
-        bad_training_labels = 0
-        bad_validation_labels = 0
-        # DEBUG Print the labels for which the prediction are incorrect
-        for i in range(0, len(test_pred_labels)):
-            if not np.array_equal(test_pred_labels[i], np.array(test_targets.iloc[i])):
-                bad_training_labels += 1
-                true_label = test_examples.iloc[i].sort_index()
-                bad_label = test_pred_labels[i]
-                # print training_pred_labels
-                print "[" + str(true_label["loss_rate_dpr_c0_9000"]) + ", " + str(true_label["loss_rate_dpr_c0_6000"]) + "]"
-                print true_label.filter(regex="loss_rate_dpr_c([0-9]+)_9000", axis=0)
-                print true_label.filter(regex="label_c([0-9]+)", axis=0)
-                print bad_label
+        if not is_pairwise:
+            test_pred_labels = np.round([item['probabilities'] for item in test_predictions])
+        else:
+            test_pred_labels = np.array([item['class_ids'][0] for item in test_predictions])
+        print_bad_labels(test_pred_labels, test_targets, test_examples)
 
         accuracy = metrics.accuracy_score(test_targets, test_pred_labels)
         print("Accuracy on test data: %0.3f" % accuracy)
@@ -422,27 +455,29 @@ if __name__ == "__main__":
         rf_classifier = rf_.random_forest_classifier(training_examples, training_targets,
                                      validation_examples, validation_targets)
 
-        print rf_classifier.predict(test_examples)
+        test_predictions = rf_classifier.predict(test_examples)
+        print_false_positives(test_predictions, test_targets, test_examples)
         print rf_classifier.score(test_examples, test_targets)
+
 
         from sklearn.tree import export_graphviz
 
         # Export as dot file
-        export_graphviz(rf_classifier.estimators_[0], out_file='tree.dot',
-                        feature_names=training_examples.columns,
-                        class_names=["Non Alias", "Alias"],
-                        rounded=True, proportion=False,
-                        precision=2, filled=True)
-
-        # Convert to png using system command (requires Graphviz)
-        from subprocess import call
-
-        call(['dot', '-Tpng', 'tree.dot', '-o', 'tree.png', '-Gdpi=600'])
-
-        # Display in jupyter notebook
-        from IPython.display import Image
-
-        Image(filename='tree.png')
+        # export_graphviz(rf_classifier.estimators_[0], out_file='tree.dot',
+        #                 feature_names=training_examples.columns,
+        #                 class_names=["Non Alias", "Alias"],
+        #                 rounded=True, proportion=False,
+        #                 precision=2, filled=True)
+        #
+        # # Convert to png using system command (requires Graphviz)
+        # from subprocess import call
+        #
+        # call(['dot', '-Tpng', 'tree.dot', '-o', 'tree.png', '-Gdpi=600'])
+        #
+        # # Display in jupyter notebook
+        # from IPython.display import Image
+        #
+        # Image(filename='tree.png')
 
         # # training_examples = tf.convert_to_tensor(training_examples.values, dtype=tf.float64)
     # # training_targets = tf.convert_to_tensor(training_targets.values, dtype=tf.float64)

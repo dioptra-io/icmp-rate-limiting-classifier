@@ -104,6 +104,44 @@ def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_su
 
 
 
+def find_index(e, l):
+    for i in range(0, len(l)):
+        if l[i] == e:
+            return i
+    return None
+
+
+def parse_correlation(df, rates_dpr, candidates, witnesses):
+
+
+    row = {}
+    high_rate_candidate_ip = candidates[0]
+
+    for rate in rates_dpr:
+        df_filter_dpr_rate_high_rate_candidate = df[(df["probing_rate"]== rate) & \
+                                                     (df["ip_address"] == high_rate_candidate_ip) & \
+                                                      (df["probing_type"] ==  "GROUPDPR")]
+
+        for field in df_filter_dpr_rate_high_rate_candidate.keys():
+            if field.startswith("correlation"):
+                correlation_field = df_filter_dpr_rate_high_rate_candidate[field].iloc[0]
+
+                # In case candidates correlation are not in the same order
+                correlation_split = correlation_field.split(":")
+                ip_correlation = correlation_split[0].strip()
+                correlation = correlation_split[1].strip()
+
+
+
+                ip_corr_index = find_index(ip_correlation, candidates)
+                if ip_corr_index is not None:
+                    row["correlation_c" + str(ip_corr_index)] = float(correlation)
+                else:
+                    ip_corr_index = find_index(ip_correlation, witnesses)
+                    if ip_corr_index is not None:
+                        row["correlation_w" + str(ip_corr_index)] = float(correlation)
+
+    return row
 
 def remove_uninteresting_rate(new_entry, rates, probing_type,default_full_responsive_value):
 
