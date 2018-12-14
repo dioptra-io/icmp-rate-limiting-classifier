@@ -1,6 +1,8 @@
 from sklearn.preprocessing import MinMaxScaler
 import copy
 
+minimum_probing_rate = 512
+
 def minmax_scale(features):
     scaler = MinMaxScaler()
     scaler.fit(features)
@@ -83,6 +85,9 @@ def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_su
                                ])
                 if not is_lr_classifier:
                     key += "_" + str(probing_rate)
+                if probing_rate == minimum_probing_rate:
+                    if not new_entry.has_key(key + "_min"):
+                        key += "_min"
 
                 new_entry[key] = row[i]
 
@@ -97,7 +102,9 @@ def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_su
 
                 if not is_lr_classifier:
                     key += "_" + str(probing_rate)
-
+                if probing_rate == minimum_probing_rate:
+                    if not new_entry.has_key(key + "_min"):
+                        key += "_min"
                 new_entry[key] = row[i]
 
     return new_entry
@@ -205,3 +212,24 @@ def sort_ips_by(df_result, candidates, witnesses, filter):
     witnesses_sorted = [x[0] for x in witnesses_loss_rate_order]
 
     return candidates_sorted, witnesses_sorted
+
+
+
+def extract_feature_labels_columns(df_computed_result, is_pairwise):
+    # Select features
+    feature_columns = []
+    for column in df_computed_result.columns:
+        if not column.startswith("label") \
+                :
+            feature_columns.append(column)
+
+    labels_column = []
+    for column in df_computed_result.columns:
+        if is_pairwise:
+            if column == ("label_pairwise"):
+                labels_column.append(column)
+        else:
+            if column.startswith("label"):
+                labels_column.append(column)
+
+    return feature_columns, labels_column

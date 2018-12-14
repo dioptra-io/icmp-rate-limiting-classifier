@@ -10,12 +10,12 @@ import tensorflow as tf
 from tensorflow.python.data import Dataset
 from plot_metrics import plot_metrics
 from matplotlib import pyplot as plt
-
+from metrics import compute_metrics
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 10
 pd.options.display.float_format = '{:.1f}'.format
 
-def print_bad_labels(data_pred_labels, data_targets, data_examples):
+def print_bad_labels(data_pred_labels, data_targets, data_examples, labeled_df):
     for i in range(0, len(data_pred_labels)):
         if not data_pred_labels[i] == data_targets.iloc[i][0]:
             true_label = data_examples.iloc[i].sort_index()
@@ -27,6 +27,8 @@ def print_bad_labels(data_pred_labels, data_targets, data_examples):
             print true_label.filter(regex="label_c([0-9]+)", axis=0)
 
             print bad_label
+
+            print labeled_df.loc[data_examples.index[i]]["measurement_id"]
 
 def parse_labels_and_features(dataset, label_column, features_columns):
     """Extracts labels and features.
@@ -242,14 +244,22 @@ def train_nn_classification_model(
 
 
         # DEBUG Print the labels for which the prediction are incorrect
-        print "Bad labels on training set: "
-        print_bad_labels(training_pred_labels, training_targets, training_examples)
-        print "Bad labels on validation set: "
-        print_bad_labels(validation_pred_labels, validation_targets, validation_examples)
-        accuracy = metrics.accuracy_score(training_targets, training_pred_labels)
-        print "Accuracy on training set: " + str(accuracy)
-        accuracy = metrics.accuracy_score(validation_targets, validation_pred_labels)
-        print "Accuracy on validation set: " + str(accuracy)
+        # print "Bad labels on training set: "
+        # print_bad_labels(training_pred_labels, training_targets, training_examples)
+
+        precision, recall, accuracy = compute_metrics(training_pred_labels, training_targets)
+        print "Precision: " + str(precision)
+        print "Recall: " + str(recall)
+        print "Accuracy: " + str(accuracy)
+
+
+        # print "Bad labels on validation set: "
+        # print_bad_labels(validation_pred_labels, validation_targets, validation_examples)
+
+        precision, recall, accuracy = compute_metrics(validation_pred_labels, validation_targets)
+        print "Precision: " + str(precision)
+        print "Recall: " + str(recall)
+        print "Accuracy: " + str(accuracy)
         # training_hamming_loss_errors.append(training_hamming_loss)
         # validation_hamming_loss_errors.append(validation_hamming_loss)
     print("Model training finished.")
@@ -262,8 +272,10 @@ def train_nn_classification_model(
         final_predictions = np.round([item['probabilities'] for item in final_predictions])
     else:
         final_predictions = np.array([item['class_ids'][0] for item in final_predictions])
-    accuracy = metrics.accuracy_score(validation_targets, final_predictions)
-    print("Final accuracy (on validation data): %0.3f" % accuracy)
+    precision, recall, accuracy = compute_metrics(final_predictions, validation_targets)
+    print "Final precision: " + str(precision)
+    print "Final recall: " + str(recall)
+    print "Final accuracy: " + str(accuracy)
     # roc_auc = metrics.roc_auc_score(validation_targets, final_predictions)
     # print("ROC AUC on test data: %0.3f" % roc_auc)
 

@@ -25,3 +25,17 @@ def plot_metrics(training_errors, validation_errors, validation_targets, final_p
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
     plt.show()
+
+def show_confusion_matrix(predictions, labels):
+    # Output a plot of the confusion matrix.
+    cm = metrics.confusion_matrix(labels, predictions)
+    # Normalize the confusion matrix by row (i.e by the number of samples
+    # in each class).
+    cm_normalized = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
+
+    ax = sns.heatmap(cm_normalized, cmap="bone_r")
+    ax.set_aspect(1)
+    plt.title("Confusion matrix")
+    plt.ylabel("True label")
+    plt.xlabel("Predicted label")
+    plt.show()
