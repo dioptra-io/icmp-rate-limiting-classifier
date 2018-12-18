@@ -57,6 +57,14 @@ def extract_routers_by_node(routers_dir):
     return routers_by_node
 
 
+def internet2_routers(routers_dir, nodes):
+    all_routers = extract_routers(routers_dir)
+    routers_by_node = {}
+    for node in nodes:
+        routers_by_node[node] = {}
+        for router_file, router in all_routers.items():
+            routers_by_node[node][router_file] = router
+    return routers_by_node
 
 def transitive_closure(routers):
     # Apply transitive closure

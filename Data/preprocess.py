@@ -220,6 +220,7 @@ def extract_feature_labels_columns(df_computed_result, is_pairwise):
     feature_columns = []
     for column in df_computed_result.columns:
         if not column.startswith("label") \
+            and not column.startswith("ip_address")\
                 :
             feature_columns.append(column)
 
