@@ -1,4 +1,5 @@
 from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 import copy
 
 minimum_probing_rate = 512
@@ -129,24 +130,36 @@ def parse_correlation(df, rates_dpr, candidates, witnesses):
                                                      (df["ip_address"] == high_rate_candidate_ip) & \
                                                       (df["probing_type"] ==  "GROUPDPR")]
 
+        correlations_fields = []
         for field in df_filter_dpr_rate_high_rate_candidate.keys():
             if field.startswith("correlation"):
                 correlation_field = df_filter_dpr_rate_high_rate_candidate[field].iloc[0]
 
                 # In case candidates correlation are not in the same order
-                correlation_split = correlation_field.split(":")
-                ip_correlation = correlation_split[0].strip()
-                correlation = correlation_split[1].strip()
-
-
-
-                ip_corr_index = find_index(ip_correlation, candidates)
-                if ip_corr_index is not None:
-                    row["correlation_c" + str(ip_corr_index)] = float(correlation)
+                if type(correlation_field) != type(""):
+                    continue
                 else:
-                    ip_corr_index = find_index(ip_correlation, witnesses)
-                    if ip_corr_index is not None:
-                        row["correlation_w" + str(ip_corr_index)] = float(correlation)
+                    correlations_fields.append(correlation_field)
+
+
+        for correlation_field in correlations_fields:
+
+            correlation_split = correlation_field.split(":")
+            ip_correlation = correlation_split[0].strip()
+            correlation = correlation_split[1].strip()
+
+
+            for i in range(0, len(candidates)):
+                if candidates[i] == ip_correlation:
+                    row["correlation_c" + str(i)] = float(correlation)
+                    break
+            for i in range(0, len(witnesses)):
+                if witnesses[i] == ip_correlation:
+                    row["correlation_w" + str(i)] = float(correlation)
+                    break
+
+        if not row.has_key("correlation_c1") or not row.has_key("correlation_w0") :
+            return None
 
     return row
 

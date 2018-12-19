@@ -51,7 +51,7 @@ def extract_routers_by_node(routers_dir):
     routers_by_node = {}
     for router_file, router in all_routers.items():
         node = router_file.split("_")[0]
-        if not routers_by_node.has_key(node):
+        if not node in routers_by_node:
             routers_by_node[node] = {}
         routers_by_node[node][router_file] = router
     return routers_by_node

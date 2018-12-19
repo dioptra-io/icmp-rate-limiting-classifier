@@ -11,10 +11,8 @@ import os
 # from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-# import seaborn as sns
-from sklearn import metrics
 import tensorflow as tf
-from tensorflow.python.data import Dataset
+from sklearn.metrics import f1_score
 # from Cluster.dbscan import kmeans, DBSCAN_impl
 from Classification import neural_network as nn
 from Classification.neural_network import print_bad_labels
@@ -24,8 +22,8 @@ from Classification.random_forest import *
 from Classification.metrics import compute_metrics
 from Data.preprocess import minmax_scale, minimum_probing_rate
 from Validation.midar import extract_routers, set_router_labels, extract_routers_by_node, internet2_routers, transitive_closure
-
-from joblib import dump, load
+from Validation.evaluation import evaluate
+from joblib import load, dump
 
 tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 25
@@ -51,9 +49,9 @@ def print_df_labels(df):
     true_negatives_df = df[df[label] == 0]
     true_positives_df = df[df[label] == 1]
     # true_unknown_df = labeled_df[labeled_df[label] == labels_map["U"]]
-    print "Number of non aliases: " + str(len(true_negatives_df))
+    print ("Number of non aliases: " + str(len(true_negatives_df)))
     # print "Number of false negatives: " + str(FN)
-    print "Number of aliases: " + str(len(true_positives_df))
+    print ("Number of aliases: " + str(len(true_positives_df)))
 
 
 debug = [
@@ -130,12 +128,13 @@ def compute_dataset(is_pairwise,
 
         #################### DEBUG INFOS ################
         total += 1
-        print total, result_file
-        # if total != 1440:
-        #     continue
+        print (total, result_file)
+
         if not recompute_dataset:
             if total == 1:
                 break
+        # if total < 260:
+        #     continue
         #################################################
 
         new_entry = {}
@@ -143,7 +142,6 @@ def compute_dataset(is_pairwise,
         node = split_file_name[0]
 
         router_name = split_file_name[-1]
-        router_names.add(router_name)
 
         ip_index = 5
         candidates = []
@@ -192,6 +190,9 @@ def compute_dataset(is_pairwise,
         ######################### DEBUG ###########################
         # if candidates != ["27.68.229.146", "27.68.229.218"]:
         #     continue
+        #
+        # if result_file != "planetlab-1.research.netlab.hut.fi_hous":
+        #     continue
         ###########################################################
 
         raw_columns = copy.deepcopy(global_raw_columns)
@@ -209,6 +210,8 @@ def compute_dataset(is_pairwise,
         df_raw = pd.read_csv(results_dir + result_file,
                                 names=raw_columns,
                                 skipinitialspace=True,
+                                # encoding="utf-8",
+                                engine="python",
                                 index_col=False)
         # usecols=[x for x in range(0, 9)])
 
@@ -259,6 +262,8 @@ def compute_dataset(is_pairwise,
                                     is_lr_classifier=True)
 
             correlation_row = parse_correlation(df_result, [group_probing_rate], pairwise_candidates, witnesses)
+            if correlation_row is None:
+                continue
             new_row.update(correlation_row)
 
             label = set_router_labels(new_entry, ground_truth_routers[node], pairwise_candidates, witnesses)
@@ -276,7 +281,7 @@ def compute_dataset(is_pairwise,
             for i in range(0, len(pairwise_candidates)):
                 if new_entry["label_c0"] != new_entry["label_c" + str(i)]:
                     TN += 1
-                    print "TN: " + str(TN)
+                    print ("TN: " + str(TN))
 
             '''
             Excluded from the classifier:
@@ -360,7 +365,7 @@ def compute_dataset(is_pairwise,
                 new_entry["label_pairwise"] = 2
             if new_entry["label_c0"] == 1 and new_entry["label_c1"] == 0:
                 TN_pairwise += 1
-                print "TN Pairwise: " + str(TN_pairwise)
+                print ("TN Pairwise: " + str(TN_pairwise))
                 new_entry["label_pairwise"] = 0
             if new_entry["label_c0"] == 1 and new_entry["label_c1"] == 1:
                 new_entry["label_pairwise"] = 1
@@ -369,9 +374,11 @@ def compute_dataset(is_pairwise,
                 df_computed_result = pd.DataFrame(columns=new_entry.keys())
                 df_computed_result.set_index(df_computed_result["measurement_id"])
             if len(new_entry) != df_computed_result.shape[1]:
-                print "Bad measurement file " + result_file
+                print ("Bad measurement file " + result_file)
                 continue
             df_computed_result.loc[len(df_computed_result)] = new_entry
+            router_names.add(router_name)
+
 
     # if recompute_dataset:
     #     with open("resources/correlation_distributions.json", "w") as correlation_distributions_fp:
@@ -398,20 +405,20 @@ def compute_dataset(is_pairwise,
         alias_df = labeled_df[labeled_df[label] == 1]
         unknown_df = labeled_df[labeled_df[label] == 2]
         # true_unknown_df = labeled_df[labeled_df[label] == labels_map["U"]]
-        print "Number of alias: " + str(len(alias_df))
-        print "Number of alias but not shared: " + str(n_not_shared)
-        print "Number of non alias: " + str(len(non_alias_df))
-        print "Number of unknown: " + str(len(unknown_df))
-        print "Number of not triggered: " + str(n_not_triggered)
-        print "Number of unusable witness: " + str(n_unusable_witness)
-        print "Number of witness loss rate too high: " + str(n_witness_too_high)
-        print "Number of candidate loss rate too high on minimum rate: " + str(n_not_aliases_lr_too_high)
-        print "Number of distinct ips: " + str(len(distinct_ips))
-        print "Number of distinct routers: " + str(len(distinct_routers))
+        print ("Number of alias: " + str(len(alias_df)))
+        print ("Number of alias but not shared: " + str(n_not_shared))
+        print ("Number of non alias: " + str(len(non_alias_df)))
+        print ("Number of unknown: " + str(len(unknown_df)))
+        print ("Number of not triggered: " + str(n_not_triggered))
+        print ("Number of unusable witness: " + str(n_unusable_witness))
+        print ("Number of witness loss rate too high: " + str(n_witness_too_high))
+        print ("Number of candidate loss rate too high on minimum rate: " + str(n_not_aliases_lr_too_high))
+        print ("Number of distinct ips: " + str(len(distinct_ips)))
+        print ("Number of distinct routers: " + str(len(distinct_routers)))
 
-        print "Number of routers probed: " +str(len(router_names))
+        print ("Number of routers probed: " +str(len(router_names)))
 
-        print "Missing routers: " + str(set(ground_truth_routers["ple41.planet-lab.eu"].keys()) - router_names)
+        print ("Missing routers: " + str(set(ground_truth_routers["ple41.planet-lab.eu"].keys()) - router_names))
 
 
 
@@ -458,9 +465,9 @@ def compute_classifier(feature_columns,
         print_bad_labels(test_pred_labels, test_targets, test_examples, labeled_df)
 
         precision, recall, accuracy = compute_metrics(test_predictions, test_targets)
-        print "Precision: " + str(precision)
-        print "Recall: " + str(recall)
-        print "Accuracy: " + str(accuracy)
+        print ("Precision: " + str(precision))
+        print ("Recall: " + str(recall))
+        print ("Accuracy: " + str(accuracy))
 
     ################# RANDOM FOREST ##################
 
@@ -514,7 +521,7 @@ if __name__ == "__main__":
     df_file = "resources/test_set_internet2"
     ground_truth_routers = internet2_routers(routers_path, ple_nodes)
 
-    recompute_dataset = True
+    recompute_dataset = False
     is_pairwise = True
     if recompute_dataset:
         df_computed_result = compute_dataset(is_pairwise,
@@ -550,38 +557,8 @@ if __name__ == "__main__":
     use_saved_classifier = True
     ################################# Use existing classifier##########################
     if use_saved_classifier:
-        classifier = load("resources/classifier.joblib")
-        test_targets, test_examples = nn.parse_labels_and_features(labeled_df, labels_column, feature_columns)
-        probabilities = classifier.predict_proba(test_examples)
-        predictions = []
-
-        for i in range(0, len(probabilities)):
-            if probabilities[i][1] > 0.8:
-                predictions.append(1)
-            else:
-                predictions.append(0)
-        print_false_positives(predictions, test_targets, test_examples, labeled_df)
-
-        precision, recall, accuracy = compute_metrics(predictions, test_targets)
-        print "Precision: " + str(precision)
-        print "Recall: " + str(recall)
-        print "Accuracy: " + str(accuracy)
-
-        # Rebuild routers from the classification
-        positives = []
-        negatives = []
-        for i in range(0, len(labeled_df)):
-            ip_address0 = labeled_df.iloc[i]["ip_address_c0"]
-            ip_address1 = labeled_df.iloc[i]["ip_address_c1"]
-            if predictions[i] == 1:
-                positives.append({ip_address0, ip_address1})
-                continue
-
-        positives = transitive_closure(positives)
-
-        print len(positives)
-
-
+        classifier = load("resources/random_forest_classifier.joblib")
+        evaluate(classifier, ground_truth_routers["ple41.planet-lab.eu"], labeled_df, labels_column, feature_columns)
 
     ############################# Evaluate the classifier ##########################
     precisions = []
@@ -609,15 +586,15 @@ if __name__ == "__main__":
             test_df = labeled_df.iloc[cross_validation_n + training_n + 1:]
 
             training_targets, training_examples = nn.parse_labels_and_features(training_df, labels_column, feature_columns)
-            print "Size of the training examples: " + str(training_examples.shape)
+            print ("Size of the training examples: " + str(training_examples.shape))
             print_df_labels(training_df)
 
             validation_targets, validation_examples = nn.parse_labels_and_features(cross_validation_df, labels_column, feature_columns)
-            print "Size of the validation examples: " + str(validation_examples.shape)
+            print ("Size of the validation examples: " + str(validation_examples.shape))
             print_df_labels(cross_validation_df)
 
             test_targets, test_examples = nn.parse_labels_and_features(test_df, labels_column, feature_columns)
-            print "Size of the test examples: " + str(test_examples.shape)
+            print ("Size of the test examples: " + str(test_examples.shape))
             print_df_labels(test_df)
 
 
@@ -643,10 +620,11 @@ if __name__ == "__main__":
                         predictions.append(1)
 
 
-                precision, recall, accuracy = compute_metrics(predictions, targets)
-                print "Precision: " + str(precision)
-                print "Recall: " + str(recall)
-                print "Accuracy: " + str(accuracy)
+                precision, recall, accuracy, f_score = compute_metrics(predictions, targets)
+                print ("Precision: " + str(precision))
+                print ("Recall: " + str(recall))
+                print ("Accuracy: " + str(accuracy))
+                print("F score: "+ str(f_score))
                 precisions.append(precision)
                 recalls.append(recall)
                 accuracys.append(accuracy)
@@ -655,8 +633,10 @@ if __name__ == "__main__":
                     best_classifier = classifier
 
         if save_classifier:
-            dump(best_classifier, 'resources/classifier.joblib')
-
+            if use_random_forest:
+                dump(best_classifier, 'resources/random_forest_classifier.joblib')
+            elif use_dnn:
+                dump(best_classifier, 'resources/nn_classifier.joblib')
 
         if save_results:
             with open("/home/kevin/icmp-rate-limiting-paper/resources/results/results_classifier_"+ target_loss_rate_window + ".json", "w") as results_classifier_fp:

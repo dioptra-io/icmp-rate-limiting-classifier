@@ -8,24 +8,25 @@ from sklearn.metrics import precision_recall_curve
 from matplotlib import pyplot as plt
 import seaborn as sns
 import numpy as np
-from metrics import compute_metrics
+from Classification.metrics import compute_metrics
 from sklearn.utils.fixes import signature
 
 
 def print_false_positives(predictions, labels, features, labeled_df):
     for i in range(0, len(predictions)):
         if predictions[i] == 1 and labels.iloc[i]["label_pairwise"] != 1:
-            print features.iloc[i][["loss_rate_dpr_c0", "loss_rate_dpr_c1", "loss_rate_dpr_w0"]]
-            print "Predicted: " + str(predictions[i])
-            print "True label: " +str(labels.iloc[i]["label_pairwise"])
-            print labeled_df.loc[features.index[i]]["measurement_id"]
+            print (features.iloc[i][["loss_rate_dpr_c0", "loss_rate_dpr_c1", "loss_rate_dpr_w0"]])
+            print ("Predicted: " + str(predictions[i]))
+            print ("True label: " +str(labels.iloc[i]["label_pairwise"]))
+            print (labeled_df.loc[features.index[i]]["measurement_id"])
 
 
 def evaluate_classifier(predictions, labels):
-    precision, recall, accuracy = compute_metrics(predictions, labels)
-    print "Precision: " + str(precision)
-    print "Recall: " + str(recall)
-    print "Accuracy: " + str(accuracy)
+    precision, recall, accuracy, f_score = compute_metrics(predictions, labels)
+    print("Precision: " + str(precision))
+    print("Recall: " + str(recall))
+    print("Accuracy: " + str(accuracy))
+    print("F score: " + str(f_score))
 
 def feature_importance(rf, columns):
     feats = {}  # a dict to hold feature_name: feature_importance
@@ -39,8 +40,8 @@ def feature_importance(rf, columns):
 
 def random_forest_classifier(train_features, train_labels):
 
-    classifier = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=0, verbose=0,
-                                class_weight={0:2000000, 1:1}
+    classifier = RandomForestClassifier(n_estimators=20, n_jobs=-1, random_state=0, verbose=0,
+                                class_weight={0:20000000, 1:1}
                                 )
 
     y_scores = cross_val_predict(classifier, train_features, train_labels, cv=3, method="predict_proba")
