@@ -11,21 +11,22 @@ import os
 # from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+# import tensorflow as tf
 from sklearn.metrics import f1_score
+from sklearn import clone
 # from Cluster.dbscan import kmeans, DBSCAN_impl
-from Classification import neural_network as nn
-from Classification.neural_network import print_bad_labels
-from Classification import adanet_wrap as adanet_
-from Classification import random_forest as rf_
+from Algorithms.algorithms import transitive_closure
+# from Classification import neural_network as nn
+# from Classification.neural_network import print_bad_labels
+# from Classification import adanet_wrap as adanet_
 from Classification.random_forest import *
+from Classification.mlp import *
 from Classification.metrics import compute_metrics
-from Data.preprocess import minmax_scale, minimum_probing_rate
-from Validation.midar import extract_routers, set_router_labels, extract_routers_by_node, internet2_routers, transitive_closure
+from Data.preprocess import parse_labels_and_features
+from Validation.midar import extract_routers, set_router_labels, extract_routers_by_node, internet2_routers
 from Validation.evaluation import evaluate
 from joblib import load, dump
-
-tf.logging.set_verbosity(tf.logging.ERROR)
+# tf.logging.set_verbosity(tf.logging.ERROR)
 pd.options.display.max_rows = 25
 pd.options.display.float_format = '{:.3f}'.format
 #################################################
@@ -72,7 +73,7 @@ def compute_dataset(is_pairwise,
 
     pd.options.display.float_format = '{:.5f}'.format
 
-    skip_fields = ["Index", "probing_type", "ip_address", "probing_rate", "correlation"]
+    skip_fields = ["Index", "probing_type", "ip_address", "correlation"]
                    # "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"]
 
     df_computed_result = None
@@ -115,9 +116,7 @@ def compute_dataset(is_pairwise,
 
     weak_correlations = []
     strong_correlations = []
-    correlations = []
-
-
+    correlations_by_ip = {}
     for result_file in os.listdir(results_dir):
 
         # Only results file
@@ -137,7 +136,6 @@ def compute_dataset(is_pairwise,
         #     continue
         #################################################
 
-        new_entry = {}
         split_file_name = result_file.split("_")
         node = split_file_name[0]
 
@@ -215,7 +213,12 @@ def compute_dataset(is_pairwise,
                                 index_col=False)
         # usecols=[x for x in range(0, 9)])
 
-
+        if len(df_raw) != 9:
+            print("Bad measurement file not enough rows " + result_file)
+            continue
+        group_spr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[0]
+        group_dpr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPDPR"]["probing_rate"].iloc[0]
+        correlations = parse_correlation(df_raw, [group_dpr_probing_rate], candidates, witnesses)
         ##################################### Split the df in pairwise elements #############################
 
         df_list_pairwise = []
@@ -227,6 +230,8 @@ def compute_dataset(is_pairwise,
             pairwise_candidates_list.append([candidates[0], candidates[i]])
 
         for i in range(0, len(df_list_pairwise)):
+            new_entry = {}
+
             pairwise_candidates = pairwise_candidates_list[i]
             df_result = df_list_pairwise[i]
 
@@ -248,12 +253,11 @@ def compute_dataset(is_pairwise,
             df_individual = df_result[df_result["probing_type"] == "INDIVIDUAL"]
 
 
-            ind_probing_rate = df_result[df_result["probing_type"] == "INDIVIDUAL"]["probing_rate"].iloc[1]
-            group_probing_rate = df_result[df_result["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[1]
-            # dpr_probing_rate = df_result[df_result["probing_type"] == "GROUPDPR"]["probing_rate"][0]
-            probing_type_rates = {"INDIVIDUAL": [minimum_probing_rate, ind_probing_rate],
-                                  "GROUPSPR": [minimum_probing_rate, group_probing_rate],
-                                  "GROUPDPR": [minimum_probing_rate, group_probing_rate]}
+            ind_probing_rate = df_result[df_result["probing_type"] == "INDIVIDUAL"]["probing_rate"]
+
+            probing_type_rates = {"INDIVIDUAL": list(ind_probing_rate),
+                                  "GROUPSPR": [group_spr_probing_rate],
+                                  "GROUPDPR": [group_dpr_probing_rate]}
 
             new_row = build_new_row(df_result, pairwise_candidates, witnesses,
                                     skip_fields,
@@ -261,7 +265,7 @@ def compute_dataset(is_pairwise,
                                     probing_type_rates,
                                     is_lr_classifier=True)
 
-            correlation_row = parse_correlation(df_result, [group_probing_rate], pairwise_candidates, witnesses)
+            correlation_row = get_pairwise_correlation_row(correlations, pairwise_candidates, witnesses)
             if correlation_row is None:
                 continue
             new_row.update(correlation_row)
@@ -308,55 +312,52 @@ def compute_dataset(is_pairwise,
             #     continue
 
             # RL Not triggered
-            # df_dpr = df_result[(df_result["probing_type"].isin(["GROUPDPR"]))]
-            #
-            # df_not_triggered = df_dpr[df_dpr["ip_address"] == pairwise_candidates[0]]
-            # not_triggered = (df_not_triggered["loss_rate"] < n_not_triggered_threshold).all()
-            # if not_triggered:
-            #     n_not_triggered += 1
-            #     continue
+            df_dpr = df_result[(df_result["probing_type"].isin(["GROUPDPR"]))]
+
+            df_not_triggered = df_dpr[df_dpr["ip_address"] == pairwise_candidates[0]]
+            not_triggered = (df_not_triggered["loss_rate"] < n_not_triggered_threshold).all()
+            if not_triggered:
+                n_not_triggered += 1
+                continue
             # RL not shared but aliases
-            # alias_but_not_shared = False
-
-            # if not not_triggered:
-            #     for i in range(0, len(candidates)):
-            #         df_not_shared = df_dpr[df_dpr["ip_address"] == candidates[i]]
-            #         # Exclude not shared counter from classification:
-            #         not_shared = (df_not_shared["loss_rate"] < epsilon).all()
-            #         if not_shared and new_entry["label_c" + str(i)] == 1:
-            #             alias_but_not_shared = True
-            #             break
-            # if alias_but_not_shared:
-            #     n_not_shared += 1
-            #     continue
-
-            # Check if the loss rate of the witness is too high.
+            alias_but_not_shared = False
+            epsilon = 0.02
+            if not not_triggered:
+                for i in range(0, len(pairwise_candidates)):
+                    df_not_shared = df_dpr[df_dpr["ip_address"] == pairwise_candidates[i]]
+                    # Exclude not shared counter from classification:
+                    not_shared = (df_not_shared["loss_rate"] < epsilon).all()
+                    if not_shared and new_entry["label_c" + str(i)] == 1:
+                        alias_but_not_shared = True
+                        break
+            if alias_but_not_shared:
+                n_not_shared += 1
+                continue
+            #
+            # # Check if the loss rate of the witness is too high.
             # df_witness_lr = df_dpr[df_dpr["ip_address"] == witnesses[0]]["loss_rate"]
             # minimum_lr = min(df_dpr["loss_rate"])
             #
-            # if df_witness_lr.iloc[0] == 1:
-            #     n_unusable_witness += 1
-            #     continue
-            # if df_witness_lr.iloc[0] > minimum_lr and df_witness_lr.iloc[0] >= 0.01:
-            #     n_unusable_witness += 1
-            #     continue
             # if df_witness_lr.iloc[0] > alpha:
             #     n_witness_too_high += 1
-            #     continue
-                # for i in range(0, len(candidates)):
-                #     new_entry["label_c" + str(i)] = 0
+            #     new_entry["label_c1"] = 0
 
             # Check different patterns
             # correlation_patterns["correlation_spr"].append(correlation_row["correlation_spr_c1"])
-            if float(correlation_row["correlation_c1"]) > 0.99 and new_entry["label_c1"] == 1:
-                strong_correlations.append(result_file)
-
-            if float(correlation_row["correlation_c1"]) < 0.3 and new_entry["label_c1"] == 1:
-                weak_correlations.append(result_file)
+            # if float(correlation_row["correlation_c1"]) > 0.99 and new_entry["label_c1"] == 1:
+            #     strong_correlations.append(result_file)
+            #
+            # if float(correlation_row["correlation_c1"]) < 0.3 and new_entry["label_c1"] == 1:
+            #     weak_correlations.append(result_file)
                 # print "Not correlated but alias and triggered: " + result_file
-            # if not alias_but_not_shared and new_entry["label_c1"] == 1:
-            #     correlations.append(result_file)
-            #     correlation_distributions["correlation_dpr"].append(correlation_row["correlation_c1"])
+            if new_entry["label_c1"] == 1:
+                key = ""
+                for i in range(0, len(pairwise_candidates)):
+                    key += pairwise_candidates[i]
+                    if i != len(pairwise_candidates) - 1:
+                        key += "_"
+                correlations_by_ip[key] = correlation_row["correlation_c1"]
+
 
 
             # Map the array of labels to a single label
@@ -380,16 +381,16 @@ def compute_dataset(is_pairwise,
             router_names.add(router_name)
 
 
-    # if recompute_dataset:
-    #     with open("resources/correlation_distributions.json", "w") as correlation_distributions_fp:
-    #         json.dump(correlation_distributions, correlation_distributions_fp)
+    if recompute_dataset:
+        # with open("resources/correlation_distributions.json", "w") as correlation_distributions_fp:
+        #     json.dump(correlation_distributions, correlation_distributions_fp)
     #     with open("resources/weak_correlations.json", "w") as correlations_fp:
     #         json.dump(weak_correlations, correlations_fp)
     #     with open("resources/strong_correlations.json", "w") as correlations_fp:
     #         json.dump(strong_correlations, correlations_fp)
     #
-    #     with open("resources/correlations.json", "w") as correlations_fp:
-    #         json.dump(correlations, correlations_fp)
+        with open("resources/correlations_by_ip.json", "w") as correlations_fp:
+            json.dump(correlations_by_ip, correlations_fp)
     df_computed_result.set_index("measurement_id", inplace=True)
     df_computed_result.to_csv(ofile, encoding="utf-8")
 
@@ -418,7 +419,7 @@ def compute_dataset(is_pairwise,
 
         print ("Number of routers probed: " +str(len(router_names)))
 
-        print ("Missing routers: " + str(set(ground_truth_routers["ple41.planet-lab.eu"].keys()) - router_names))
+        # print ("Missing routers: " + str(set(ground_truth_routers["ple41.planet-lab.eu"].keys()) - router_names))
 
 
 
@@ -434,7 +435,8 @@ def compute_classifier(feature_columns,
                        test_examples,
                        test_targets,
                        use_dnn,
-                       use_random_forest):
+                       use_random_forest,
+                       use_mlp):
     ######################## CLASSIFIERS ############################
 
     #### DEEP NEURAL NETWORK CLASSIFIER ####
@@ -472,22 +474,27 @@ def compute_classifier(feature_columns,
     ################# RANDOM FOREST ##################
 
     if use_random_forest:
-        classifier, threshold_decision = rf_.random_forest_classifier(training_examples,
+        classifier, threshold_decision = random_forest_classifier(training_examples,
                                                      training_targets,
                                                      )
 
         # validations_predictions = classifier.predict_proba(validation_examples)
-        # importances = feature_importance(classifier, training_examples.columns)
-        # print importances.to_string()
+        importances = feature_importance(classifier, training_examples.columns)
+        print (importances.to_string())
         # print_false_positives(validations_predictions, validation_targets, validation_examples, labeled_df)
         return classifier, threshold_decision
+
+    if use_mlp:
+        classifier, threshold_decision = mlp_classifier(training_examples, training_targets)
+        return classifier, threshold_decision
+
     return None
 
 if __name__ == "__main__":
-    ple_nodes = []
-    with open("/home/kevin/mda-lite-v6-survey/resources/nodes/v4_nodes") as nodes_f:
-        for node in nodes_f:
-            ple_nodes.append(node.strip("\n"))
+    # ple_nodes = []
+    # with open("/home/kevin/mda-lite-v6-survey/resources/nodes/v4_nodes") as nodes_f:
+    #     for node in nodes_f:
+    #         ple_nodes.append(node.strip("\n"))
 
 
     '''
@@ -499,27 +506,26 @@ if __name__ == "__main__":
     '''
 
 
-    target_loss_rate_window = "lr0.15-0.20"
+    target_loss_rate_window = "lr0.05-0.10"
     alpha = 0.02
     n_not_triggered_threshold = 0.05
 
     '''
         Different paths of data
     '''
-    # measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
-    # candidates_witness_dir = ""
-    # results_dir = measurement_prefix + "results/"
-    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
-    # df_file = "resources/test_set_" + target_loss_rate_window
-    # ground_truth_routers = extract_routers_by_node(routers_path)
-
-
-    measurement_prefix = "/srv/icmp-rl-survey/midar/survey/internet2/"
-    candidates_witness_dir = measurement_prefix +"candidates-witness/"
+    measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
+    candidates_witness_dir = ""
     results_dir = measurement_prefix + "results/"
-    routers_path = "/home/kevin/mda-lite-v6-survey/resources/internet2/routers/v4/"
-    df_file = "resources/test_set_internet2"
-    ground_truth_routers = internet2_routers(routers_path, ple_nodes)
+    routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
+    df_file = "resources/test_set_" + target_loss_rate_window
+    # ground_truth_routers = extract_routers_by_node(routers_path)
+    ground_truth_routers = []
+    # measurement_prefix = "/srv/icmp-rl-survey/midar/survey/internet2/"
+    # candidates_witness_dir = measurement_prefix +"candidates-witness/"
+    # results_dir = measurement_prefix + "results/"
+    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/internet2/routers/v4/"
+    # df_file = "resources/test_set_internet2"
+    # ground_truth_routers = internet2_routers(routers_path, ple_nodes)
 
     recompute_dataset = False
     is_pairwise = True
@@ -535,65 +541,54 @@ if __name__ == "__main__":
     else:
         df_computed_result = pd.read_csv(df_file, index_col=0)
 
-    for column in df_computed_result.columns:
-        if column.startswith("changing_behaviour"):
-            df_computed_result[column] = minmax_scale(np.array(df_computed_result[column]).reshape(-1, 1))
-        if column.startswith("label"):
-            df_computed_result[column] = df_computed_result[column].apply(np.int64)
-
-    labeled_df = df_computed_result
-    labeled_df = labeled_df.reset_index()
-
-    feature_columns, labels_column = extract_feature_labels_columns(df_computed_result, is_pairwise)
-
-    labeled_df = labeled_df.dropna(subset=feature_columns)
-    loss_rate_df = labeled_df[["measurement_id","loss_rate_dpr_c0", "loss_rate_dpr_c1", "loss_rate_dpr_w0"]]
-
-    # Now train a classifier on the labeled data.
-    #
-    # Shuffle the data
-    labeled_df = labeled_df.sort_index(axis=1)
-
-    use_saved_classifier = True
+    labeled_df, feature_columns, labels_column = build_labeled_df(is_pairwise, df_computed_result)
+    use_saved_classifier = False
     ################################# Use existing classifier##########################
     if use_saved_classifier:
-        classifier = load("resources/random_forest_classifier.joblib")
+        # features_data = pd.read_csv("resources/features_data.csv", index_col=0)
+        classifier_file_name = "resources/random_forest_classifier.joblib"
+        classifier = load(classifier_file_name)
+        # probabilities = classifier.predict_proba(features_data)
+        importances = feature_importance(classifier, feature_columns)
+        print (importances.to_string())
         evaluate(classifier, ground_truth_routers["ple41.planet-lab.eu"], labeled_df, labels_column, feature_columns)
 
-    ############################# Evaluate the classifier ##########################
+    ############################# Train and evaluate the classifier ##########################
     precisions = []
     recalls = []
     accuracys = []
-
-    use_random_forest = False
-    use_dnn = False
-    save_results = False
-    save_classifier = False
-    best_classifier = None
-
-    train_classifier = False
+    f_scores = []
+    f_scores_99 = []
+    train_classifier = not use_saved_classifier
     if train_classifier:
-        for i in range(0, 30):
+        use_random_forest = True
+        use_dnn = False
+        use_mlp = False
+        save_results = False
+        save_classifier = True
+        best_classifier = None
+
+        for i in range(0, 10):
             labeled_df = labeled_df.reindex(np.random.permutation(labeled_df.index))
             labeled_df.to_csv("resources/labeled_test_set", encoding='utf-8')
             # Split the training validation and test set
-            training_n = int(0.3 * len(labeled_df))
+            training_n = int(0.8 * len(labeled_df))
             training_df = labeled_df.iloc[0:training_n]
 
-            cross_validation_n = int(0.3 * len(labeled_df))
+            cross_validation_n = int(0.1 * len(labeled_df))
             cross_validation_df = labeled_df.iloc[training_n + 1:cross_validation_n + training_n]
 
             test_df = labeled_df.iloc[cross_validation_n + training_n + 1:]
 
-            training_targets, training_examples = nn.parse_labels_and_features(training_df, labels_column, feature_columns)
+            training_targets, training_examples = parse_labels_and_features(training_df, labels_column, feature_columns)
             print ("Size of the training examples: " + str(training_examples.shape))
             print_df_labels(training_df)
 
-            validation_targets, validation_examples = nn.parse_labels_and_features(cross_validation_df, labels_column, feature_columns)
+            validation_targets, validation_examples = parse_labels_and_features(cross_validation_df, labels_column, feature_columns)
             print ("Size of the validation examples: " + str(validation_examples.shape))
             print_df_labels(cross_validation_df)
 
-            test_targets, test_examples = nn.parse_labels_and_features(test_df, labels_column, feature_columns)
+            test_targets, test_examples = parse_labels_and_features(test_df, labels_column, feature_columns)
             print ("Size of the test examples: " + str(test_examples.shape))
             print_df_labels(test_df)
 
@@ -603,12 +598,11 @@ if __name__ == "__main__":
                                             validation_examples, validation_targets,
                                             test_examples, test_targets,
                                             use_dnn=use_dnn,
-                                            use_random_forest=use_random_forest)
+                                            use_random_forest=use_random_forest,
+                                            use_mlp=use_mlp)
 
-            if best_classifier is None:
-                best_classifier = classifier
 
-            if use_random_forest:
+            if use_random_forest or use_mlp:
                 examples = pd.concat([validation_examples, test_examples])
                 targets = pd.concat([validation_targets, test_targets])
                 probabilities = classifier.predict_proba(examples)
@@ -628,15 +622,26 @@ if __name__ == "__main__":
                 precisions.append(precision)
                 recalls.append(recall)
                 accuracys.append(accuracy)
+                f_scores.append(f_score)
 
-                if precision == max(precisions):
-                    best_classifier = classifier
+                if use_random_forest:
+                    importances = feature_importance(classifier, feature_columns)
+                    if precision > 0.995:
+                        f_scores_99.append(f_score)
+                    if len(f_scores_99) > 0:
+                        if precision > 0.995 and f_score >= max(f_scores_99):
+                            print ("New Best classifier")
+                            best_classifier = classifier
+                            print(best_classifier)
+
 
         if save_classifier:
             if use_random_forest:
-                dump(best_classifier, 'resources/random_forest_classifier.joblib')
+                classifier_file_name = 'resources/random_forest_classifier.joblib'
+                dump(best_classifier, classifier_file_name)
+                print("Saved classifier into " + classifier_file_name)
             elif use_dnn:
-                dump(best_classifier, 'resources/nn_classifier.joblib')
+                pass
 
         if save_results:
             with open("/home/kevin/icmp-rate-limiting-paper/resources/results/results_classifier_"+ target_loss_rate_window + ".json", "w") as results_classifier_fp:

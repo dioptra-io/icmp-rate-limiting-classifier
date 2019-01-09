@@ -8,7 +8,7 @@ from sklearn.metrics import precision_recall_curve
 from matplotlib import pyplot as plt
 import seaborn as sns
 import numpy as np
-from Classification.metrics import compute_metrics
+from Classification.metrics import compute_metrics, evaluate_classifier
 from sklearn.utils.fixes import signature
 
 
@@ -20,13 +20,6 @@ def print_false_positives(predictions, labels, features, labeled_df):
             print ("True label: " +str(labels.iloc[i]["label_pairwise"]))
             print (labeled_df.loc[features.index[i]]["measurement_id"])
 
-
-def evaluate_classifier(predictions, labels):
-    precision, recall, accuracy, f_score = compute_metrics(predictions, labels)
-    print("Precision: " + str(precision))
-    print("Recall: " + str(recall))
-    print("Accuracy: " + str(accuracy))
-    print("F score: " + str(f_score))
 
 def feature_importance(rf, columns):
     feats = {}  # a dict to hold feature_name: feature_importance
@@ -40,8 +33,8 @@ def feature_importance(rf, columns):
 
 def random_forest_classifier(train_features, train_labels):
 
-    classifier = RandomForestClassifier(n_estimators=20, n_jobs=-1, random_state=0, verbose=0,
-                                class_weight={0:20000000, 1:1}
+    classifier = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0, verbose=0,
+                                class_weight= {0: 1, 1: 1}
                                 )
 
     y_scores = cross_val_predict(classifier, train_features, train_labels, cv=3, method="predict_proba")

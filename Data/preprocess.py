@@ -1,7 +1,7 @@
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import copy
-
+import pandas as pd
 minimum_probing_rate = 512
 
 def minmax_scale(features):
@@ -55,21 +55,25 @@ def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_su
 
     new_entry = {}
 
+    columns = list(df_result.columns)
+    probing_rate_column_index = columns.index("probing_rate")
+    ip_address_column_index = columns.index("ip_address")
+    probing_type_column_index = columns.index("probing_type")
     for row in df_result.itertuples():
-        probing_rate = row.probing_rate
+        probing_rate = row[probing_rate_column_index + 1]
 
-        ip_address = row.ip_address
-        probing_type = row.probing_type
+        ip_address = row[ip_address_column_index + 1]
+        probing_type = row[probing_type_column_index + 1]
 
         if probing_rate not in probing_type_rates[probing_type]:
             continue
 
-        for i in range(0, len(row._fields)):
+        for i in range(0, len(columns)):
 
             # Skip some fields
             skip = False
             for skip_field in skip_fields:
-                if skip_field in row._fields[i]:
+                if skip_field in columns[i]:
                     skip = True
                     break
             if skip:
@@ -78,35 +82,35 @@ def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_su
 
             if ip_address in candidates:
                 additional_suffix = "c"
-                key = "".join([row._fields[i],
+                key = "".join([columns[i],
                                "_",
                                probing_type_suffix[probing_type],
                                "_", additional_suffix,
-                               str(candidates.index(row.ip_address))
+                               str(candidates.index(ip_address))
                                ])
                 if not is_lr_classifier:
                     key += "_" + str(probing_rate)
                 if probing_rate == minimum_probing_rate:
-                    if not new_entry.has_key(key + "_min"):
+                    if not key + "_min" in new_entry:
                         key += "_min"
 
-                new_entry[key] = row[i]
+                new_entry[key] = row[i + 1]
 
             elif ip_address in witnesses:
                 additional_suffix = "w"
-                key = "".join([row._fields[i],
+                key = "".join([columns[i],
                                "_",
                                probing_type_suffix[probing_type],
                                "_", additional_suffix,
-                               str(witnesses.index(row.ip_address))
+                               str(witnesses.index(ip_address))
                               ])
 
                 if not is_lr_classifier:
                     key += "_" + str(probing_rate)
                 if probing_rate == minimum_probing_rate:
-                    if not new_entry.has_key(key + "_min"):
+                    if not key + "_min" in new_entry:
                         key += "_min"
-                new_entry[key] = row[i]
+                new_entry[key] = row[i + 1]
 
     return new_entry
 
@@ -121,47 +125,49 @@ def find_index(e, l):
 
 def parse_correlation(df, rates_dpr, candidates, witnesses):
 
+    correlations = {}
 
-    row = {}
     high_rate_candidate_ip = candidates[0]
 
     for rate in rates_dpr:
         df_filter_dpr_rate_high_rate_candidate = df[(df["probing_rate"]== rate) & \
                                                      (df["ip_address"] == high_rate_candidate_ip) & \
-                                                      (df["probing_type"] ==  "GROUPDPR")]
-
-        correlations_fields = []
-        for field in df_filter_dpr_rate_high_rate_candidate.keys():
-            if field.startswith("correlation"):
-                correlation_field = df_filter_dpr_rate_high_rate_candidate[field].iloc[0]
-
-                # In case candidates correlation are not in the same order
-                if type(correlation_field) != type(""):
-                    continue
-                else:
-                    correlations_fields.append(correlation_field)
+                                                      (df["probing_type"] ==  "GROUPDPR")].filter(regex='correlation.*', axis=1)
+        correlations_row = df_filter_dpr_rate_high_rate_candidate.iloc[0]
 
 
-        for correlation_field in correlations_fields:
-
-            correlation_split = correlation_field.split(":")
+        for i in range(1, len(candidates)):
+            correlation_i = correlations_row["correlation_c" + str(i)]
+            correlation_split = correlation_i.split(":")
             ip_correlation = correlation_split[0].strip()
             correlation = correlation_split[1].strip()
+            correlations[ip_correlation] = correlation
+        for i in range(0, len(witnesses)):
+            correlation_i = correlations_row["correlation_w" + str(i)]
+            correlation_split = correlation_i.split(":")
+            ip_correlation = correlation_split[0].strip()
+            correlation = correlation_split[1].strip()
+            correlations[ip_correlation] = correlation
+    return correlations
 
-
-            for i in range(0, len(candidates)):
-                if candidates[i] == ip_correlation:
-                    row["correlation_c" + str(i)] = float(correlation)
-                    break
-            for i in range(0, len(witnesses)):
-                if witnesses[i] == ip_correlation:
-                    row["correlation_w" + str(i)] = float(correlation)
-                    break
-
-        if not row.has_key("correlation_c1") or not row.has_key("correlation_w0") :
+def get_pairwise_correlation_row(correlations, candidates, witnesses):
+    row = {}
+    for i in range(1, len(candidates)):
+        if candidates[i] in correlations:
+            row["correlation_c" + str(i)] = correlations[candidates[i]]
+        else:
             return None
-
+    for i in range(0, len(witnesses)):
+        if witnesses[i] in correlations:
+            row["correlation_w" + str(i)] = correlations[witnesses[i]]
+        else:
+            return None
     return row
+
+
+
+
+
 
 def remove_uninteresting_rate(new_entry, rates, probing_type,default_full_responsive_value):
 
@@ -235,6 +241,12 @@ def extract_feature_labels_columns(df_computed_result, is_pairwise):
         if not column.startswith("label") \
             and not column.startswith("ip_address")\
                 :
+            if "transition" in column and not "dpr" in column:
+                continue
+            if "changing_behaviour" in column:
+                continue
+            if "probing_rate" in column and not "ind" in column:
+                continue
             feature_columns.append(column)
 
     labels_column = []
@@ -247,3 +259,184 @@ def extract_feature_labels_columns(df_computed_result, is_pairwise):
                 labels_column.append(column)
 
     return feature_columns, labels_column
+
+
+
+def build_labeled_df(is_pairwise, df_computed_result):
+    for column in df_computed_result.columns:
+        if column.startswith("changing_behaviour") or column.startswith("probing_rate"):
+            df_computed_result[column] = minmax_scale(np.array(df_computed_result[column]).reshape(-1, 1))
+        if column.startswith("label"):
+            df_computed_result[column] = df_computed_result[column].apply(np.int64)
+
+    labeled_df = df_computed_result
+    labeled_df = labeled_df.reset_index()
+
+    feature_columns, labels_column = extract_feature_labels_columns(df_computed_result, is_pairwise)
+
+    labeled_df = labeled_df.dropna(subset=feature_columns)
+
+    # Now train a classifier on the labeled data.
+    #
+    # Shuffle the data
+    labeled_df = labeled_df.sort_index(axis=1)
+    return labeled_df, feature_columns, labels_column
+
+
+def parse_labels_and_features(dataset, label_column, features_columns):
+    """Extracts labels and features.
+
+    This is a good place to scale or transform the features if needed.
+
+    Args:
+      dataset: A Pandas `Dataframe`, containing the label on the first column and
+        monochrome pixel values on the remaining columns, in row major order.
+    Returns:
+      A `tuple` `(labels, features)`:
+        labels: A Pandas `Series`.
+        features: A Pandas `DataFrame`.
+    """
+    labels = dataset[label_column]
+
+    # DataFrame.loc index ranges are inclusive at both ends.
+    features = dataset[features_columns]
+    features = features.reindex(sorted(features.columns), axis=1)
+    return labels, features
+
+
+def extract_individual(cpp_output_individual_file, raw_columns):
+    df_raw = pd.read_csv(cpp_output_individual_file,
+                         names=raw_columns,
+                         skipinitialspace=True,
+                         # encoding="utf-8",
+                         engine="python",
+                         index_col=False)
+    df_individual = df_raw[df_raw["probing_type"] == "INDIVIDUAL"]
+    return df_individual
+
+def build_classifier_entry_from_csv(targets_file,
+                                    global_raw_columns,
+                                    skip_fields,
+                                    probing_type_suffix,
+                                    cpp_output_file,
+                                    df_individual,
+                                    df_witness_individual):
+
+    unresponsive_candidates = []
+
+    candidates = []
+    witnesses = []
+    ip_index = 5
+    df_computed_result = None
+    try:
+        with open(targets_file) as cw_file:
+            for line in cw_file:
+                line = line.replace(" ", "")
+                fields = line.split(",")
+                ip_address = fields[ip_index]
+                if "CANDIDATE" in fields:
+                    candidates.append(ip_address)
+                elif "WITNESS" in fields:
+                    witnesses.append(ip_address)
+    except IOError as e:
+        return None
+
+
+    raw_columns = copy.deepcopy(global_raw_columns)
+
+    # # Add correlation columns
+    for i in range(1, len(candidates)):
+        raw_columns.append("correlation_c" + str(i))
+
+    for i in range(0, len(witnesses)):
+        raw_columns.append("correlation_w" + str(i))
+
+    # print "Routers with more than 2 interfaces: " + str(multiple_interfaces_router)
+    # 1 point is represented by different dimensions:
+    df_raw = pd.read_csv(cpp_output_file,
+                         names=raw_columns,
+                         skipinitialspace=True,
+                         # encoding="utf-8",
+                         engine="python",
+                         index_col=False)
+    group_spr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[0]
+    group_dpr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPDPR"]["probing_rate"].iloc[0]
+    correlations = parse_correlation(df_raw, [group_dpr_probing_rate], candidates, witnesses)
+    # Remove correlations columns
+    df_raw = df_raw[df_raw.columns.drop(list(df_raw.filter(regex='correlation.*')))]
+
+    if df_individual is not None and df_witness_individual is not None:
+        df_raw = pd.concat([df_individual, df_witness_individual, df_raw], sort=False)
+
+
+
+    # usecols=[x for x in range(0, 9)])
+
+
+
+
+    ##################################### Split the df in pairwise elements #############################
+
+    df_list_pairwise = []
+    pairwise_candidates_list = []
+    for i in range(1, len(candidates)):
+        df_pairwise = df_raw[df_raw["ip_address"].isin([candidates[0], candidates[i], witnesses[0]])]
+        df_list_pairwise.append(df_pairwise)
+        pairwise_candidates_list.append([candidates[0], candidates[i]])
+
+
+
+    for i in range(0, len(df_list_pairwise)):
+        print(i)
+        # if i == 5:
+        #     break
+        new_entry = {}
+        pairwise_candidates = pairwise_candidates_list[i]
+        df_result = df_list_pairwise[i]
+
+        for k in range(0, len(pairwise_candidates)):
+            new_entry["ip_address_c" + str(k)] = pairwise_candidates[k]
+
+        # Skip the measurement if all the loss rates are 1.
+        not_usable = False
+        for candidate in pairwise_candidates:
+            df_not_usable = df_result[(df_result["loss_rate"] == 1) &
+                                      (df_result["ip_address"] == candidate) &
+                                      (df_result["probing_type"] == "GROUPDPR")]
+            if len(df_not_usable) > 0:
+                not_usable |= df_not_usable["loss_rate"].iloc[0] == 1
+        if not_usable:
+            unresponsive_candidates.append(pairwise_candidates[1])
+            continue
+
+
+        ind_probing_rate = df_result[df_result["probing_type"] == "INDIVIDUAL"]["probing_rate"]
+        probing_type_rates = {"INDIVIDUAL": list(ind_probing_rate),
+                              "GROUPSPR": [group_spr_probing_rate],
+                              "GROUPDPR": [group_dpr_probing_rate]}
+
+        new_row = build_new_row(df_result, pairwise_candidates, witnesses,
+                                skip_fields,
+                                probing_type_suffix,
+                                probing_type_rates,
+                                is_lr_classifier=True)
+
+        correlation_row = get_pairwise_correlation_row(correlations, pairwise_candidates, witnesses)
+        if correlation_row is None:
+            continue
+        new_row.update(correlation_row)
+
+        new_entry["measurement_id"] = targets_file
+        new_entry.update(new_row)
+
+        if df_computed_result is None:
+            df_computed_result = pd.DataFrame(columns=new_entry.keys())
+        if len(new_entry) != df_computed_result.shape[1]:
+            print("Bad csv " + str(pairwise_candidates[1]))
+            continue
+        df_computed_result.loc[len(df_computed_result)] = new_entry
+
+    df_computed_result.set_index("measurement_id", inplace=True)
+
+    labeled_df, features_columns, labels_column = build_labeled_df(df_computed_result= df_computed_result, is_pairwise = True)
+    return unresponsive_candidates, labeled_df, features_columns, labels_column

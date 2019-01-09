@@ -30,26 +30,6 @@ def print_bad_labels(data_pred_labels, data_targets, data_examples, labeled_df):
 
             print (labeled_df.loc[data_examples.index[i]]["measurement_id"])
 
-def parse_labels_and_features(dataset, label_column, features_columns):
-    """Extracts labels and features.
-
-    This is a good place to scale or transform the features if needed.
-
-    Args:
-      dataset: A Pandas `Dataframe`, containing the label on the first column and
-        monochrome pixel values on the remaining columns, in row major order.
-    Returns:
-      A `tuple` `(labels, features)`:
-        labels: A Pandas `Series`.
-        features: A Pandas `DataFrame`.
-    """
-    labels = dataset[label_column]
-
-    # DataFrame.loc index ranges are inclusive at both ends.
-    features = dataset[features_columns]
-
-    return labels, features
-
 
 def create_training_input_fn(features, labels, batch_size, num_epochs=None, shuffle=True):
     """A custom input_fn for sending data to the estimator for training.

@@ -66,34 +66,9 @@ def internet2_routers(routers_dir, nodes):
             routers_by_node[node][router_file] = router
     return routers_by_node
 
-def transitive_closure(routers):
-    # Apply transitive closure
-    old_len_tc = len(routers)
-    new_len = 0
-    # End condition
-    while old_len_tc != new_len:
-        old_len_tc = new_len
-        tc_routers = []
-        # Now apply transitive closure
-        merged = []
-        for i in range(0, len(routers)):
-            if routers[i] in merged:
-                continue
-            for j in range(i + 1, len(routers)):
-                if len(routers[i].intersection(routers[j])) > 0:
-                    routers[i].update(routers[j])
-                    if routers[j] not in merged:
-                        merged.append(routers[j])
-            tc_routers.append(routers[i])
-
-        routers = tc_routers
-        new_len = len(tc_routers)
-    final_routers = tc_routers
-    return final_routers
-
 
 def find_router_from_ip(ip, routers):
-    for router_name, ips in routers.iteritems():
+    for router_name, ips in routers.items():
         if ip in ips:
             return router_name
     return None
