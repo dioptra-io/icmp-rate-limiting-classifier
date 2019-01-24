@@ -2,6 +2,8 @@ from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 import copy
 import pandas as pd
+import re
+from Files.utils import ipv6_regex, ipv4_regex
 minimum_probing_rate = 512
 
 def minmax_scale(features):
@@ -138,13 +140,13 @@ def parse_correlation(df, rates_dpr, candidates, witnesses):
 
         for i in range(1, len(candidates)):
             correlation_i = correlations_row["correlation_c" + str(i)]
-            correlation_split = correlation_i.split(":")
+            correlation_split = correlation_i.split(": ")
             ip_correlation = correlation_split[0].strip()
             correlation = correlation_split[1].strip()
             correlations[ip_correlation] = correlation
         for i in range(0, len(witnesses)):
             correlation_i = correlations_row["correlation_w" + str(i)]
-            correlation_split = correlation_i.split(":")
+            correlation_split = correlation_i.split(": ")
             ip_correlation = correlation_split[0].strip()
             correlation = correlation_split[1].strip()
             correlations[ip_correlation] = correlation
@@ -320,7 +322,8 @@ def build_classifier_entry_from_csv(targets_file,
                                     probing_type_suffix,
                                     cpp_output_file,
                                     df_individual,
-                                    df_witness_individual):
+                                    df_witness_individual,
+                                    witness_by_candidate):
 
     unresponsive_candidates = []
 
@@ -361,12 +364,13 @@ def build_classifier_entry_from_csv(targets_file,
                          index_col=False)
     group_spr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[0]
     group_dpr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPDPR"]["probing_rate"].iloc[0]
+
     correlations = parse_correlation(df_raw, [group_dpr_probing_rate], candidates, witnesses)
     # Remove correlations columns
     df_raw = df_raw[df_raw.columns.drop(list(df_raw.filter(regex='correlation.*')))]
 
     if df_individual is not None and df_witness_individual is not None:
-        df_raw = pd.concat([df_individual, df_witness_individual, df_raw], sort=False)
+        df_raw = pd.concat([df_individual, df_witness_individual, df_raw], sort=False, ignore_index=True)
 
 
 
@@ -380,7 +384,10 @@ def build_classifier_entry_from_csv(targets_file,
     df_list_pairwise = []
     pairwise_candidates_list = []
     for i in range(1, len(candidates)):
-        df_pairwise = df_raw[df_raw["ip_address"].isin([candidates[0], candidates[i], witnesses[0]])]
+        if candidates[i] not in witness_by_candidate:
+            unresponsive_candidates.append(candidates[i])
+            continue
+        df_pairwise = df_raw[df_raw["ip_address"].isin([candidates[0], candidates[i], witness_by_candidate[candidates[i]]])]
         df_list_pairwise.append(df_pairwise)
         pairwise_candidates_list.append([candidates[0], candidates[i]])
 
@@ -415,6 +422,7 @@ def build_classifier_entry_from_csv(targets_file,
                               "GROUPSPR": [group_spr_probing_rate],
                               "GROUPDPR": [group_dpr_probing_rate]}
 
+        witnesses = [witness_by_candidate[pairwise_candidates[1]]]
         new_row = build_new_row(df_result, pairwise_candidates, witnesses,
                                 skip_fields,
                                 probing_type_suffix,

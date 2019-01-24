@@ -10,9 +10,9 @@ setup(name='Rate Limiting alias classifier',
       url='',
       packages=['Algorithms', 'Classification', 'Cluster', 'Cpp', 'Data', 'Files', 'Validation'],
       install_requires=[
-          'tensorflow',
           'seaborn',
           'sklearn',
-
+          'pandas',
+          'joblib'
       ],
      )

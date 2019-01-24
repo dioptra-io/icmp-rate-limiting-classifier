@@ -47,3 +47,33 @@ def extract_ip_witness(version, traceroute_output, dst_ip):
         else:
             previous_lines.append(line)
     return ""
+
+
+def is_unresponsive(out):
+    is_witness_unresponsive = False
+    for line in out:
+        if "0 received" in line:
+            is_witness_unresponsive = True
+            break
+    return is_witness_unresponsive
+
+if __name__ == "__main__":
+    '''
+    Tansforrm an IP list to a candidate file 
+    '''
+
+    ip_file = "resources/survey/ips"
+    output_file = "/root/ICMPRateLimiting/resources/survey_ips"
+
+    group = "1"
+    af_family = "4"
+    probing_type = "DIRECT"
+    probing_protocol = "icmp"
+
+
+    with open(ip_file) as ip_file_fp:
+        with open(output_file, "w") as output_file_fp:
+            for line in ip_file_fp:
+                ip = line.strip("\n")
+                candidate_line = build_candidate_line(group, af_family, probing_type, probing_protocol, ip, ip)
+                output_file_fp.write(candidate_line + "\n")

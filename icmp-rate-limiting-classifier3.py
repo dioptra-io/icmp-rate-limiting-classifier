@@ -21,6 +21,8 @@ from Algorithms.algorithms import transitive_closure
 # from Classification import adanet_wrap as adanet_
 from Classification.random_forest import *
 from Classification.mlp import *
+from Classification.knn import *
+from Classification.svm import *
 from Classification.metrics import compute_metrics
 from Data.preprocess import parse_labels_and_features
 from Validation.midar import extract_routers, set_router_labels, extract_routers_by_node, internet2_routers
@@ -61,13 +63,13 @@ debug = [
 
 
 
-def compute_dataset(is_pairwise,
+def compute_dataset(version,
+                    is_pairwise,
                     ground_truth_routers,
                     alpha, n_not_triggered_threshold,
                     candidates_witness_dir,
                     results_dir,
                     ofile):
-    version = "4"
 
     max_interfaces = 200
 
@@ -137,7 +139,11 @@ def compute_dataset(is_pairwise,
         #################################################
 
         split_file_name = result_file.split("_")
-        node = split_file_name[0]
+        if version == "4":
+            node = split_file_name[0]
+        elif version == "6":
+            node = "router"
+
 
         router_name = split_file_name[-1]
 
@@ -145,9 +151,15 @@ def compute_dataset(is_pairwise,
         candidates = []
         witnesses = []
         if "TN" in result_file:
-            candidates_witness_dir = "/srv/icmp-rl-survey/midar/survey/batch2/lr0.05-0.10/candidates-witness-tn/"
+            if version == "4":
+                candidates_witness_dir = "/srv/icmp-rl-survey/midar/survey/batch2/lr0.05-0.10/candidates-witness-tn/"
+            elif version == "6":
+                candidates_witness_dir = "/srv/icmp-rl-survey/speedtrap/survey/lr0.45-0.50/candidates-witness-tn/"
         elif "router" in result_file:
-            candidates_witness_dir = "/srv/icmp-rl-survey/midar/survey/batch2/lr0.05-0.10/candidates-witness/"
+            if version == "4":
+                candidates_witness_dir = "/srv/icmp-rl-survey/midar/survey/batch2/lr0.05-0.10/candidates-witness/"
+            elif version == "6":
+                candidates_witness_dir = "/srv/icmp-rl-survey/speedtrap/survey/lr0.45-0.50/candidates-witness/"
         else:
             candidates_witness_dir = candidates_witness_dir
         try:
@@ -213,7 +225,7 @@ def compute_dataset(is_pairwise,
                                 index_col=False)
         # usecols=[x for x in range(0, 9)])
 
-        if len(df_raw) != 9:
+        if len(df_raw) < 9:
             print("Bad measurement file not enough rows " + result_file)
             continue
         group_spr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[0]
@@ -265,12 +277,12 @@ def compute_dataset(is_pairwise,
                                     probing_type_rates,
                                     is_lr_classifier=True)
 
-            correlation_row = get_pairwise_correlation_row(correlations, pairwise_candidates, witnesses)
+            correlation_row = get_pairwise_correlation_row(correlations, pairwise_candidates, witnesses[:1])
             if correlation_row is None:
                 continue
             new_row.update(correlation_row)
 
-            label = set_router_labels(new_entry, ground_truth_routers[node], pairwise_candidates, witnesses)
+            label = set_router_labels(new_entry, ground_truth_routers[node], pairwise_candidates, witnesses[:1])
 
             if label == "U":
                 continue
@@ -312,35 +324,36 @@ def compute_dataset(is_pairwise,
             #     continue
 
             # RL Not triggered
-            df_dpr = df_result[(df_result["probing_type"].isin(["GROUPDPR"]))]
-
-            df_not_triggered = df_dpr[df_dpr["ip_address"] == pairwise_candidates[0]]
-            not_triggered = (df_not_triggered["loss_rate"] < n_not_triggered_threshold).all()
-            if not_triggered:
-                n_not_triggered += 1
-                continue
-            # RL not shared but aliases
-            alias_but_not_shared = False
-            epsilon = 0.02
-            if not not_triggered:
-                for i in range(0, len(pairwise_candidates)):
-                    df_not_shared = df_dpr[df_dpr["ip_address"] == pairwise_candidates[i]]
-                    # Exclude not shared counter from classification:
-                    not_shared = (df_not_shared["loss_rate"] < epsilon).all()
-                    if not_shared and new_entry["label_c" + str(i)] == 1:
-                        alias_but_not_shared = True
-                        break
-            if alias_but_not_shared:
-                n_not_shared += 1
-                continue
+            # df_dpr = df_result[(df_result["probing_type"].isin(["GROUPDPR"]))]
+            #
+            # df_not_triggered = df_dpr[df_dpr["ip_address"] == pairwise_candidates[0]]
+            # not_triggered = (df_not_triggered["loss_rate"] < n_not_triggered_threshold).all()
+            # if not_triggered:
+            #     n_not_triggered += 1
+            #     continue
+            # # RL not shared but aliases
+            # alias_but_not_shared = False
+            # epsilon = 0.02
+            # if not not_triggered:
+            #     for i in range(0, len(pairwise_candidates)):
+            #         df_not_shared = df_dpr[df_dpr["ip_address"] == pairwise_candidates[i]]
+            #         # Exclude not shared counter from classification:
+            #         not_shared = (df_not_shared["loss_rate"] < epsilon).all()
+            #         if not_shared and new_entry["label_c" + str(i)] == 1:
+            #             alias_but_not_shared = True
+            #             break
+            # if alias_but_not_shared:
+            #     n_not_shared += 1
+            #     continue
             #
             # # Check if the loss rate of the witness is too high.
             # df_witness_lr = df_dpr[df_dpr["ip_address"] == witnesses[0]]["loss_rate"]
             # minimum_lr = min(df_dpr["loss_rate"])
-            #
+
             # if df_witness_lr.iloc[0] > alpha:
             #     n_witness_too_high += 1
             #     new_entry["label_c1"] = 0
+            #     print ("Witness loss rate too high \n")
 
             # Check different patterns
             # correlation_patterns["correlation_spr"].append(correlation_row["correlation_spr_c1"])
@@ -356,7 +369,18 @@ def compute_dataset(is_pairwise,
                     key += pairwise_candidates[i]
                     if i != len(pairwise_candidates) - 1:
                         key += "_"
-                correlations_by_ip[key] = correlation_row["correlation_c1"]
+                if "correlation_c1" in correlation_row  \
+                    and "transition_0_0_dpr_c1" in new_entry \
+                    and "transition_0_1_dpr_c1" in new_entry \
+                    and "transition_1_0_dpr_c1" in new_entry \
+                    and "transition_1_1_dpr_c1" in new_entry:
+                    correlations_by_ip[key] = {
+                    "correlation":correlation_row["correlation_c1"],
+                    "tm_0_0": new_entry["transition_0_0_dpr_c1"],
+                    "tm_0_1": new_entry["transition_0_1_dpr_c1"],
+                    "tm_1_0": new_entry["transition_1_0_dpr_c1"],
+                    "tm_1_1": new_entry["transition_1_1_dpr_c1"]
+                }
 
 
 
@@ -434,9 +458,7 @@ def compute_classifier(feature_columns,
                        validation_targets,
                        test_examples,
                        test_targets,
-                       use_dnn,
-                       use_random_forest,
-                       use_mlp):
+                       use_dnn, use_random_forest, use_mlp, use_knn, use_svm):
     ######################## CLASSIFIERS ############################
 
     #### DEEP NEURAL NETWORK CLASSIFIER ####
@@ -488,6 +510,13 @@ def compute_classifier(feature_columns,
         classifier, threshold_decision = mlp_classifier(training_examples, training_targets)
         return classifier, threshold_decision
 
+    if use_knn:
+        classifier, threshold_decision = knn_classifier(training_examples, training_targets)
+        return classifier, threshold_decision
+    if use_svm:
+        classifier, threshold_decision = svm_classifier(training_examples, training_targets)
+        return classifier, threshold_decision
+
     return None
 
 if __name__ == "__main__":
@@ -507,12 +536,17 @@ if __name__ == "__main__":
 
 
     target_loss_rate_window = "lr0.05-0.10"
-    alpha = 0.02
+    alpha = 0.05
     n_not_triggered_threshold = 0.05
 
     '''
         Different paths of data
     '''
+
+    '''
+    IPv4
+    '''
+    version = "4"
     measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
     candidates_witness_dir = ""
     results_dir = measurement_prefix + "results/"
@@ -520,6 +554,23 @@ if __name__ == "__main__":
     df_file = "resources/test_set_" + target_loss_rate_window
     # ground_truth_routers = extract_routers_by_node(routers_path)
     ground_truth_routers = []
+
+    '''
+    IPv6
+    '''
+    # version = "6"
+    # measurement_prefix = "/srv/icmp-rl-survey/speedtrap/survey/" + target_loss_rate_window + "/"
+    # candidates_witness_dir = ""
+    # results_dir = measurement_prefix + "results/"
+    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/speedtrap/routers/"
+    # df_file = "resources/test_set6_" + target_loss_rate_window
+    # ground_truth_routers = extract_routers_by_node(routers_path)
+
+    '''
+    Internet2
+    '''
+    # ground_truth_routers = []
+
     # measurement_prefix = "/srv/icmp-rl-survey/midar/survey/internet2/"
     # candidates_witness_dir = measurement_prefix +"candidates-witness/"
     # results_dir = measurement_prefix + "results/"
@@ -530,7 +581,8 @@ if __name__ == "__main__":
     recompute_dataset = False
     is_pairwise = True
     if recompute_dataset:
-        df_computed_result = compute_dataset(is_pairwise,
+        df_computed_result = compute_dataset(version,
+                                             is_pairwise,
                                              ground_truth_routers=ground_truth_routers,
                                              alpha=alpha,
                                              n_not_triggered_threshold=n_not_triggered_threshold,
@@ -564,6 +616,8 @@ if __name__ == "__main__":
         use_random_forest = True
         use_dnn = False
         use_mlp = False
+        use_knn = False
+        use_svm = False
         save_results = False
         save_classifier = True
         best_classifier = None
@@ -572,10 +626,10 @@ if __name__ == "__main__":
             labeled_df = labeled_df.reindex(np.random.permutation(labeled_df.index))
             labeled_df.to_csv("resources/labeled_test_set", encoding='utf-8')
             # Split the training validation and test set
-            training_n = int(0.8 * len(labeled_df))
+            training_n = int(0.3 * len(labeled_df))
             training_df = labeled_df.iloc[0:training_n]
 
-            cross_validation_n = int(0.1 * len(labeled_df))
+            cross_validation_n = int(0.3 * len(labeled_df))
             cross_validation_df = labeled_df.iloc[training_n + 1:cross_validation_n + training_n]
 
             test_df = labeled_df.iloc[cross_validation_n + training_n + 1:]
@@ -597,12 +651,14 @@ if __name__ == "__main__":
                                             training_examples, training_targets,
                                             validation_examples, validation_targets,
                                             test_examples, test_targets,
-                                            use_dnn=use_dnn,
-                                            use_random_forest=use_random_forest,
-                                            use_mlp=use_mlp)
+                                            use_dnn = use_dnn,
+                                            use_random_forest = use_random_forest,
+                                            use_mlp = use_mlp,
+                                            use_knn = use_knn,
+                                            use_svm = use_svm)
 
 
-            if use_random_forest or use_mlp:
+            if use_random_forest or use_mlp or use_knn or use_svm:
                 examples = pd.concat([validation_examples, test_examples])
                 targets = pd.concat([validation_targets, test_targets])
                 probabilities = classifier.predict_proba(examples)
@@ -637,13 +693,29 @@ if __name__ == "__main__":
 
         if save_classifier:
             if use_random_forest:
-                classifier_file_name = 'resources/random_forest_classifier.joblib'
+                classifier_file_name = 'resources/random_forest_classifier' + version +'.joblib'
                 dump(best_classifier, classifier_file_name)
                 print("Saved classifier into " + classifier_file_name)
             elif use_dnn:
                 pass
 
+        if use_knn:
+            classifier_type = "knn"
+        elif use_random_forest:
+            classifier_type = "random_forest"
+        elif use_mlp:
+            classifier_type = "mlp"
+        elif use_svm:
+            classifier_type = "svm"
+        print(classifier_type)
+        print("Mean Precision: " + str(np.mean(precisions)))
+        print("Mean Recall: " + str(np.mean(recalls)))
+        print("Mean F-Score: " + str(np.mean(f_scores)))
+        latex_table = str(np.mean(precisions)) + " & " + str(np.mean(recalls)) + " & " + str(np.mean(f_scores)) + "\\\\"
+        print(latex_table)
+
         if save_results:
+
             with open("/home/kevin/icmp-rate-limiting-paper/resources/results/results_classifier_"+ target_loss_rate_window + ".json", "w") as results_classifier_fp:
                 results = {"precision" : precisions, "recall":recalls, "accuracies":accuracys}
                 json.dump(results, results_classifier_fp)
