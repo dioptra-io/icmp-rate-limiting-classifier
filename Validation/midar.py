@@ -35,6 +35,8 @@ def compute_midar_routers(midar_dir):
 def extract_routers(routers_dir):
     routers = {}
     for router_file in os.listdir(routers_dir):
+        # if not router_file.startswith("ple41"):
+        #     continue
         routers[router_file] = []
         with open(routers_dir + router_file) as router_fd:
             for ip in router_fd.readlines():
@@ -55,6 +57,35 @@ def extract_routers_by_node(routers_dir):
             routers_by_node[node] = {}
         routers_by_node[node][router_file] = router
     return routers_by_node
+
+
+
+def extract_routers_evaluation(routers_dir):
+    routers = {}
+
+    for router_file in os.listdir(routers_dir):
+        split = router_file.split("_")
+
+        step_stable = int(split[len(split) - 1])
+        next_step_stable = step_stable + 1
+        next_alias_file = (routers_dir + router_file)[:-1] + str(next_step_stable)
+        if os.path.exists(next_alias_file):
+            continue
+        else:
+            if step_stable == 0:
+                continue
+            prev_step_stable = step_stable - 1
+            prev_alias_file = (routers_dir + router_file)[:-1] + str(prev_step_stable)
+            alias_file = routers_dir + router_file
+            # if os.stat(prev_alias_file).st_size == os.stat(alias_file).st_size:
+            ips = []
+            with open(routers_dir + router_file) as router_fd:
+                for ip in router_fd.readlines():
+                    ip = ip.strip()
+                    ips.append(ip)
+                if len(ips) > 0:
+                    routers[router_file] = ips
+    return routers
 
 
 def internet2_routers(routers_dir, nodes):

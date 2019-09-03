@@ -92,9 +92,9 @@ def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_su
                                ])
                 if not is_lr_classifier:
                     key += "_" + str(probing_rate)
-                if probing_rate == minimum_probing_rate:
-                    if not key + "_min" in new_entry:
-                        key += "_min"
+                # if probing_rate == minimum_probing_rate:
+                #     if not key + "_min" in new_entry:
+                #         key += "_min"
 
                 new_entry[key] = row[i + 1]
 
@@ -109,9 +109,9 @@ def build_new_row(df_result, candidates, witnesses, skip_fields, probing_type_su
 
                 if not is_lr_classifier:
                     key += "_" + str(probing_rate)
-                if probing_rate == minimum_probing_rate:
-                    if not key + "_min" in new_entry:
-                        key += "_min"
+                # if probing_rate == minimum_probing_rate:
+                #     if not key + "_min" in new_entry:
+                #         key += "_min"
                 new_entry[key] = row[i + 1]
 
     return new_entry
@@ -143,13 +143,13 @@ def parse_correlation(df, rates_dpr, candidates, witnesses):
             correlation_split = correlation_i.split(": ")
             ip_correlation = correlation_split[0].strip()
             correlation = correlation_split[1].strip()
-            correlations[ip_correlation] = correlation
+            correlations[ip_correlation] = float(correlation)
         for i in range(0, len(witnesses)):
             correlation_i = correlations_row["correlation_w" + str(i)]
             correlation_split = correlation_i.split(": ")
             ip_correlation = correlation_split[0].strip()
             correlation = correlation_split[1].strip()
-            correlations[ip_correlation] = correlation
+            correlations[ip_correlation] = float(correlation)
     return correlations
 
 def get_pairwise_correlation_row(correlations, candidates, witnesses):
@@ -158,12 +158,12 @@ def get_pairwise_correlation_row(correlations, candidates, witnesses):
         if candidates[i] in correlations:
             row["correlation_c" + str(i)] = correlations[candidates[i]]
         else:
-            return None
+            row["correlation_c" + str(i)] = 0
     for i in range(0, len(witnesses)):
         if witnesses[i] in correlations:
             row["correlation_w" + str(i)] = correlations[witnesses[i]]
         else:
-            return None
+            row["correlation_w" + str(i)] = 0
     return row
 
 
@@ -249,6 +249,8 @@ def extract_feature_labels_columns(df_computed_result, is_pairwise):
                 continue
             if "probing_rate" in column and not "ind" in column:
                 continue
+            if "spr" in column:
+                continue
             feature_columns.append(column)
 
     labels_column = []
@@ -266,7 +268,8 @@ def extract_feature_labels_columns(df_computed_result, is_pairwise):
 
 def build_labeled_df(is_pairwise, df_computed_result):
     for column in df_computed_result.columns:
-        if column.startswith("changing_behaviour") or column.startswith("probing_rate"):
+        # if column.startswith("changing_behaviour") or column.startswith("probing_rate"):
+        if column.startswith("probing_rate"):
             df_computed_result[column] = minmax_scale(np.array(df_computed_result[column]).reshape(-1, 1))
         if column.startswith("label"):
             df_computed_result[column] = df_computed_result[column].apply(np.int64)
@@ -316,6 +319,7 @@ def extract_individual(cpp_output_individual_file, raw_columns):
     df_individual = df_raw[df_raw["probing_type"] == "INDIVIDUAL"]
     return df_individual
 
+
 def build_classifier_entry_from_csv(targets_file,
                                     global_raw_columns,
                                     skip_fields,
@@ -344,7 +348,6 @@ def build_classifier_entry_from_csv(targets_file,
     except IOError as e:
         return None
 
-
     raw_columns = copy.deepcopy(global_raw_columns)
 
     # # Add correlation columns
@@ -362,7 +365,8 @@ def build_classifier_entry_from_csv(targets_file,
                          # encoding="utf-8",
                          engine="python",
                          index_col=False)
-    group_spr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[0]
+
+    # group_spr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPSPR"]["probing_rate"].iloc[0]
     group_dpr_probing_rate = df_raw[df_raw["probing_type"] == "GROUPDPR"]["probing_rate"].iloc[0]
 
     correlations = parse_correlation(df_raw, [group_dpr_probing_rate], candidates, witnesses)
@@ -381,6 +385,9 @@ def build_classifier_entry_from_csv(targets_file,
 
     ##################################### Split the df in pairwise elements #############################
 
+    rows_to_adds = []
+    keys = None
+
     df_list_pairwise = []
     pairwise_candidates_list = []
     for i in range(1, len(candidates)):
@@ -394,7 +401,7 @@ def build_classifier_entry_from_csv(targets_file,
 
 
     for i in range(0, len(df_list_pairwise)):
-        print(i)
+        # print(i)
         # if i == 5:
         #     break
         new_entry = {}
@@ -416,10 +423,9 @@ def build_classifier_entry_from_csv(targets_file,
             unresponsive_candidates.append(pairwise_candidates[1])
             continue
 
-
         ind_probing_rate = df_result[df_result["probing_type"] == "INDIVIDUAL"]["probing_rate"]
         probing_type_rates = {"INDIVIDUAL": list(ind_probing_rate),
-                              "GROUPSPR": [group_spr_probing_rate],
+                              # "GROUPSPR": [group_spr_probing_rate],
                               "GROUPDPR": [group_dpr_probing_rate]}
 
         witnesses = [witness_by_candidate[pairwise_candidates[1]]]
@@ -430,21 +436,101 @@ def build_classifier_entry_from_csv(targets_file,
                                 is_lr_classifier=True)
 
         correlation_row = get_pairwise_correlation_row(correlations, pairwise_candidates, witnesses)
-        if correlation_row is None:
-            continue
+
         new_row.update(correlation_row)
 
         new_entry["measurement_id"] = targets_file
         new_entry.update(new_row)
 
-        if df_computed_result is None:
+        # In case we are missing a witness individual features, artificially create it.
+
+        if keys is None:
+            # Total number of figures
             df_computed_result = pd.DataFrame(columns=new_entry.keys())
+            keys = list(new_entry.keys())
         if len(new_entry) != df_computed_result.shape[1]:
             print("Bad csv " + str(pairwise_candidates[1]))
             continue
-        df_computed_result.loc[len(df_computed_result)] = new_entry
+        rows_to_adds.append(new_entry)
+        # df_computed_result.loc[len(df_computed_result)] = new_entry
+    df_computed_result = pd.DataFrame(rows_to_adds, columns=keys)
 
     df_computed_result.set_index("measurement_id", inplace=True)
 
     labeled_df, features_columns, labels_column = build_labeled_df(df_computed_result= df_computed_result, is_pairwise = True)
     return unresponsive_candidates, labeled_df, features_columns, labels_column
+
+
+
+
+if __name__ == "__main__":
+
+    from Classification.classifier_options import ClassifierOptions
+    # DEBUG stuff
+    ip_version = "4"
+
+    icmp_install_dir = "/root/ICMPRateLimiting/"
+    classifier_options = ClassifierOptions()
+
+    cpp_individual_file = icmp_install_dir + "resources/results/survey_individual" + ip_version
+    cpp_individual_file_witness = icmp_install_dir + "resources/results/survey_individual_witness" + ip_version
+
+    from joblib import load
+    classifier_file_name = "resources/random_forest_classifier4" + ".joblib"
+    classifier = load(filename=classifier_file_name)
+
+    # Recreate a context
+
+    df_individual = extract_individual(cpp_individual_file, classifier_options.global_raw_columns)
+    df_individual_witness = extract_individual(cpp_individual_file_witness, classifier_options.global_raw_columns)
+
+
+    targets_file = "/root/ICMPRateLimiting/resources/cpp_targets_file_cluster2048_0_0"
+    witness_by_candidate_file = "resources/witness_by_candidate" + ip_version +".json"
+    import json
+    with open(witness_by_candidate_file) as witness_by_candidate_fp:
+        witness_by_candidate = json.load(witness_by_candidate_fp)
+
+    # Remove unresponsive addresses
+    df_individual = df_individual[df_individual["loss_rate"] < 1]
+
+    from Cpp.launcher import find_witness
+    candidates = list(df_individual["ip_address"])
+    witness_by_candidate, hop_by_candidate = find_witness(ip_version, candidates)
+
+    with open("resources/hop_by_candidate4.json", "w") as fp:
+        json.dump(hop_by_candidate, fp)
+
+    cpp_output_file = "/root/ICMPRateLimiting/test_cluster2048_0_0"
+
+    unresponsive_candidates, labeled_df, features_columns, labels_column = build_classifier_entry_from_csv(targets_file,
+                                    classifier_options.global_raw_columns,
+                                    classifier_options.skip_fields,
+                                    classifier_options.probing_type_suffix,
+                                    cpp_output_file,
+                                    df_individual,
+                                    df_individual_witness,
+                                    witness_by_candidate)
+
+    labels, features_data = parse_labels_and_features(labeled_df, labels_column, features_columns)
+    # import pandas as pd
+    # features_data = pd.read_csv("resources/features_data.csv", index_col=0)
+    # features_data = features_data.reindex(sorted(features_data.columns), axis=1)
+    print(" done")
+    # Classify
+    print("Predicting probabilities...", end="", flush=True)
+    predictions = []
+    try:
+        probabilities = classifier.predict_proba(features_data)
+    except ValueError as e:
+        predictions = [0 for x in range(0, len(labeled_df))]
+
+    print (predictions)
+
+
+
+
+
+
+
+

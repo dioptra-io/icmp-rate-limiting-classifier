@@ -34,7 +34,7 @@ def feature_importance(rf, columns):
 def random_forest_classifier(train_features, train_labels):
 
     classifier = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0, verbose=0,
-                                class_weight= {0: 1, 1: 1}
+                                class_weight= {0: 100, 1: 1}
                                 )
 
     y_scores = cross_val_predict(classifier, train_features, train_labels, cv=3, method="predict_proba")

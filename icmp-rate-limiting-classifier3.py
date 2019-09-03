@@ -69,7 +69,8 @@ def compute_dataset(version,
                     alpha, n_not_triggered_threshold,
                     candidates_witness_dir,
                     results_dir,
-                    ofile):
+                    ofile,
+                    is_detect_per_interface):
 
     max_interfaces = 200
 
@@ -110,7 +111,7 @@ def compute_dataset(version,
 
     n_total = 0
     multiple_interfaces_router = {k: 0 for k in range(2, max_interfaces + 1)}
-
+    transition_probabilities_distribution = {}
     correlation_distributions = {
         "correlation_spr": []
         , "correlation_dpr": []
@@ -324,27 +325,27 @@ def compute_dataset(version,
             #     continue
 
             # RL Not triggered
-            # df_dpr = df_result[(df_result["probing_type"].isin(["GROUPDPR"]))]
+            df_dpr = df_result[(df_result["probing_type"].isin(["GROUPDPR"]))]
             #
             # df_not_triggered = df_dpr[df_dpr["ip_address"] == pairwise_candidates[0]]
             # not_triggered = (df_not_triggered["loss_rate"] < n_not_triggered_threshold).all()
             # if not_triggered:
             #     n_not_triggered += 1
             #     continue
-            # # RL not shared but aliases
-            # alias_but_not_shared = False
-            # epsilon = 0.02
-            # if not not_triggered:
-            #     for i in range(0, len(pairwise_candidates)):
-            #         df_not_shared = df_dpr[df_dpr["ip_address"] == pairwise_candidates[i]]
-            #         # Exclude not shared counter from classification:
-            #         not_shared = (df_not_shared["loss_rate"] < epsilon).all()
-            #         if not_shared and new_entry["label_c" + str(i)] == 1:
-            #             alias_but_not_shared = True
-            #             break
-            # if alias_but_not_shared:
-            #     n_not_shared += 1
-            #     continue
+            # RL not shared but aliases
+            if is_detect_per_interface:
+                alias_but_not_shared = False
+                epsilon = 0
+                for i in range(0, len(pairwise_candidates)):
+                    df_not_shared = df_dpr[df_dpr["ip_address"] == pairwise_candidates[i]]
+                    # Exclude not shared counter from classification:
+                    not_shared = (df_not_shared["loss_rate"] <= epsilon).all()
+                    if not_shared and new_entry["label_c" + str(i)] == 1:
+                        alias_but_not_shared = True
+                        break
+                if alias_but_not_shared:
+                    n_not_shared += 1
+                    continue
             #
             # # Check if the loss rate of the witness is too high.
             # df_witness_lr = df_dpr[df_dpr["ip_address"] == witnesses[0]]["loss_rate"]
@@ -363,24 +364,25 @@ def compute_dataset(version,
             # if float(correlation_row["correlation_c1"]) < 0.3 and new_entry["label_c1"] == 1:
             #     weak_correlations.append(result_file)
                 # print "Not correlated but alias and triggered: " + result_file
-            if new_entry["label_c1"] == 1:
-                key = ""
-                for i in range(0, len(pairwise_candidates)):
-                    key += pairwise_candidates[i]
-                    if i != len(pairwise_candidates) - 1:
-                        key += "_"
-                if "correlation_c1" in correlation_row  \
-                    and "transition_0_0_dpr_c1" in new_entry \
-                    and "transition_0_1_dpr_c1" in new_entry \
-                    and "transition_1_0_dpr_c1" in new_entry \
-                    and "transition_1_1_dpr_c1" in new_entry:
-                    correlations_by_ip[key] = {
-                    "correlation":correlation_row["correlation_c1"],
-                    "tm_0_0": new_entry["transition_0_0_dpr_c1"],
-                    "tm_0_1": new_entry["transition_0_1_dpr_c1"],
-                    "tm_1_0": new_entry["transition_1_0_dpr_c1"],
-                    "tm_1_1": new_entry["transition_1_1_dpr_c1"]
-                }
+            if not is_detect_per_interface:
+                if new_entry["label_c1"] == 1:
+                    key = ""
+                    for i in range(0, len(pairwise_candidates)):
+                        key += pairwise_candidates[i]
+                        if i != len(pairwise_candidates) - 1:
+                            key += "_"
+                    if "correlation_c1" in correlation_row  \
+                        and "transition_0_0_dpr_c1" in new_entry \
+                        and "transition_0_1_dpr_c1" in new_entry \
+                        and "transition_1_0_dpr_c1" in new_entry \
+                        and "transition_1_1_dpr_c1" in new_entry:
+                        correlations_by_ip[key] = {
+                        "correlation":correlation_row["correlation_c1"],
+                        "tm_0_0": new_entry["transition_0_0_dpr_c1"],
+                        "tm_0_1": new_entry["transition_0_1_dpr_c1"],
+                        "tm_1_0": new_entry["transition_1_0_dpr_c1"],
+                        "tm_1_1": new_entry["transition_1_1_dpr_c1"]
+                    }
 
 
 
@@ -405,9 +407,9 @@ def compute_dataset(version,
             router_names.add(router_name)
 
 
-    if recompute_dataset:
-        # with open("resources/correlation_distributions.json", "w") as correlation_distributions_fp:
-        #     json.dump(correlation_distributions, correlation_distributions_fp)
+    if recompute_dataset and not is_detect_per_interface:
+        with open("resources/transition_probabilities_distributions.json", "w") as correlation_distributions_fp:
+            json.dump(correlation_distributions, correlation_distributions_fp)
     #     with open("resources/weak_correlations.json", "w") as correlations_fp:
     #         json.dump(weak_correlations, correlations_fp)
     #     with open("resources/strong_correlations.json", "w") as correlations_fp:
@@ -535,9 +537,11 @@ if __name__ == "__main__":
     '''
 
 
-    target_loss_rate_window = "lr0.05-0.10"
+    target_loss_rate_window = "lr0.45-0.50"
     alpha = 0.05
     n_not_triggered_threshold = 0.05
+    is_detect_per_interface = True
+
 
     '''
         Different paths of data
@@ -546,25 +550,29 @@ if __name__ == "__main__":
     '''
     IPv4
     '''
-    version = "4"
-    measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
-    candidates_witness_dir = ""
-    results_dir = measurement_prefix + "results/"
-    routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
-    df_file = "resources/test_set_" + target_loss_rate_window
+    # version = "4"
+    # measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
+    # candidates_witness_dir = ""
+    # results_dir = measurement_prefix + "results/"
+    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
+    # df_file = "resources/test_set_" + target_loss_rate_window
+    # if is_detect_per_interface:
+    #     df_file = "resources/test_set_without_per_interface_strict" + target_loss_rate_window
     # ground_truth_routers = extract_routers_by_node(routers_path)
-    ground_truth_routers = []
+    # ground_truth_routers = []
 
     '''
     IPv6
     '''
-    # version = "6"
-    # measurement_prefix = "/srv/icmp-rl-survey/speedtrap/survey/" + target_loss_rate_window + "/"
-    # candidates_witness_dir = ""
-    # results_dir = measurement_prefix + "results/"
-    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/speedtrap/routers/"
-    # df_file = "resources/test_set6_" + target_loss_rate_window
-    # ground_truth_routers = extract_routers_by_node(routers_path)
+    version = "6"
+    measurement_prefix = "/srv/icmp-rl-survey/speedtrap/survey/" + target_loss_rate_window + "/"
+    candidates_witness_dir = ""
+    results_dir = measurement_prefix + "results/"
+    routers_path = "/home/kevin/mda-lite-v6-survey/resources/speedtrap/routers/"
+    df_file = "resources/test_set6_" + target_loss_rate_window
+    if is_detect_per_interface:
+        df_file = "resources/test_set6_without_per_interface_strict" + target_loss_rate_window
+    ground_truth_routers = extract_routers_by_node(routers_path)
 
     '''
     Internet2
@@ -588,11 +596,13 @@ if __name__ == "__main__":
                                              n_not_triggered_threshold=n_not_triggered_threshold,
                                              candidates_witness_dir=candidates_witness_dir,
                                              results_dir=results_dir,
-                                             ofile= df_file)
+                                             ofile= df_file,
+                                             is_detect_per_interface = is_detect_per_interface)
     # label = "label"
     else:
         df_computed_result = pd.read_csv(df_file, index_col=0)
-
+        # df_computed_result["correlation_c0"].apply(pd.to_numeric)
+        df_computed_result["correlation_c1"].apply(pd.to_numeric)
     labeled_df, feature_columns, labels_column = build_labeled_df(is_pairwise, df_computed_result)
     use_saved_classifier = False
     ################################# Use existing classifier##########################

@@ -1,6 +1,6 @@
 
 
-class ClassifierOptions:
+class ClassifierOptions(object):
 
     def __init__(self):
 
@@ -24,7 +24,7 @@ class ClassifierOptions:
 
     @property
     def probability_threshold(self):
-        return self.probability_threshold
+        return self._probability_threshold
 
     @probability_threshold.setter
     def probability_threshold(self, new_probability_threshold):

@@ -18,6 +18,9 @@ class CppOptions:
         self.measurement_time = 0
         self.low_rate_dpr = 0
         self.pcap_prefix = ""
+        self.individual_result_file = ""
+        self.starting_probing_rate = 512
+        self.exponential_ratio = 1.05
 
     def to_string(self):
         options_str = ""
