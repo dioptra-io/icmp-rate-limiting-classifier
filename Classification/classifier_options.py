@@ -1,12 +1,22 @@
-
-
 class ClassifierOptions(object):
-
     def __init__(self):
 
-        self._probing_type_suffix = {"INDIVIDUAL": "ind", "GROUPSPR": "spr", "GROUPDPR": "dpr"}
-        self._global_raw_columns = ["ip_address", "probing_type", "probing_rate", "changing_behaviour", "loss_rate",
-                          "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"]
+        self._probing_type_suffix = {
+            "INDIVIDUAL": "ind",
+            "GROUPSPR": "spr",
+            "GROUPDPR": "dpr",
+        }
+        self._global_raw_columns = [
+            "ip_address",
+            "probing_type",
+            "probing_rate",
+            "changing_behaviour",
+            "loss_rate",
+            "transition_0_0",
+            "transition_0_1",
+            "transition_1_0",
+            "transition_1_1",
+        ]
         self._skip_fields = ["Index", "probing_type", "ip_address", "correlation"]
         self._probability_threshold = 0.6
 

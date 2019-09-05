@@ -2,11 +2,11 @@ from Algorithms.algorithms import transitive_closure
 
 
 def extract_speedtrap_routers(speedtrap_result_file):
-    '''
+    """
     Speedtrap outputs results by pair. Rebuilds then the transitive closure
     :param speedtrap_result_file:
     :return:
-    '''
+    """
 
     routers = []
     with open(speedtrap_result_file) as speedtrap_fp:

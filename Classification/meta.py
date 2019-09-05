@@ -3,10 +3,14 @@ from sklearn.model_selection import cross_val_predict
 
 
 def compute_threshold_decision(classifier, train_features, train_labels):
-    y_scores = cross_val_predict(classifier, train_features, train_labels, cv=3, method="predict_proba")
+    y_scores = cross_val_predict(
+        classifier, train_features, train_labels, cv=3, method="predict_proba"
+    )
 
     y_scores = [y_scores[i][1] for i in range(0, len(y_scores))]
-    precision, recall, thresholds = precision_recall_curve(y_true=train_labels, probas_pred=y_scores)
+    precision, recall, thresholds = precision_recall_curve(
+        y_true=train_labels, probas_pred=y_scores
+    )
 
     # # In matplotlib < 1.5, plt.fill_between does not have a 'step' argument
     # step_kwargs = ({'step': 'post'}

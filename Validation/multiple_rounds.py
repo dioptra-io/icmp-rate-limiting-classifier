@@ -2,6 +2,7 @@ import os
 import json
 from Validation.evaluation import extract_routers_by_node
 
+
 def evaluate_rounds(rounds, rounds_dir):
     for round_file in os.listdir(rounds_dir):
         if os.stat(rounds_dir + round_file).st_size == 0:
@@ -36,15 +37,15 @@ def evaluate_rounds(rounds, rounds_dir):
         #     continue
         rounds[iteration].append(predicted_aliases)
 
+
 if __name__ == "__main__":
 
-    '''
+    """
     This script evaluates the number of rounds necessary on Limited Ltd. algorithm.
-    '''
+    """
 
     rounds_dir_v4 = "resources/results/survey/aliases/v4/ple41.planet-lab.eu/"
     rounds_dir_v6 = "resources/results/survey/aliases/v6/ple2.planet-lab.eu/"
-
 
     rounds = {}
     evaluate_rounds(rounds, rounds_dir_v4)
@@ -52,11 +53,13 @@ if __name__ == "__main__":
 
     print(rounds)
     node = "ple41.planet-lab.eu"
-    midar_routers = extract_routers_by_node("/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/")[node]
+    midar_routers = extract_routers_by_node(
+        "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
+    )[node]
     rounds["midar"] = []
     for router_id, router in midar_routers.items():
         rounds["midar"].append(len(router))
-    with open("/home/kevin/icmp-rate-limiting-paper/resources/multiple_rounds.json", "w") as f:
+    with open(
+        "/home/kevin/icmp-rate-limiting-paper/resources/multiple_rounds.json", "w"
+    ) as f:
         json.dump(rounds, f)
-
-

@@ -1,3 +1,4 @@
+
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -22,7 +23,7 @@ def DBSCAN_impl(points, feature_columns):
     points = points[feature_columns].dropna()
     processed_points = get_columns(points, feature_columns)
     # processed_points = normalize_feature(processed_points)
-    print processed_points.to_string()
+    print_function(processed_points.to_string())
     X = processed_points.values.tolist()
 
     X = np.array(X)

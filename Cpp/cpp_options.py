@@ -1,8 +1,6 @@
-
 class CppOptions:
-    
     def __init__(self):
-        self.analyse_only= False
+        self.analyse_only = False
         self.probe_only = False
         self.group_only = False
         self.individual_only = False
@@ -51,6 +49,4 @@ class CppOptions:
         if self.low_rate_dpr != 0:
             options_str += " -r " + str(self.low_rate_dpr)
 
-
         return options_str
-
