@@ -15,10 +15,14 @@ from sklearn.utils.fixes import signature
 def print_false_positives(predictions, labels, features, labeled_df):
     for i in range(0, len(predictions)):
         if predictions[i] == 1 and labels.iloc[i]["label_pairwise"] != 1:
-            print (features.iloc[i][["loss_rate_dpr_c0", "loss_rate_dpr_c1", "loss_rate_dpr_w0"]])
-            print ("Predicted: " + str(predictions[i]))
-            print ("True label: " +str(labels.iloc[i]["label_pairwise"]))
-            print (labeled_df.loc[features.index[i]]["measurement_id"])
+            print(
+                features.iloc[i][
+                    ["loss_rate_dpr_c0", "loss_rate_dpr_c1", "loss_rate_dpr_w0"]
+                ]
+            )
+            print("Predicted: " + str(predictions[i]))
+            print("True label: " + str(labels.iloc[i]["label_pairwise"]))
+            print(labeled_df.loc[features.index[i]]["measurement_id"])
 
 
 def feature_importance(rf, columns):
@@ -26,21 +30,32 @@ def feature_importance(rf, columns):
     for feature, importance in zip(columns, rf.feature_importances_):
         feats[feature] = importance  # add the name/value pair
 
-    importances = pd.DataFrame.from_dict(feats, orient='index').rename(columns={0: 'Gini-importance'})
-    importances = importances.sort_values(by='Gini-importance')
+    importances = pd.DataFrame.from_dict(feats, orient="index").rename(
+        columns={0: "Gini-importance"}
+    )
+    importances = importances.sort_values(by="Gini-importance")
 
     return importances
 
+
 def random_forest_classifier(train_features, train_labels):
 
-    classifier = RandomForestClassifier(n_estimators=500, n_jobs=-1, random_state=0, verbose=0,
-                                class_weight= {0: 100, 1: 1}
-                                )
+    classifier = RandomForestClassifier(
+        n_estimators=500,
+        n_jobs=-1,
+        random_state=0,
+        verbose=0,
+        class_weight={0: 100, 1: 1},
+    )
 
-    y_scores = cross_val_predict(classifier, train_features, train_labels, cv=3, method="predict_proba")
+    y_scores = cross_val_predict(
+        classifier, train_features, train_labels, cv=3, method="predict_proba"
+    )
 
     y_scores = [y_scores[i][1] for i in range(0, len(y_scores))]
-    precision, recall, thresholds = precision_recall_curve(y_true=train_labels, probas_pred=y_scores)
+    precision, recall, thresholds = precision_recall_curve(
+        y_true=train_labels, probas_pred=y_scores
+    )
 
     # # In matplotlib < 1.5, plt.fill_between does not have a 'step' argument
     # step_kwargs = ({'step': 'post'}
@@ -60,8 +75,8 @@ def random_forest_classifier(train_features, train_labels):
 
     # Find the minimum threshold when the precision is 99,5%
     threshold_decision = None
-    for i in range(0, len(precision)) :
-        if precision[i] > 0.99 :
+    for i in range(0, len(precision)):
+        if precision[i] > 0.99:
             if i >= len(thresholds):
                 threshold_decision = thresholds[-1]
             else:

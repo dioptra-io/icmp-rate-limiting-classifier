@@ -4,14 +4,12 @@ import re
 import json
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     dic = {}
 
-
-    with open('/home/kevin/hop_by_candidate4.json', "r") as json_f:
+    with open("/home/kevin/hop_by_candidate4.json", "r") as json_f:
         ips = json.loads(json_f.read())
-
 
     if False:
         for ip in ips:
@@ -24,7 +22,7 @@ if __name__ == '__main__':
                 "sudo nmap  -O --osscan-guess " + ip,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                shell=True
+                shell=True,
             )
             try:
                 out, err = nmap.communicate(timeout=15)
@@ -36,7 +34,7 @@ if __name__ == '__main__':
                 continue
 
     for result in os.listdir("/srv/nmap/results"):
-        ip       = result.split('_')[0]
+        ip = result.split("_")[0]
 
         with open("/srv/nmap/results/" + result, "r") as f:
             for line in f.readlines():
@@ -45,6 +43,5 @@ if __name__ == '__main__':
                     dic[ip] = os
                     break
 
-
-    with open('resources/results/survey/ip_os_nmap.json', 'w') as f:
+    with open("resources/results/survey/ip_os_nmap.json", "w") as f:
         json.dump(dic, f, indent=4)

@@ -3,14 +3,15 @@ import re
 
 if __name__ == "__main__":
 
-
-    '''
+    """
     This script parse the Internet2 interfaces files and generates router files 
-    '''
+    """
 
-    router_id_regex = re.compile("<th id=\".*?\">(.*)</th>")
+    router_id_regex = re.compile('<th id=".*?">(.*)</th>')
 
-    gt_interface_addresses = "resources/internet2/ground-truth/Internet2-interfaces.html"
+    gt_interface_addresses = (
+        "resources/internet2/ground-truth/Internet2-interfaces.html"
+    )
 
     ground_truth_routers_v4 = {}
     ground_truth_routers_v6 = {}
@@ -38,14 +39,20 @@ if __name__ == "__main__":
 
     n_ipv4_ips = 0
 
-
-    discard_interfaces = {"198.32.11.6", "172.31.254.2", "64.57.22.233","64.57.22.225","64.57.22.65","2001:468:fc:3a::1"}
+    discard_interfaces = {
+        "198.32.11.6",
+        "172.31.254.2",
+        "64.57.22.233",
+        "64.57.22.225",
+        "64.57.22.65",
+        "2001:468:fc:3a::1",
+    }
 
     ipv4_candidates = set()
     ipv6_candidates = set()
 
     for router_id, ips in ground_truth_routers_v4.items():
-        with open(gt_routers_dir +"v4/" + router_id, "w") as f:
+        with open(gt_routers_dir + "v4/" + router_id, "w") as f:
             for ip in ips:
                 f.write(ip + "\n")
                 if ip in ipv4_candidates:
@@ -75,5 +82,3 @@ if __name__ == "__main__":
             f.write(ip + "\n")
     print("IPv4 addresses: " + str(n_ipv4_ips))
     print("IPv6 addresses: " + str(n_ipv6_ips))
-
-

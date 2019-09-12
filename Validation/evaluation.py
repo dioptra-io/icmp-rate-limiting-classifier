@@ -1,4 +1,8 @@
-from Validation.midar import extract_routers, extract_routers_by_node, extract_routers_evaluation
+from Validation.midar import (
+    extract_routers,
+    extract_routers_by_node,
+    extract_routers_evaluation,
+)
 from Algorithms.algorithms import transitive_closure
 import pandas as pd
 import copy
@@ -10,9 +14,27 @@ import ipaddress
 import json
 import random
 
-base_columns = ["ip_address", "probing_type", "probing_rate", "changing_behaviour", "loss_rate",
-                "transition_0_0", "transition_0_1", "transition_1_0", "transition_1_1"]
-targets_columns = ["GROUP_ID", "AF_FAMILY", "PROBING_TYPE", "PROTOCOL", "INTERFACE_TYPE", "IP_TARGET", "REAL_IP"]
+base_columns = [
+    "ip_address",
+    "probing_type",
+    "probing_rate",
+    "changing_behaviour",
+    "loss_rate",
+    "transition_0_0",
+    "transition_0_1",
+    "transition_1_0",
+    "transition_1_1",
+]
+targets_columns = [
+    "GROUP_ID",
+    "AF_FAMILY",
+    "PROBING_TYPE",
+    "PROTOCOL",
+    "INTERFACE_TYPE",
+    "IP_TARGET",
+    "REAL_IP",
+]
+
 
 def find_corresponding_router(ip, ground_truth_routers):
     matches = []
@@ -21,6 +43,7 @@ def find_corresponding_router(ip, ground_truth_routers):
             if ip_router == ip:
                 matches.append((router_name, router))
     return matches
+
 
 def compare_routers_set(routers_set1, routers_set2):
     # Now compare the common pairs.
@@ -35,8 +58,13 @@ def compare_routers_set(routers_set1, routers_set2):
             # Find the corresponding router in midar
             corresponding_router_i = find_corresponding_router(router[i], routers_set2)
             for j in range(i + 1, len(router)):
-                corresponding_router_j = find_corresponding_router(router[j], routers_set2)
-                if corresponding_router_i is not None and corresponding_router_j is not None:
+                corresponding_router_j = find_corresponding_router(
+                    router[j], routers_set2
+                )
+                if (
+                    corresponding_router_i is not None
+                    and corresponding_router_j is not None
+                ):
                     if corresponding_router_i == corresponding_router_j:
                         common_pairs.add(tuple({router[i], router[j]}))
                     else:
@@ -45,24 +73,29 @@ def compare_routers_set(routers_set1, routers_set2):
                     uncommon_pairs.add(tuple({router[i], router[j]}))
 
     return common_pairs, uncommon_pairs, disagreement_pairs
+
+
 def combin(n, k):
     """Number of combinations C(n,k)"""
-    if k > n//2:
-        k = n-k
+    if k > n // 2:
+        k = n - k
     x = 1
     y = 1
-    i = n-k+1
+    i = n - k + 1
     while i <= n:
-        x = (x*i)//y
+        x = (x * i) // y
         y += 1
         i += 1
     return x
 
+
 def precision(tp, fp):
     return tp / (tp + fp)
 
+
 def recall(tp, fn):
-    return tp/(tp+fn)
+    return tp / (tp + fn)
+
 
 def clean_false_positives(routers, ground_truth_routers):
     tp = 0
@@ -72,7 +105,7 @@ def clean_false_positives(routers, ground_truth_routers):
         to_remove_ips[router_name] = set()
         for i in range(0, len(router)):
             matches_i = find_corresponding_router(router[i], ground_truth_routers)
-            for j in range(i+1, len(router)):
+            for j in range(i + 1, len(router)):
                 matches_j = find_corresponding_router(router[j], ground_truth_routers)
                 found_match = False
                 for match_router_i, ips_i in matches_i:
@@ -85,7 +118,9 @@ def clean_false_positives(routers, ground_truth_routers):
                 if not found_match:
                     fp += 1
                     print(router[i], router[j])
-                    if len(set(router).intersection(set(ips_i))) > len(set(router).intersection(set(ips_j))):
+                    if len(set(router).intersection(set(ips_i))) > len(
+                        set(router).intersection(set(ips_j))
+                    ):
                         to_remove_ips[router_name].add(router[j])
                     else:
                         to_remove_ips[router_name].add(router[i])
@@ -96,7 +131,10 @@ def clean_false_positives(routers, ground_truth_routers):
             routers[router_name].remove(ip)
     return routers, tp, fp
 
-def write_uncommon_routers(uncommon_directory, uncommon_pairs, do_transitive_closure = True):
+
+def write_uncommon_routers(
+    uncommon_directory, uncommon_pairs, do_transitive_closure=True
+):
     # Uncommon IPs
     routers = [set(x) for x in uncommon_pairs]
     if do_transitive_closure:
@@ -107,11 +145,15 @@ def write_uncommon_routers(uncommon_directory, uncommon_pairs, do_transitive_clo
     n_uncommon = 0
     for uncommom_router in uncommon_routers:
         with open(
-                uncommon_directory + "uncommon_router_lovebirds_not_midar" + str(
-                        n_uncommon), "w") as fp:
+            uncommon_directory
+            + "uncommon_router_lovebirds_not_midar"
+            + str(n_uncommon),
+            "w",
+        ) as fp:
             for ip in uncommom_router:
                 fp.write(ip + "\n")
         n_uncommon += 1
+
 
 def evaluate(routers, ground_truth_routers, n_ground_truth_pairs):
 
@@ -122,7 +164,6 @@ def evaluate(routers, ground_truth_routers, n_ground_truth_pairs):
     print("True positives", tp)
     print("False positives", fp)
 
-
     # with open("resources/results/internet2/unresponsive/ple41.planet-lab.eu_internet2_unresponsive6.json") as unresponsive_ips_fp:
     #     unresponsive_ips = set(json.load(unresponsive_ips_fp))
     #     # unresponsive_ips.update(set(pirate_ips))
@@ -132,47 +173,52 @@ def evaluate(routers, ground_truth_routers, n_ground_truth_pairs):
     #         if ip in ips:
     #             ips.remove(ip)
 
-
-
-
     """Stats"""
     res_gt = n_ground_truth_pairs
 
     # for router, ips in sorted(ground_truth_routers.items()):
     #     res_gt += combin(len(set(ips)), 2)
 
+    print("Ground Truth pairs: ")
+    print(res_gt)
+    print("Rate Limiting pairs :")
+    print(tp)
 
-    print ("Ground Truth pairs: ")
-    print (res_gt)
-    print ("Rate Limiting pairs :")
-    print (tp)
-
-    print("Precision:" )
+    print("Precision:")
     print(float(tp) / (tp + fp))
 
-    print ("Recall :")
-    print (float(tp)/res_gt)
+    print("Recall :")
+    print(float(tp) / res_gt)
 
 
 def compare_tools():
     is_internet2 = True
     is_survey = False
     ip_version = "4"
-    '''
+    """
     Internet2 V4 evaluation
-    '''
+    """
     if is_internet2 and ip_version == "4":
-        ground_truth_routers = extract_routers("/home/kevin/mda-lite-v6-survey/resources/internet2/routers/v4/")
+        ground_truth_routers = extract_routers(
+            "/home/kevin/mda-lite-v6-survey/resources/internet2/routers/v4/"
+        )
 
-        rate_limiting_nodes = ["cse-yellow.cse.chalmers.se", "ple1.cesnet.cz",
-                               "planetlab1.cs.vu.nl",
-                                "ple41.planet-lab.eu"]
+        rate_limiting_nodes = [
+            "cse-yellow.cse.chalmers.se",
+            "ple1.cesnet.cz",
+            "planetlab1.cs.vu.nl",
+            "ple41.planet-lab.eu",
+        ]
 
         routers = []
         precisions = []
         for node in rate_limiting_nodes:
-            routers_node = extract_routers_evaluation("resources/results/internet2/aliases/v4/" + node + "/")
-            routers_node, tp, fp = clean_false_positives(routers_node, ground_truth_routers)
+            routers_node = extract_routers_evaluation(
+                "resources/results/internet2/aliases/v4/" + node + "/"
+            )
+            routers_node, tp, fp = clean_false_positives(
+                routers_node, ground_truth_routers
+            )
             print(node, precision(tp, fp))
             precisions.append(precision(tp, fp))
 
@@ -185,25 +231,33 @@ def compare_tools():
 
         print("Mean precision over ple nodes:" + str(np.mean(precisions)))
 
-        midar_nodes = ["ple1.cesnet.cz",
-                       "ple41.planet-lab.eu",
-                       "planetlab2.informatik.uni-goettingen.de",
-                       "cse-yellow.chalmers.cse.se",
-                       "planetlab1.cs.vu.nl"]
+        midar_nodes = [
+            "ple1.cesnet.cz",
+            "ple41.planet-lab.eu",
+            "planetlab2.informatik.uni-goettingen.de",
+            "cse-yellow.chalmers.cse.se",
+            "planetlab1.cs.vu.nl",
+        ]
         midar_routers = []
         for node in midar_nodes:
             midar_routers_node = extract_routers(
-                "/home/kevin/mda-lite-v6-survey/resources/internet2/midar/v4/" + node + "/")
+                "/home/kevin/mda-lite-v6-survey/resources/internet2/midar/v4/"
+                + node
+                + "/"
+            )
             for router_name, router in midar_routers_node.items():
                 midar_routers.append(set(router))
         midar_routers = transitive_closure(midar_routers)
-        midar_routers_tc_dic = {i: list(midar_routers[i]) for i in range(0, len(midar_routers))}
+        midar_routers_tc_dic = {
+            i: list(midar_routers[i]) for i in range(0, len(midar_routers))
+        }
 
         evaluate(midar_routers_tc_dic, ground_truth_routers)
         evaluate(routers_tc_dic, ground_truth_routers)
 
         common_pairs, uncommon_pairs, disagreement_pairs = compare_routers_set(
-                                                                               routers_tc_dic, midar_routers_tc_dic,)
+            routers_tc_dic, midar_routers_tc_dic
+        )
         total_pairs = len(common_pairs) + len(uncommon_pairs) + len(disagreement_pairs)
         print("Common pairs: " + str(len(common_pairs)))
         print("Uncommon pairs: " + str(len(uncommon_pairs)))
@@ -217,11 +271,19 @@ def compare_tools():
         # uncommon_directory = "resources/results/internet2/uncommon/v4/lovebirds-not-midar/"
         # write_uncommon_routers(uncommon_directory, uncommon_pairs, do_transitive_closure=False)
 
-        uncommon_directory = "resources/results/internet2/uncommon/v4/lovebirds-not-midar/"
-        classification_file = "resources/results/internet2/midar-analysis/target-summary.txt"
-        comparable_directory = "resources/results/internet2/uncommon/v4/comparable-lovebirds-not-midar/"
+        uncommon_directory = (
+            "resources/results/internet2/uncommon/v4/lovebirds-not-midar/"
+        )
+        classification_file = (
+            "resources/results/internet2/midar-analysis/target-summary.txt"
+        )
+        comparable_directory = (
+            "resources/results/internet2/uncommon/v4/comparable-lovebirds-not-midar/"
+        )
 
-        comparable_pairs = lovebirds_not_midar(uncommon_directory, classification_file, comparable_directory)
+        comparable_pairs = lovebirds_not_midar(
+            uncommon_directory, classification_file, comparable_directory
+        )
         # uncommon_directory = "resources/results/internet2/uncommon/v4/comparable-lovebirds-not-midar/"
         # write_uncommon_routers(uncommon_directory, comparable_pairs, do_transitive_closure=False)
 
@@ -237,7 +299,8 @@ def compare_tools():
         # print("Pairs found by MIDAR after rerun: " + str(n_found_after_rerun))
 
         common_pairs, uncommon_pairs, disagreement_pairs = compare_routers_set(
-             midar_routers_tc_dic, routers_tc_dic)
+            midar_routers_tc_dic, routers_tc_dic
+        )
         total_pairs = len(common_pairs) + len(uncommon_pairs) + len(disagreement_pairs)
         print("Common pairs: " + str(len(common_pairs)))
         print("Uncommon pairs: " + str(len(uncommon_pairs)))
@@ -251,6 +314,7 @@ def compare_tools():
         witness_file = "resources/witness_by_candidate_internet24.json"
         with open(witness_file) as f:
             import json
+
             witness_by_candidate = json.load(f)
 
         n_findable = 0
@@ -267,15 +331,21 @@ def compare_tools():
         # write_uncommon_routers(uncommon_directory, uncommon_pairs)
 
     if is_internet2 and ip_version == "6":
-        ground_truth_routers = extract_routers("/home/kevin/mda-lite-v6-survey/resources/internet2/routers/v6/")
+        ground_truth_routers = extract_routers(
+            "/home/kevin/mda-lite-v6-survey/resources/internet2/routers/v6/"
+        )
 
         rate_limiting_nodes = ["ple41.planet-lab.eu"]
 
         routers = []
         precisions = []
         for node in rate_limiting_nodes:
-            routers_node = extract_routers("resources/results/internet2/aliases/v6/" + node + "/")
-            routers_node, tp, fp = clean_false_positives(routers_node, ground_truth_routers)
+            routers_node = extract_routers(
+                "resources/results/internet2/aliases/v6/" + node + "/"
+            )
+            routers_node, tp, fp = clean_false_positives(
+                routers_node, ground_truth_routers
+            )
             print(node, precision(tp, fp))
             precisions.append(precision(tp, fp))
 
@@ -290,9 +360,9 @@ def compare_tools():
 
         evaluate(routers_tc_dic, ground_truth_routers)
 
-    '''
+    """
         D4 Evaluation
-    '''
+    """
 
     if is_survey and ip_version == "4":
         result_individual_file = "resources/results/survey/survey_individual4"
@@ -301,25 +371,33 @@ def compare_tools():
 
         rate_limiting_routers_dir = "resources/results/survey/aliases/v4/" + node + "/"
         rate_limiting_routers = extract_routers_evaluation(rate_limiting_routers_dir)
-        midar_routers = extract_routers_by_node("/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/")
+        midar_routers = extract_routers_by_node(
+            "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
+        )
 
         # Test on ple41
         midar_routers_node = midar_routers[node]
 
         # Compare only IP's that were seen by both experience. i.e remove those tried by MIDAR and not by Lovebirds.
-        df_individual = pd.read_csv(result_individual_file,
-                                    names=base_columns,
-                                    skipinitialspace=True,
-                                    # encoding="utf-8",
-                                    engine="python",
-                                    index_col=False)
+        df_individual = pd.read_csv(
+            result_individual_file,
+            names=base_columns,
+            skipinitialspace=True,
+            # encoding="utf-8",
+            engine="python",
+            index_col=False,
+        )
 
         df_unresponsive = df_individual[df_individual["loss_rate"] == 1]
         unresponsive_addresses = list(df_unresponsive["ip_address"])
         unresponsives = set(unresponsive_addresses)
 
-        rate_limiting_ip_addresses = list(df_individual[(df_individual["probing_rate"] >= 256)
-                                                        & (df_individual["probing_rate"] < 50000)]["ip_address"])
+        rate_limiting_ip_addresses = list(
+            df_individual[
+                (df_individual["probing_rate"] >= 256)
+                & (df_individual["probing_rate"] < 50000)
+            ]["ip_address"]
+        )
 
         common_ips = []
         for router_name, router in midar_routers_node.items():
@@ -336,8 +414,9 @@ def compare_tools():
         #     import json
         #     json.dump(midar_routers_node, fp,sort_keys=True,indent=4, separators=(',', ': '))
 
-        common_pairs, uncommon_pairs, disagreement_pairs = compare_routers_set(rate_limiting_routers,
-                                                                               midar_routers_node)
+        common_pairs, uncommon_pairs, disagreement_pairs = compare_routers_set(
+            rate_limiting_routers, midar_routers_node
+        )
         total_pairs = len(common_pairs) + len(uncommon_pairs) + len(disagreement_pairs)
         print("Common pairs: " + str(len(common_pairs)))
         print("Uncommon pairs: " + str(len(uncommon_pairs)))
@@ -351,7 +430,6 @@ def compare_tools():
         # uncommon_directory = "resources/results/survey/uncommon/v4/lovebirds-not-midar-disagreement/"
         # write_uncommon_routers(uncommon_directory, disagreement_pairs)
 
-
         # uncommon_ips = set()
         # for router in routers:
         #     for ip in router:
@@ -364,8 +442,9 @@ def compare_tools():
         #             fp.write(ip + "\n")
         #     n_disagreement += 1
 
-        common_pairs, uncommon_pairs, disagreement_pairs = compare_routers_set(midar_routers_node,
-                                                                               rate_limiting_routers, )
+        common_pairs, uncommon_pairs, disagreement_pairs = compare_routers_set(
+            midar_routers_node, rate_limiting_routers
+        )
         total_pairs = len(common_pairs) + len(uncommon_pairs) + len(disagreement_pairs)
         print("Common pairs: " + str(len(common_pairs)))
         print("Uncommon pairs: " + str(len(uncommon_pairs)))
@@ -385,10 +464,10 @@ def compare_tools():
         #         for ip in uncommom_router:
         #             fp.write(ip + "\n")
         #     n_uncommon += 1
-        uncommon_directory = "resources/results/survey/uncommon/v4/midar-not-lovebirds-disagreement/"
+        uncommon_directory = (
+            "resources/results/survey/uncommon/v4/midar-not-lovebirds-disagreement/"
+        )
         write_uncommon_routers(uncommon_directory, disagreement_pairs)
-
-
 
         # Extract correlation from the routers set for printing figure on paper
         # for router_name, router in rate_limiting_routers.items():
@@ -426,7 +505,7 @@ def compare_tools():
         # print(df_alias["correlation_c1"])
 
 
-def rerun_stable(rerun_directory, results_rerun_directory, rerun_pairs = None):
+def rerun_stable(rerun_directory, results_rerun_directory, rerun_pairs=None):
     # Count number of confirmed pairs after rerun.
     n_stable_pairs = 0
     n_rerun_pairs = 0
@@ -480,9 +559,16 @@ def compute_midar_comparables_pairs(ips, midar_classification):
             # elif icmp_i_class == "monotonic" and icmp_j_class == "monotonic":
             #     is_comparable = True
 
-            if (udp_i_class == "monotonic" or tcp_i_class == "monotonic" or icmp_i_class == "monotonic") and \
-                 (tcp_j_class == "monotonic" or udp_j_class  == "monotonic" or icmp_j_class =="monotonic"):
-                    is_comparable = True
+            if (
+                udp_i_class == "monotonic"
+                or tcp_i_class == "monotonic"
+                or icmp_i_class == "monotonic"
+            ) and (
+                tcp_j_class == "monotonic"
+                or udp_j_class == "monotonic"
+                or icmp_j_class == "monotonic"
+            ):
+                is_comparable = True
 
             if is_comparable:
                 comparable_pairs.add(frozenset({ips[i], ips[j]}))
@@ -491,22 +577,24 @@ def compute_midar_comparables_pairs(ips, midar_classification):
             if not is_comparable:
                 uncomparable_pairs.add(frozenset({ips[i], ips[j]}))
 
-
     return comparable_pairs, uncomparable_pairs
+
 
 def compute_midar_classification(ips, classification_file):
     midar_classification = {}
     usable = set()
 
-    df_target_summary = pd.read_csv(classification_file,
-                                    # header=0,
-                                    # skipinitialspace=True,
-                                    skiprows=[0],
-                                    # encoding="utf-8",
-                                    engine="python",
-                                    sep="\s+",
-                                    index_col=False,
-                                    usecols=[x for x in range(0, 15)])
+    df_target_summary = pd.read_csv(
+        classification_file,
+        # header=0,
+        # skipinitialspace=True,
+        skiprows=[0],
+        # encoding="utf-8",
+        engine="python",
+        sep="\s+",
+        index_col=False,
+        usecols=[x for x in range(0, 15)],
+    )
 
     targets = list(df_target_summary["target_addr"])
     for target in targets:
@@ -542,12 +630,13 @@ def compute_midar_classification(ips, classification_file):
     print("Midar nonmonotonic: " + str(len(non_monotonic)))
     print("Midar classification: " + str(len(midar_classification)))
 
-
     for ip in ips:
         if ip not in midar_classification:
-            midar_classification[ip] = {"udp" : "unknown", "tcp": "unknown", "icmp": "unkown"}
-
-
+            midar_classification[ip] = {
+                "udp": "unknown",
+                "tcp": "unknown",
+                "icmp": "unkown",
+            }
 
     print("Number of usable: " + str(len(usable)))
 
@@ -574,11 +663,10 @@ def compute_speedtrap_comparable_pairs(ips, speedtrap_classification):
         classification_i = speedtrap_classification[ips[i]]
         for j in range(i + 1, len(ips)):
             classification_j = speedtrap_classification[ips[j]]
-            if classification_i == "incr" and classification_j =="incr":
+            if classification_i == "incr" and classification_j == "incr":
                 comparable_pairs.add(frozenset({ips[i], ips[j]}))
             else:
                 uncomparable_pairs.add(frozenset({ips[i], ips[j]}))
-
 
     return comparable_pairs, uncomparable_pairs
 
@@ -599,12 +687,13 @@ def compute_speedtrap_classification(ips, speedtrap_classification_file):
 
     for ip in ips:
         if ip not in speedtrap_classification:
-            print (ip)
+            print(ip)
             speedtrap_classification[ip] = "unknown"
 
-    print (printable_classification)
+    print(printable_classification)
 
     return speedtrap_classification
+
 
 def lovebirds_not_midar(uncommon_directory, classification_file, comparable_directory):
     ###### Lovebirds not midar #########
@@ -643,7 +732,6 @@ def lovebirds_not_midar(uncommon_directory, classification_file, comparable_dire
             else:
                 classification[icmp_i_class] += 1
 
-
             for j in range(i + 1, len(router)):
                 classification_ip_j = midar_classification[router[j]]
                 udp_j_class = classification_ip_j["udp"]
@@ -671,14 +759,15 @@ def lovebirds_not_midar(uncommon_directory, classification_file, comparable_dire
     print("Not comparable: " + str(n_not_comparable / total))
     print("Comparable: " + str(n_fp))
     print("Comparable: " + str(n_fp / total))
-    print (classification)
+    print(classification)
     return comparable_pairs
 
+
 def analyse_rerun():
-    '''
+    """
         Analyze the rerun of both tools on uncommon routers.
     :return:
-    '''
+    """
 
     # Midar not Lovebirds.
     is_midar_not_lovebirds = True
@@ -686,6 +775,7 @@ def analyse_rerun():
         rerun_directory = "resources/results/survey/uncommon/v4/midar-not-lovebirds-disagreement-rerun/"
 
         import json
+
         witness_file = "resources/witness_by_candidate4.json"
         with open(witness_file) as f:
             witness_by_candidate = json.load(f)
@@ -718,26 +808,30 @@ def analyse_rerun():
             # Find the corresponding target file
             targets_file = "cpp_targets_file_cluster" + str(id) + "_0_0"
             try:
-                df_targets = pd.read_csv(rerun_directory + targets_file,
-                                       names=targets_columns,
-                                       skipinitialspace=True,
-                                       # encoding="utf-8",
-                                       engine="python",
-                                       index_col=False)
+                df_targets = pd.read_csv(
+                    rerun_directory + targets_file,
+                    names=targets_columns,
+                    skipinitialspace=True,
+                    # encoding="utf-8",
+                    engine="python",
+                    index_col=False,
+                )
 
-                df_alias = pd.read_csv(rerun_directory + uncommon_file,
-                                       names=base_columns,
-                                       skipinitialspace=True,
-                                       # encoding="utf-8",
-                                       engine="python",
-                                       index_col=False)
+                df_alias = pd.read_csv(
+                    rerun_directory + uncommon_file,
+                    names=base_columns,
+                    skipinitialspace=True,
+                    # encoding="utf-8",
+                    engine="python",
+                    index_col=False,
+                )
             except:
                 continue
-            candidates = list(df_targets[df_targets["INTERFACE_TYPE"] == "CANDIDATE"]["IP_TARGET"])
-
+            candidates = list(
+                df_targets[df_targets["INTERFACE_TYPE"] == "CANDIDATE"]["IP_TARGET"]
+            )
 
             ###### Start pattern pair classification ##########
-
 
             is_not_triggered = False
             has_shared_icmp_counter = False
@@ -774,27 +868,33 @@ def analyse_rerun():
         total = n_not_shared_counter + n_missed + n_witness_too_high + n_not_triggered
         print("Not shared: " + str(n_not_shared_counter / total))
         print("Witness too high: " + str(n_witness_too_high / total))
-        print("Missed: " + str(n_missed/total))
-        print("Not triggered" + str(n_not_triggered/total))
+        print("Missed: " + str(n_missed / total))
+        print("Not triggered" + str(n_not_triggered / total))
         print("Else: " + str(n_else / total))
         print("Multiple: " + str(n_multiple_behaviour))
         print(total)
 
         uncommon_directory = "resources/results/survey/uncommon/v4/lovebirds-not-midar/"
         classification_file = "resources/results/survey/target-summary.txt"
-        comparable_directory = "resources/results/survey/uncommon/v4/comparable-lovebirds-not-midar/"
+        comparable_directory = (
+            "resources/results/survey/uncommon/v4/comparable-lovebirds-not-midar/"
+        )
 
-        comparable_pairs = lovebirds_not_midar(uncommon_directory, classification_file, comparable_directory)
+        comparable_pairs = lovebirds_not_midar(
+            uncommon_directory, classification_file, comparable_directory
+        )
 
-        comparable_directory_rerun = "resources/results/survey/uncommon/v4/comparable-lovebirds-not-midar-rerun/"
+        comparable_directory_rerun = (
+            "resources/results/survey/uncommon/v4/comparable-lovebirds-not-midar-rerun/"
+        )
         rerun_stable(comparable_directory, comparable_directory_rerun, comparable_pairs)
 
-
         ####### Disagreement analysis ###########
-        disagreement_directory = "resources/results/survey/uncommon/v4/lovebirds-not-midar-disagreement/"
+        disagreement_directory = (
+            "resources/results/survey/uncommon/v4/lovebirds-not-midar-disagreement/"
+        )
         disagreement_directory_rerun = "resources/results/survey/uncommon/v4/lovebirds-not-midar-disagreement-rerun/"
         rerun_stable(disagreement_directory, disagreement_directory_rerun)
-
 
 
 def get_lovebirds_comparables_pairs(responsive_addresses, unresponsive_addresses):
@@ -804,7 +904,7 @@ def get_lovebirds_comparables_pairs(responsive_addresses, unresponsive_addresses
     total_address = copy.deepcopy(responsive_addresses)
     total_address.extend(unresponsive_addresses)
     for i in range(0, len(total_address)):
-        for j in range(i+1, len(total_address)):
+        for j in range(i + 1, len(total_address)):
             if i < unresponsive_index and j < unresponsive_index:
                 comparable_pairs.add(frozenset({total_address[i], total_address[j]}))
             else:
@@ -812,32 +912,46 @@ def get_lovebirds_comparables_pairs(responsive_addresses, unresponsive_addresses
     return comparable_pairs, uncomparable_pairs
 
 
-def get_alias_common_pairs_and_comparable(lovebirds_pairs, midar_pairs, comparable_pairs):
-    common_pairs = lovebirds_pairs.intersection(midar_pairs).intersection(comparable_pairs)
-    lovebirds_not_midar_pair = (lovebirds_pairs - midar_pairs).intersection(comparable_pairs)
-    midar_not_lovebirds_pairs = (midar_pairs - lovebirds_pairs).intersection(comparable_pairs)
+def get_alias_common_pairs_and_comparable(
+    lovebirds_pairs, midar_pairs, comparable_pairs
+):
+    common_pairs = lovebirds_pairs.intersection(midar_pairs).intersection(
+        comparable_pairs
+    )
+    lovebirds_not_midar_pair = (lovebirds_pairs - midar_pairs).intersection(
+        comparable_pairs
+    )
+    midar_not_lovebirds_pairs = (midar_pairs - lovebirds_pairs).intersection(
+        comparable_pairs
+    )
 
     return common_pairs, lovebirds_not_midar_pair, midar_not_lovebirds_pairs
+
 
 def get_alias_pairs(routers):
     alias_pairs = set()
     for router_name, router in routers.items():
         for i in range(0, len(router)):
-            for j in range(i+1, len(router)):
+            for j in range(i + 1, len(router)):
                 alias_pairs.add(frozenset({router[i], router[j]}))
     return alias_pairs
 
+
 def extract_rate_limiting_addresses(individual_file):
     # Compare only IP's that were seen by both experience. i.e remove those tried by MIDAR and not by Lovebirds.
-    df_individual = pd.read_csv(individual_file,
-                                names=base_columns,
-                                skipinitialspace=True,
-                                # encoding="utf-8",
-                                engine="python",
-                                index_col=False)
+    df_individual = pd.read_csv(
+        individual_file,
+        names=base_columns,
+        skipinitialspace=True,
+        # encoding="utf-8",
+        engine="python",
+        index_col=False,
+    )
 
-    df_evaluated = df_individual[(df_individual["probing_rate"] >= 128)
-                                 & (df_individual["probing_rate"] <= 32768)]
+    df_evaluated = df_individual[
+        (df_individual["probing_rate"] >= 128)
+        & (df_individual["probing_rate"] <= 32768)
+    ]
     rate_limiting_ip_addresses = list(set(df_evaluated["ip_address"]))
     print("Total IP addrsses: " + str(len(rate_limiting_ip_addresses)))
     print("Total pairs: " + str(combin(len(rate_limiting_ip_addresses), 2)))
@@ -851,34 +965,73 @@ def extract_rate_limiting_addresses(individual_file):
     return rate_limiting_ip_addresses, responsive_addresses, unresponsive_addresses
 
 
-def compute_comparable_matrix(lovebirds_comparable_pairs, lovebirds_uncomparable_pairs,
-                              else_comparable_pairs, else_uncomparable_pairs):
+def compute_comparable_matrix(
+    lovebirds_comparable_pairs,
+    lovebirds_uncomparable_pairs,
+    else_comparable_pairs,
+    else_uncomparable_pairs,
+):
     # Get the full picture of comparable
-    midar_not_lovebird_comparable = else_comparable_pairs.intersection(lovebirds_uncomparable_pairs)
-    lovebirds_not_midar_comparable = lovebirds_comparable_pairs.intersection(else_uncomparable_pairs)
+    midar_not_lovebird_comparable = else_comparable_pairs.intersection(
+        lovebirds_uncomparable_pairs
+    )
+    lovebirds_not_midar_comparable = lovebirds_comparable_pairs.intersection(
+        else_uncomparable_pairs
+    )
 
-    midar_lovebirds_comparable = else_comparable_pairs.intersection(lovebirds_comparable_pairs)
+    midar_lovebirds_comparable = else_comparable_pairs.intersection(
+        lovebirds_comparable_pairs
+    )
 
-    midar_lovebirds_not_comparable = else_uncomparable_pairs.intersection(lovebirds_uncomparable_pairs)
+    midar_lovebirds_not_comparable = else_uncomparable_pairs.intersection(
+        lovebirds_uncomparable_pairs
+    )
 
-    n_total = len(midar_lovebirds_comparable) + len(midar_lovebirds_not_comparable) + \
-              len(lovebirds_not_midar_comparable) + len(midar_not_lovebird_comparable)
+    n_total = (
+        len(midar_lovebirds_comparable)
+        + len(midar_lovebirds_not_comparable)
+        + len(lovebirds_not_midar_comparable)
+        + len(midar_not_lovebird_comparable)
+    )
 
-    print("Midar and Lovebirds comparable: " + str(len(midar_lovebirds_comparable)) + ", " +
-          str(len(midar_lovebirds_comparable) / n_total))
-    print("Midar and Lovebirds not comparable: " + str(len(midar_lovebirds_not_comparable)) + ", " + str(
-        len(midar_lovebirds_not_comparable) / n_total))
-    print("Midar not Lovebirds comparable: " + str(len(midar_not_lovebird_comparable)) + ", " + str(
-        len(midar_not_lovebird_comparable) / n_total))
-    print("Not Midar but Lovebirds comparable: " + str(len(lovebirds_not_midar_comparable)) + ", " + str(
-        len(lovebirds_not_midar_comparable) / n_total))
-
+    print(
+        "Midar and Lovebirds comparable: "
+        + str(len(midar_lovebirds_comparable))
+        + ", "
+        + str(len(midar_lovebirds_comparable) / n_total)
+    )
+    print(
+        "Midar and Lovebirds not comparable: "
+        + str(len(midar_lovebirds_not_comparable))
+        + ", "
+        + str(len(midar_lovebirds_not_comparable) / n_total)
+    )
+    print(
+        "Midar not Lovebirds comparable: "
+        + str(len(midar_not_lovebird_comparable))
+        + ", "
+        + str(len(midar_not_lovebird_comparable) / n_total)
+    )
+    print(
+        "Not Midar but Lovebirds comparable: "
+        + str(len(lovebirds_not_midar_comparable))
+        + ", "
+        + str(len(lovebirds_not_midar_comparable) / n_total)
+    )
 
     return midar_lovebirds_comparable
 
 
-def compare_v6(speedtrap_classification_file, individual_file, rate_limiting_routers, speedtrap_alias_pairs_file, is_only_responsive):
-    rate_limiting_ip_addresses, responsive_addresses, unresponsive_addresses = extract_rate_limiting_addresses(individual_file)
+def compare_v6(
+    speedtrap_classification_file,
+    individual_file,
+    rate_limiting_routers,
+    speedtrap_alias_pairs_file,
+    is_only_responsive,
+):
+    rate_limiting_ip_addresses, responsive_addresses, unresponsive_addresses = extract_rate_limiting_addresses(
+        individual_file
+    )
 
     #
     # prefix_difference(random_pairs, socket.AF_INET6, ofile="/Users/kevinvermeulen/PycharmProjects/"
@@ -886,7 +1039,9 @@ def compare_v6(speedtrap_classification_file, individual_file, rate_limiting_rou
     #                                                       "prefix_difference/prefix_difference_random_v6")
     # Extract paris from midar and lovebirds results.
     lovebirds_alias_pairs = get_alias_pairs(rate_limiting_routers)
-    speedtrap_alias_pairs = extract_speedtrap_alias_pairs(rate_limiting_ip_addresses, speedtrap_alias_pairs_file)
+    speedtrap_alias_pairs = extract_speedtrap_alias_pairs(
+        rate_limiting_ip_addresses, speedtrap_alias_pairs_file
+    )
 
     # fingerprinting_speedtrap_pairs = {}
     # i = 0
@@ -894,40 +1049,63 @@ def compare_v6(speedtrap_classification_file, individual_file, rate_limiting_rou
     #     fingerprinting_speedtrap_pairs[i] = list(pair)
     #     i += 1
 
-    fingerprinting_return_ttl(lovebirds_alias_pairs,"6")
-    fingerprinting_return_ttl(speedtrap_alias_pairs,"6")
+    fingerprinting_return_ttl(lovebirds_alias_pairs, "6")
+    fingerprinting_return_ttl(speedtrap_alias_pairs, "6")
 
     union_alias_pair = lovebirds_alias_pairs.union(speedtrap_alias_pairs)
-    print("Total number of alias pairs found by Lovebirds U Speedtrap: " + str(len(union_alias_pair)))
-    print("Total number of alias pairs found by Lovebirds: " + str(len(lovebirds_alias_pairs)))
-    print("Total number of alias pairs found by speedtrap: " + str(len(speedtrap_alias_pairs)))
-
+    print(
+        "Total number of alias pairs found by Lovebirds U Speedtrap: "
+        + str(len(union_alias_pair))
+    )
+    print(
+        "Total number of alias pairs found by Lovebirds: "
+        + str(len(lovebirds_alias_pairs))
+    )
+    print(
+        "Total number of alias pairs found by speedtrap: "
+        + str(len(speedtrap_alias_pairs))
+    )
 
     if is_only_responsive:
         unresponsive_addresses = []
-    speedtrap_classification = compute_speedtrap_classification(rate_limiting_ip_addresses, speedtrap_classification_file)
+    speedtrap_classification = compute_speedtrap_classification(
+        rate_limiting_ip_addresses, speedtrap_classification_file
+    )
     speedtrap_comparable_pairs, speedtrap_uncomparable_pairs = compute_speedtrap_comparable_pairs(
-        rate_limiting_ip_addresses,
-        speedtrap_classification)
+        rate_limiting_ip_addresses, speedtrap_classification
+    )
     print("Comparable pairs for Speedtrap: " + str(len(speedtrap_comparable_pairs)))
-    print("Not comparable pairs for Speedtrap: " + str(len(speedtrap_uncomparable_pairs)))
-    print("Total pairs for Speedtrap: " + str(len(speedtrap_comparable_pairs) + len(speedtrap_uncomparable_pairs)))
+    print(
+        "Not comparable pairs for Speedtrap: " + str(len(speedtrap_uncomparable_pairs))
+    )
+    print(
+        "Total pairs for Speedtrap: "
+        + str(len(speedtrap_comparable_pairs) + len(speedtrap_uncomparable_pairs))
+    )
 
-    lovebirds_comparable_pairs, lovebirds_uncomparable_pairs = get_lovebirds_comparables_pairs(responsive_addresses,
-                                                                                               unresponsive_addresses)
+    lovebirds_comparable_pairs, lovebirds_uncomparable_pairs = get_lovebirds_comparables_pairs(
+        responsive_addresses, unresponsive_addresses
+    )
 
     print("Comparable pairs for Lovebirds: " + str(len(lovebirds_comparable_pairs)))
-    print("Not comparable pairs for Lovebirds: " + str(len(lovebirds_uncomparable_pairs)))
-    print("Total pairs for Lovebirds: " + str(len(lovebirds_comparable_pairs) + len(lovebirds_uncomparable_pairs)))
+    print(
+        "Not comparable pairs for Lovebirds: " + str(len(lovebirds_uncomparable_pairs))
+    )
+    print(
+        "Total pairs for Lovebirds: "
+        + str(len(lovebirds_comparable_pairs) + len(lovebirds_uncomparable_pairs))
+    )
 
-
-
-    speedtrap_lovebirds_comparable = compute_comparable_matrix(lovebirds_comparable_pairs, lovebirds_uncomparable_pairs,
-                                                              speedtrap_comparable_pairs, speedtrap_uncomparable_pairs)
-
+    speedtrap_lovebirds_comparable = compute_comparable_matrix(
+        lovebirds_comparable_pairs,
+        lovebirds_uncomparable_pairs,
+        speedtrap_comparable_pairs,
+        speedtrap_uncomparable_pairs,
+    )
 
     alias_common_pairs, alias_lovebirds_not_midar_pairs, alias_midar_not_lovebird_pairs = get_alias_common_pairs_and_comparable(
-        lovebirds_alias_pairs, speedtrap_alias_pairs, speedtrap_lovebirds_comparable)
+        lovebirds_alias_pairs, speedtrap_alias_pairs, speedtrap_lovebirds_comparable
+    )
 
     # with open("resources/results/survey/uncommon/v6/lovebirds_not_speedtrap_pairs.pairs","w") as f:
     #     for pair in alias_lovebirds_not_midar_pairs:
@@ -935,19 +1113,33 @@ def compare_v6(speedtrap_classification_file, individual_file, rate_limiting_rou
     #             f.write(ip + " ")
     #         f.write("\n")
 
-    print("Alias common: " + str(len(alias_common_pairs)) + ", " + str(
-        len(alias_common_pairs) / len(speedtrap_lovebirds_comparable)))
-    print("Speedtrap not lovebirds alias: " + str(len(alias_midar_not_lovebird_pairs)) + ", " + str(
-        len(alias_midar_not_lovebird_pairs) / len(speedtrap_lovebirds_comparable)))
-    print("Lovebirds not Speedtrap alias: " + str(len(alias_lovebirds_not_midar_pairs)) + ", " + str(
-        len(alias_lovebirds_not_midar_pairs) / len(speedtrap_lovebirds_comparable)))
+    print(
+        "Alias common: "
+        + str(len(alias_common_pairs))
+        + ", "
+        + str(len(alias_common_pairs) / len(speedtrap_lovebirds_comparable))
+    )
+    print(
+        "Speedtrap not lovebirds alias: "
+        + str(len(alias_midar_not_lovebird_pairs))
+        + ", "
+        + str(len(alias_midar_not_lovebird_pairs) / len(speedtrap_lovebirds_comparable))
+    )
+    print(
+        "Lovebirds not Speedtrap alias: "
+        + str(len(alias_lovebirds_not_midar_pairs))
+        + ", "
+        + str(
+            len(alias_lovebirds_not_midar_pairs) / len(speedtrap_lovebirds_comparable)
+        )
+    )
 
 
 def fingerprinting_return_ttl(pairs, ip_version):
     # Compare the fingerprinting
     not_same_fingerprinting = 0
     not_in_classification = 0
-    with open("resources/results/survey/fingerprinting_" + ip_version+".json") as f:
+    with open("resources/results/survey/fingerprinting_" + ip_version + ".json") as f:
         fingerprinting = json.load(f)
 
         for p in pairs:
@@ -980,26 +1172,37 @@ def fingerprinting_return_ttl(pairs, ip_version):
                         break
 
             if len(set(initial_ping_ttl)) > 1 or len(set(initial_ttl_exceeded_ttl)) > 1:
-                not_same_fingerprinting +=1
+                not_same_fingerprinting += 1
     print("Pairs not in  fingerprinting: " + str(not_in_classification))
     print("Pairs with not same fingerprinting: " + str(not_same_fingerprinting))
+
 
 import json
 
 
-def compare_v4(midar_classification_file, individual_file, rate_limiting_routers, midar_routers, is_only_responsive):
-    '''
+def compare_v4(
+    midar_classification_file,
+    individual_file,
+    rate_limiting_routers,
+    midar_routers,
+    is_only_responsive,
+):
+    """
     This function compares the number of pairs that are comparable from MIDAR, Lovebirds and Speedtrap point of view.
     :return:
-    '''
+    """
 
-    rate_limiting_ip_addresses, responsive_addresses, unresponsive_addresses = extract_rate_limiting_addresses(individual_file)
+    rate_limiting_ip_addresses, responsive_addresses, unresponsive_addresses = extract_rate_limiting_addresses(
+        individual_file
+    )
 
     random_pairs = []
     while len(random_pairs) < 4130:
         index1 = random.randint(0, len(rate_limiting_ip_addresses) - 1)
         index2 = random.randint(0, len(rate_limiting_ip_addresses) - 1)
-        random_pairs.append([rate_limiting_ip_addresses[index1], rate_limiting_ip_addresses[index2]])
+        random_pairs.append(
+            [rate_limiting_ip_addresses[index1], rate_limiting_ip_addresses[index2]]
+        )
     fingerprinting_return_ttl(random_pairs, "4")
     # random_pairs = {}
     # while len(random_pairs) < 4130:
@@ -1016,10 +1219,13 @@ def compare_v4(midar_classification_file, individual_file, rate_limiting_routers
 
     # Extract paris from midar and lovebirds results.
     lovebirds_alias_pairs = get_alias_pairs(rate_limiting_routers)
-    fingerprinting_return_ttl(lovebirds_alias_pairs,"4")
+    fingerprinting_return_ttl(lovebirds_alias_pairs, "4")
 
     full_midar_alias_pairs = get_alias_pairs(midar_routers)
-    print("Total number of alias pairs found by MIDAR test set: " + str(len(full_midar_alias_pairs)))
+    print(
+        "Total number of alias pairs found by MIDAR test set: "
+        + str(len(full_midar_alias_pairs))
+    )
     midar_alias_pairs = set()
     for pair in full_midar_alias_pairs:
         if len(pair.intersection(rate_limiting_ip_addresses)) == 2:
@@ -1029,8 +1235,14 @@ def compare_v4(midar_classification_file, individual_file, rate_limiting_routers
 
     union_alias_pair = lovebirds_alias_pairs.union(midar_alias_pairs)
 
-    print("Total number of alias pairs found by Lovebirds U MIDAR: " + str(len(union_alias_pair)))
-    print("Total number of alias pairs found by Lovebirds: " + str(len(lovebirds_alias_pairs)))
+    print(
+        "Total number of alias pairs found by Lovebirds U MIDAR: "
+        + str(len(union_alias_pair))
+    )
+    print(
+        "Total number of alias pairs found by Lovebirds: "
+        + str(len(lovebirds_alias_pairs))
+    )
     print("Total number of alias pairs found by Midar: " + str(len(midar_alias_pairs)))
     unique_alias_ip = set()
     for pair in union_alias_pair:
@@ -1038,46 +1250,62 @@ def compare_v4(midar_classification_file, individual_file, rate_limiting_routers
             unique_alias_ip.add(ip)
 
     print("Total number of ip in alias sets:" + str(len(unique_alias_ip)))
-    '''
+    """
     Compute Lovebirds comparable
-    '''
-    lovebirds_comparable_pairs, lovebirds_uncomparable_pairs = get_lovebirds_comparables_pairs(responsive_addresses,
-                                                                                               unresponsive_addresses)
-
+    """
+    lovebirds_comparable_pairs, lovebirds_uncomparable_pairs = get_lovebirds_comparables_pairs(
+        responsive_addresses, unresponsive_addresses
+    )
 
     print("Comparable pairs for Lovebirds: " + str(len(lovebirds_comparable_pairs)))
-    print("Not comparable pairs for Lovebirds: " + str(len(lovebirds_uncomparable_pairs)))
-    print("Total pairs for Lovebirds: " + str(len(lovebirds_comparable_pairs) + len(lovebirds_uncomparable_pairs)))
+    print(
+        "Not comparable pairs for Lovebirds: " + str(len(lovebirds_uncomparable_pairs))
+    )
+    print(
+        "Total pairs for Lovebirds: "
+        + str(len(lovebirds_comparable_pairs) + len(lovebirds_uncomparable_pairs))
+    )
 
-    '''
+    """
     Compute MIDAR comparable 
-    '''
+    """
     # Compute the number of pairs that are comparable
 
-    midar_classification = compute_midar_classification(rate_limiting_ip_addresses, midar_classification_file)
+    midar_classification = compute_midar_classification(
+        rate_limiting_ip_addresses, midar_classification_file
+    )
 
-    midar_comparable_pairs, midar_uncomparable_pairs = compute_midar_comparables_pairs(rate_limiting_ip_addresses,
-                                                                                       midar_classification)
+    midar_comparable_pairs, midar_uncomparable_pairs = compute_midar_comparables_pairs(
+        rate_limiting_ip_addresses, midar_classification
+    )
 
     print("Comparable pairs for MIDAR: " + str(len(midar_comparable_pairs)))
     print("Not comparable pairs for MIDAR: " + str(len(midar_uncomparable_pairs)))
-    print("Total pairs for MIDAR: " + str(len(midar_uncomparable_pairs) + len(midar_comparable_pairs)))
+    print(
+        "Total pairs for MIDAR: "
+        + str(len(midar_uncomparable_pairs) + len(midar_comparable_pairs))
+    )
 
-    '''
+    """
     Compute Matrix of comparable
-    '''
+    """
     # Get the full picture of comparable
-    midar_lovebirds_comparable = compute_comparable_matrix(lovebirds_comparable_pairs, lovebirds_uncomparable_pairs,
-                                                              midar_comparable_pairs, midar_uncomparable_pairs)
+    midar_lovebirds_comparable = compute_comparable_matrix(
+        lovebirds_comparable_pairs,
+        lovebirds_uncomparable_pairs,
+        midar_comparable_pairs,
+        midar_uncomparable_pairs,
+    )
 
-    '''
+    """
     Now focus on common pairs.
-    '''
+    """
 
+    alias_common_pairs, alias_lovebirds_not_midar_pairs, alias_midar_not_lovebird_pairs = get_alias_common_pairs_and_comparable(
+        lovebirds_alias_pairs, midar_alias_pairs, midar_lovebirds_comparable
+    )
 
-    alias_common_pairs, alias_lovebirds_not_midar_pairs, alias_midar_not_lovebird_pairs = get_alias_common_pairs_and_comparable(lovebirds_alias_pairs, midar_alias_pairs, midar_lovebirds_comparable)
-
-    reasons = {"udp":0, "icmp": 0, "multiple_proto":0}
+    reasons = {"udp": 0, "icmp": 0, "multiple_proto": 0}
     for pair in alias_midar_not_lovebird_pairs:
         probing_methods = set()
         for e in pair:
@@ -1088,15 +1316,30 @@ def compare_v4(midar_classification_file, individual_file, rate_limiting_routers
         else:
             reasons["multiple_proto"] += 1
     print(reasons)
-    print("Alias common: " + str(len(alias_common_pairs)) + ", " + str(len(alias_common_pairs)/ len(midar_lovebirds_comparable)))
-    print("Midar not lovebirds alias: " + str(len(alias_midar_not_lovebird_pairs)) + ", " + str(
-        len(alias_midar_not_lovebird_pairs) / len(midar_lovebirds_comparable)))
-    print("Lovebirds not Midar alias: " + str(len(alias_lovebirds_not_midar_pairs)) + ", " + str(
-        len(alias_lovebirds_not_midar_pairs) / len(midar_lovebirds_comparable)))
+    print(
+        "Alias common: "
+        + str(len(alias_common_pairs))
+        + ", "
+        + str(len(alias_common_pairs) / len(midar_lovebirds_comparable))
+    )
+    print(
+        "Midar not lovebirds alias: "
+        + str(len(alias_midar_not_lovebird_pairs))
+        + ", "
+        + str(len(alias_midar_not_lovebird_pairs) / len(midar_lovebirds_comparable))
+    )
+    print(
+        "Lovebirds not Midar alias: "
+        + str(len(alias_lovebirds_not_midar_pairs))
+        + ", "
+        + str(len(alias_lovebirds_not_midar_pairs) / len(midar_lovebirds_comparable))
+    )
 
 
 def clear_unresponsive(routers, individual_file):
-    rate_limiting_ip_addresses, responsive_addresses, unresponsive_addresses = extract_rate_limiting_addresses(individual_file)
+    rate_limiting_ip_addresses, responsive_addresses, unresponsive_addresses = extract_rate_limiting_addresses(
+        individual_file
+    )
     n_unresponsive = 0
     for ip in unresponsive_addresses:
         for router_name, router in routers.items():
@@ -1104,6 +1347,7 @@ def clear_unresponsive(routers, individual_file):
                 router.remove(ip)
                 n_unresponsive += 1
     print("Number of unrepsonsive addresses", n_unresponsive)
+
 
 def extract_speedtrap_routers(speedtrap_file):
 
@@ -1116,6 +1360,7 @@ def extract_speedtrap_routers(speedtrap_file):
                 router.append(ip.upper())
             routers.append(router)
     return routers
+
 
 def extract_midar_routers(midar_file):
     routers = []
@@ -1135,12 +1380,10 @@ def extract_midar_routers(midar_file):
             routers.append(copy.deepcopy(router))
             del router[:]
 
-    return { str(i): routers[i] for i in range(0, len(routers))}
+    return {str(i): routers[i] for i in range(0, len(routers))}
 
 
 def prefix_difference(routers, af_family, ofile):
-
-
 
     prefix_difference_list = []
 
@@ -1152,17 +1395,17 @@ def prefix_difference(routers, af_family, ofile):
             ip1 = socket.inet_pton(af_family, ip1_string)
             bit_list = []
             for byte in ip1:
-                b = format(byte, '#010b')
+                b = format(byte, "#010b")
                 for bit in b[2:]:
                     bit_list.append(bit)
-            for j in range(i+1, len(router)):
+            for j in range(i + 1, len(router)):
                 ip2_s = ipaddress.ip_address(router[j].strip())
                 ip2_string = ip2_s.exploded
                 ip2 = socket.inet_pton(af_family, ip2_string)
                 bit_list2 = []
                 for byte in ip2:
 
-                    b = format(byte, '#010b')
+                    b = format(byte, "#010b")
                     for bit in b[2:]:
                         bit_list2.append(bit)
 
@@ -1172,56 +1415,78 @@ def prefix_difference(routers, af_family, ofile):
 
     with open(ofile, "w") as f:
         for prefix_diff in prefix_difference_list:
-            f.write(str(prefix_diff) +"\n")
+            f.write(str(prefix_diff) + "\n")
 
     return prefix_difference_list
 
+
 if __name__ == "__main__":
     # compare_tools()
-    #analyse_rerun()
-    imc_paper_root = "/Users/kevinvermeulen/PycharmProjects/icmp-rate-limiting-paper/resources/"
+    # analyse_rerun()
+    imc_paper_root = (
+        "/Users/kevinvermeulen/PycharmProjects/icmp-rate-limiting-paper/resources/"
+    )
     # Only consider responsive addresses
     is_only_responsive = False
     is_v4 = True
     is_v6 = False
-    '''
+    """
     Survey
-    '''
+    """
     is_survey = True
     if is_survey:
         if is_v4:
             node = "ple41.planet-lab.eu"
-            rate_limiting_routers_dir = "resources/results/survey/aliases/v4/" + node + "/"
+            rate_limiting_routers_dir = (
+                "resources/results/survey/aliases/v4/" + node + "/"
+            )
             midar_classification_file = "resources/results/survey/target-summary.txt"
             individual_file = "resources/results/survey/survey_individual4"
 
-            rate_limiting_routers = extract_routers_evaluation(rate_limiting_routers_dir)
+            rate_limiting_routers = extract_routers_evaluation(
+                rate_limiting_routers_dir
+            )
             # prefix_difference(rate_limiting_routers, af_family=socket.AF_INET, ofile=imc_paper_root + "prefix_difference/prefix_difference_ltdltd_v4")
-            midar_routers = extract_routers_by_node("/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/")[node]
+            midar_routers = extract_routers_by_node(
+                "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
+            )[node]
             # prefix_difference(midar_routers, af_family=socket.AF_INET, ofile=imc_paper_root + "prefix_difference/prefix_difference_midar")
-            compare_v4(midar_classification_file, individual_file, rate_limiting_routers, midar_routers, is_only_responsive)
-
-
-
-
+            compare_v4(
+                midar_classification_file,
+                individual_file,
+                rate_limiting_routers,
+                midar_routers,
+                is_only_responsive,
+            )
 
         if is_v6:
             node = "ple2.planet-lab.eu"
-            rate_limiting_routers_dir = "resources/results/survey/aliases/v6/" + node + "/"
-            speedtrap_classification_file = "resources/results/survey/speedtrap.classification"
+            rate_limiting_routers_dir = (
+                "resources/results/survey/aliases/v6/" + node + "/"
+            )
+            speedtrap_classification_file = (
+                "resources/results/survey/speedtrap.classification"
+            )
             individual_file = "resources/results/survey/survey_individual6"
 
             speedtrap_pairs_file = "resources/results/survey/speedtrap.pairs"
 
-            rate_limiting_routers = extract_routers_evaluation(rate_limiting_routers_dir)
+            rate_limiting_routers = extract_routers_evaluation(
+                rate_limiting_routers_dir
+            )
 
-            compare_v6(speedtrap_classification_file,
-                       individual_file, rate_limiting_routers, speedtrap_pairs_file, is_only_responsive)
+            compare_v6(
+                speedtrap_classification_file,
+                individual_file,
+                rate_limiting_routers,
+                speedtrap_pairs_file,
+                is_only_responsive,
+            )
 
             # Select 4130 IPv6 addresses
-    '''
+    """
         Internet 2
-    '''
+    """
 
     is_internet2 = False
     if is_internet2:
@@ -1230,10 +1495,14 @@ if __name__ == "__main__":
             #                        "planetlab1.cs.vu.nl",
             #                        "ple41.planet-lab.eu"]
             rate_limiting_nodes = ["ple2.planet-lab.eu"]
-            midar_classification_file = "resources/results/internet2/midar-analysis/target-summary.txt"
+            midar_classification_file = (
+                "resources/results/internet2/midar-analysis/target-summary.txt"
+            )
             individual_file = "resources/results/internet2/individual/ple2.planet-lab.eu_internet2_individual4"
 
-            ground_truth_routers = extract_routers("resources/internet2/ground-truth/routers/v4/")
+            ground_truth_routers = extract_routers(
+                "resources/internet2/ground-truth/routers/v4/"
+            )
 
             if is_only_responsive:
                 clear_unresponsive(ground_truth_routers, individual_file)
@@ -1241,9 +1510,13 @@ if __name__ == "__main__":
             print("Ground truth alias pairs: " + str(len(ground_truth_alias_pairs)))
             routers = []
             for node in rate_limiting_nodes:
-                routers_node = extract_routers("resources/results/internet2/aliases/v4/" + node + "/")
+                routers_node = extract_routers(
+                    "resources/results/internet2/aliases/v4/" + node + "/"
+                )
                 copy_router_node = copy.deepcopy(routers_node)
-                routers_node_final, tp, fp = clean_false_positives(copy_router_node, ground_truth_routers)
+                routers_node_final, tp, fp = clean_false_positives(
+                    copy_router_node, ground_truth_routers
+                )
                 fn = len(ground_truth_alias_pairs) - tp
                 print("True positives", tp)
                 print("False positives", fp)
@@ -1257,7 +1530,9 @@ if __name__ == "__main__":
             routers = transitive_closure(routers)
             print("Number of distinct routers: " + str(len(routers)))
             routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
-            routers_tc_dic_final, tp, fp = clean_false_positives(routers_tc_dic, ground_truth_routers)
+            routers_tc_dic_final, tp, fp = clean_false_positives(
+                routers_tc_dic, ground_truth_routers
+            )
             fn = len(ground_truth_alias_pairs) - tp
             print(precision(tp, fp))
             print(recall(tp, fn))
@@ -1272,26 +1547,40 @@ if __name__ == "__main__":
             midar_routers = []
             for node in midar_nodes:
                 midar_routers_node = extract_midar_routers(
-                    "resources/internet2/midar/tc")
+                    "resources/internet2/midar/tc"
+                )
                 for router_name, router in midar_routers_node.items():
                     midar_routers.append(set(router))
             midar_routers = transitive_closure(midar_routers)
             print("Number of distinct routers: " + str(len(midar_routers)))
-            midar_routers_tc_dic = {i: list(midar_routers[i]) for i in range(0, len(midar_routers))}
-            midar_routers_tc_dic, tp, fp = clean_false_positives(midar_routers_tc_dic, ground_truth_routers)
+            midar_routers_tc_dic = {
+                i: list(midar_routers[i]) for i in range(0, len(midar_routers))
+            }
+            midar_routers_tc_dic, tp, fp = clean_false_positives(
+                midar_routers_tc_dic, ground_truth_routers
+            )
             fn = len(ground_truth_alias_pairs) - tp
             print(precision(tp, fp))
             print(recall(tp, fn))
 
-
-            compare_v4(midar_classification_file, individual_file, routers_tc_dic, midar_routers_tc_dic, is_only_responsive)
+            compare_v4(
+                midar_classification_file,
+                individual_file,
+                routers_tc_dic,
+                midar_routers_tc_dic,
+                is_only_responsive,
+            )
 
             union_routers = copy.deepcopy(routers)
             union_routers.extend(midar_routers)
             union_routers = transitive_closure(union_routers)
             print("Number of distinct routers: " + str(len(union_routers)))
-            midar_routers_tc_dic = {i: list(union_routers[i]) for i in range(0, len(union_routers))}
-            midar_routers_tc_dic, tp, fp = clean_false_positives(midar_routers_tc_dic, ground_truth_routers)
+            midar_routers_tc_dic = {
+                i: list(union_routers[i]) for i in range(0, len(union_routers))
+            }
+            midar_routers_tc_dic, tp, fp = clean_false_positives(
+                midar_routers_tc_dic, ground_truth_routers
+            )
             fn = len(ground_truth_alias_pairs) - tp
             print(precision(tp, fp))
             print(recall(tp, fn))
@@ -1299,23 +1588,30 @@ if __name__ == "__main__":
         if is_v6:
             individual_file = "resources/results/internet2/individual/ple2.planet-lab.eu_internet2_individual6"
 
-            ground_truth_routers = extract_routers("resources/internet2/ground-truth/routers/v6/")
+            ground_truth_routers = extract_routers(
+                "resources/internet2/ground-truth/routers/v6/"
+            )
 
-            speedtrap_classification_file = "resources/internet2/speedtrap/speedtrap_classification_internet2"
+            speedtrap_classification_file = (
+                "resources/internet2/speedtrap/speedtrap_classification_internet2"
+            )
 
             if is_only_responsive:
                 clear_unresponsive(ground_truth_routers, individual_file)
 
             rate_limiting_nodes = ["ple2.planet-lab.eu"]
 
-
             ground_truth_alias_pairs = get_alias_pairs(ground_truth_routers)
             print("Ground truth alias pairs: " + str(len(ground_truth_alias_pairs)))
             routers = []
             precisions = []
             for node in rate_limiting_nodes:
-                routers_node = extract_routers("resources/results/internet2/aliases/v6/" + node + "/")
-                routers_node, tp, fp = clean_false_positives(routers_node, ground_truth_routers)
+                routers_node = extract_routers(
+                    "resources/results/internet2/aliases/v6/" + node + "/"
+                )
+                routers_node, tp, fp = clean_false_positives(
+                    routers_node, ground_truth_routers
+                )
                 print(node, precision(tp, fp))
                 print("True positives", tp)
                 print("False positives", fp)
@@ -1330,27 +1626,35 @@ if __name__ == "__main__":
 
             print("Mean precision over ple nodes:" + str(np.mean(precisions)))
 
-            evaluate(routers_tc_dic, ground_truth_routers, len(ground_truth_alias_pairs))
+            evaluate(
+                routers_tc_dic, ground_truth_routers, len(ground_truth_alias_pairs)
+            )
 
             compute_speedtrap_classification([], speedtrap_classification_file)
 
-    '''
+    """
     Switch
-    '''
-    from Validation.switch_ground_truth import extract_evaluation_gt_switch, extract_gt_from_yaml
+    """
+    from Validation.switch_ground_truth import (
+        extract_evaluation_gt_switch,
+        extract_gt_from_yaml,
+    )
+
     is_switch = False
     if is_switch:
         switch_gt_file = "resources/SWITCH/ground-truth.yml"
-        ground_truth_routers_v4, ground_truth_routers_v6 = extract_evaluation_gt_switch(extract_gt_from_yaml(switch_gt_file))
+        ground_truth_routers_v4, ground_truth_routers_v6 = extract_evaluation_gt_switch(
+            extract_gt_from_yaml(switch_gt_file)
+        )
         if is_v4:
             # rate_limiting_nodes = ["cse-yellow.cse.chalmers.se", "ple1.cesnet.cz",
             #                        "planetlab1.cs.vu.nl",
             #                        "ple41.planet-lab.eu"]
             rate_limiting_nodes = ["ple2.planet-lab.eu"]
-            midar_classification_file = "resources/results/switch/midar/target-summary.txt"
+            midar_classification_file = (
+                "resources/results/switch/midar/target-summary.txt"
+            )
             individual_file = "resources/results/switch/individual/ple2.planet-lab.eu_switch_individual4"
-
-
 
             if is_only_responsive:
                 clear_unresponsive(ground_truth_routers_v4, individual_file)
@@ -1358,9 +1662,13 @@ if __name__ == "__main__":
             print("Ground truth alias pairs: " + str(len(ground_truth_alias_pairs)))
             routers = []
             for node in rate_limiting_nodes:
-                routers_node = extract_routers("resources/results/switch/aliases/v4/" + node + "/")
+                routers_node = extract_routers(
+                    "resources/results/switch/aliases/v4/" + node + "/"
+                )
                 copy_router_node = copy.deepcopy(routers_node)
-                routers_node_final, tp, fp = clean_false_positives(copy_router_node, ground_truth_routers_v4)
+                routers_node_final, tp, fp = clean_false_positives(
+                    copy_router_node, ground_truth_routers_v4
+                )
                 fn = len(ground_truth_alias_pairs) - tp
                 print("True positives", tp)
                 print("False positives", fp)
@@ -1374,10 +1682,12 @@ if __name__ == "__main__":
             routers = transitive_closure(routers)
             print("Number of distinct routers: " + str(len(routers)))
             routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
-            routers_tc_dic_final, tp, fp = clean_false_positives(routers_tc_dic, ground_truth_routers_v4)
+            routers_tc_dic_final, tp, fp = clean_false_positives(
+                routers_tc_dic, ground_truth_routers_v4
+            )
             fn = len(ground_truth_alias_pairs) - tp
-            print("LtdLtd",precision(tp, fp))
-            print("LtdLtd",recall(tp, fn))
+            print("LtdLtd", precision(tp, fp))
+            print("LtdLtd", recall(tp, fn))
 
             # midar_nodes = ["ple1.cesnet.cz",
             #                "ple41.planet-lab.eu",
@@ -1389,13 +1699,18 @@ if __name__ == "__main__":
             midar_routers = []
             for node in midar_nodes:
                 midar_routers_node = extract_midar_routers(
-                    "resources/results/switch/midar/tc")
+                    "resources/results/switch/midar/tc"
+                )
                 for router_name, router in midar_routers_node.items():
                     midar_routers.append(set(router))
             midar_routers = transitive_closure(midar_routers)
             print("Number of distinct routers: " + str(len(midar_routers)))
-            midar_routers_tc_dic = {i: list(midar_routers[i]) for i in range(0, len(midar_routers))}
-            midar_routers_tc_dic, tp, fp = clean_false_positives(midar_routers_tc_dic, ground_truth_routers_v4)
+            midar_routers_tc_dic = {
+                i: list(midar_routers[i]) for i in range(0, len(midar_routers))
+            }
+            midar_routers_tc_dic, tp, fp = clean_false_positives(
+                midar_routers_tc_dic, ground_truth_routers_v4
+            )
             fn = len(ground_truth_alias_pairs) - tp
 
             print("Midar", precision(tp, fp))
@@ -1403,15 +1718,18 @@ if __name__ == "__main__":
             print("True positives", tp)
             print("False positives", fp)
 
-
             # compare_v4(midar_classification_file, individual_file, routers_tc_dic, midar_routers_tc_dic, is_only_responsive)
 
             union_routers = copy.deepcopy(routers)
             union_routers.extend(midar_routers)
             union_routers = transitive_closure(union_routers)
             print("Number of distinct routers: " + str(len(union_routers)))
-            midar_routers_tc_dic = {i: list(union_routers[i]) for i in range(0, len(union_routers))}
-            midar_routers_tc_dic, tp, fp = clean_false_positives(midar_routers_tc_dic, ground_truth_routers_v4)
+            midar_routers_tc_dic = {
+                i: list(union_routers[i]) for i in range(0, len(union_routers))
+            }
+            midar_routers_tc_dic, tp, fp = clean_false_positives(
+                midar_routers_tc_dic, ground_truth_routers_v4
+            )
             fn = len(ground_truth_alias_pairs) - tp
             print("Union", precision(tp, fp))
             print("Union", recall(tp, fn))
@@ -1419,21 +1737,26 @@ if __name__ == "__main__":
         if is_v6:
             individual_file = "resources/results/switch/individual/ple2.planet-lab.eu_switch_individual6"
 
-            speedtrap_classification_file = "resources/internet2/speedtrap/speedtrap_classification_switch"
+            speedtrap_classification_file = (
+                "resources/internet2/speedtrap/speedtrap_classification_switch"
+            )
             speedtrap_tc_file = "resources/results/switch/speedtrap/switch_speedtrap.tc"
             if is_only_responsive:
                 clear_unresponsive(ground_truth_routers_v6, individual_file)
 
             rate_limiting_nodes = ["ple2.planet-lab.eu"]
 
-
             ground_truth_alias_pairs = get_alias_pairs(ground_truth_routers_v6)
             print("Ground truth alias pairs: " + str(len(ground_truth_alias_pairs)))
             routers = []
             # precisions = []
             for node in rate_limiting_nodes:
-                routers_node = extract_routers("resources/results/switch/aliases/v6/" + node + "/")
-                routers_node, tp, fp = clean_false_positives(routers_node, ground_truth_routers_v6)
+                routers_node = extract_routers(
+                    "resources/results/switch/aliases/v6/" + node + "/"
+                )
+                routers_node, tp, fp = clean_false_positives(
+                    routers_node, ground_truth_routers_v6
+                )
                 print("LtdLtd", precision(tp, fp))
                 print("LtdLtd", recall(tp, len(ground_truth_alias_pairs) - tp))
                 print("True positives", tp)
@@ -1453,22 +1776,28 @@ if __name__ == "__main__":
             # # print("Mean precision over ple nodes:" + str(np.mean(precisions)))
             #
 
-
-
             # Extract speedtrap routers
             speedtrap_routers = extract_speedtrap_routers(speedtrap_tc_file)
-            speedtrap_routers_tc_dic = { i : speedtrap_routers[i] for i in range(0, len(speedtrap_routers))}
-            evaluate(speedtrap_routers_tc_dic, ground_truth_routers_v6, len(ground_truth_alias_pairs))
+            speedtrap_routers_tc_dic = {
+                i: speedtrap_routers[i] for i in range(0, len(speedtrap_routers))
+            }
+            evaluate(
+                speedtrap_routers_tc_dic,
+                ground_truth_routers_v6,
+                len(ground_truth_alias_pairs),
+            )
 
             union_routers = copy.deepcopy(routers)
             union_routers.extend([set(router) for router in speedtrap_routers])
             union_routers = transitive_closure(union_routers)
             print("Number of distinct routers: " + str(len(union_routers)))
-            union_routers_tc_dic = {i: list(union_routers[i]) for i in range(0, len(union_routers))}
-            union_routers_tc_dic, tp, fp = clean_false_positives(union_routers_tc_dic, ground_truth_routers_v6)
+            union_routers_tc_dic = {
+                i: list(union_routers[i]) for i in range(0, len(union_routers))
+            }
+            union_routers_tc_dic, tp, fp = clean_false_positives(
+                union_routers_tc_dic, ground_truth_routers_v6
+            )
             fn = len(ground_truth_alias_pairs) - tp
             print("Union", precision(tp, fp))
             print("Union", recall(tp, fn))
             # compute_speedtrap_classification([], speedtrap_classification_file)
-
-

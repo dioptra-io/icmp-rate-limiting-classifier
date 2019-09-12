@@ -3,11 +3,13 @@ import re
 import pprint
 from Files.utils import ipv4_regex, ipv6_regex
 
+
 def extract_gt_from_yaml(gt_file):
     with open(gt_file) as f:
         switch_gt = yaml.load(f)
 
     return switch_gt
+
 
 def extract_evaluation_gt_switch(switch_gt):
     ips4 = set()
@@ -56,10 +58,6 @@ if __name__ == "__main__":
 
     routers_v4, router_v6 = extract_evaluation_gt_switch(switch_gt)
 
-
-
-
-
     # with open(switch_dir + "ips4", "w") as f:
     #     for ip in ips4:
     #         f.write(ip + "\n")
@@ -67,7 +65,3 @@ if __name__ == "__main__":
     # with open(switch_dir + "ips6", "w") as f:
     #     for ip in ips6:
     #         f.write(ip + "\n")
-
-
-
-
