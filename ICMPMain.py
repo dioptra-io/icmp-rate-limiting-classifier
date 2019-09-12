@@ -1,305 +1,198 @@
-import sys
+"""Perform the rate limiting algorithm on a list of IP addresses."""
 import argparse
-
+import configparser
 import json
+import pandas as pd
+import re
 
-from Classification.classifier_options import ClassifierOptions
-from Cpp.cpp_options import CppOptions
-from Cpp.launcher import *
 from joblib import load
-from Cpp.cpp_files import *
-from Algorithms.algorithms import rotate, transitive_closure
-from Probing.probing_algorithm import *
+
+from Algorithms.algorithms import transitive_closure
+from Classification.classifier_options import ClassifierOptions
+from Cpp.cpp_files import ipv4_regex, ipv6_regex
+from Cpp.cpp_options import generate_cpp_options
+from Data.preprocess import extract_individual
+from Probing.probing_algorithm import (
+    execute_individual,
+    find_witness_phase,
+    simultaneous_phase,
+)
 
 
-def main(targets_file, router_id, ip_version):
+def get_candidates(targets_file, max_candidates=None):
+    """Get candidate from the target file."""
+    candidates = []
+    for line in open(targets_file, "r"):
+        if max_candidates is not None and len(candidates) >= max_candidates:
+            break
+
+        line = line.strip("\n")
+        if re.match(ipv4_regex, line) or re.match(ipv6_regex, line):
+            if line not in candidates:
+                candidates.append(line)
+    return candidates
+
+
+def cluster_by_triggering_rate(df_individual, candidates):
+    """Cluster the results by triggering rates."""
+    clusters = []
+    for i in range(7, 16):
+        cluster_triggering_rate = 2 ** i
+        probing_rate_column = df_individual["probing_rate"]
+        cluster = list(
+            df_individual[
+                (2 ** i <= probing_rate_column) & (probing_rate_column < 2 ** (i + 1))
+            ]["ip_address"]
+        )
+
+        clusters.append(
+            (
+                sorted(list(set(cluster).intersection(candidates))),
+                cluster_triggering_rate,
+            )
+        )
+    return clusters
+
+
+def main(config, candidates):
     """The algorithm is O(n)."""
-
-    categorized_candidates = []
-
-    # targets_file = "/home/kevin/mda-lite-v6-survey/resources/internet2/ips"
-
-    # targets_file = "resources/survey/ips" + ip_version
-    # icmp_rl_install_dir = "/root/ICMPRateLimiting/"
-    # cpp_binary_cmd = "cd /root/ICMPRateLimiting; " \
-    #               "sudo env LD_LIBRARY_PATH=/usr/local/lib64/:$LD_LIBRARY_PATH " \
-    #               "./build/ICMPEndToEnd "
-
-    # Command on venus (centos)
-    icmp_install_dir = "/home/matthieu/icmp-rate-limiting/"
-    cpp_binary_cmd = "cd " + icmp_install_dir + "; " \
-                     "sudo env LD_LIBRARY_PATH=/usr/local/lib64/:$LD_LIBRARY_PATH " \
-                     "./ICMPEndToEnd "
-
-    # Command on plenodes (Fedora)
-    # icmp_install_dir = "/home/matthieu/icmp-rate-limiting"
-    # cpp_binary_cmd = "cd " + icmp_install_dir + "; " "./ICMPEndToEnd "
-    """
-        Set options
-    """
-
-    ################################ Algorithm Options ##################################################
-
-    cpp_options = CppOptions()
-    # Venus individual dir
-    # cpp_options.pcap_dir_individual = "/srv/icmp-rl-survey/internet2/pcap/individual/"
-    # cpp_options.pcap_dir_groups = "/srv/icmp-rl-survey/internet2/pcap/groups/"
-
-    # Ple nodes
-    node = sys.argv[1]
-    cpp_options.pcap_dir_individual = (
-        icmp_install_dir + "resources/pcap/individual/"
-    )
-    cpp_options.pcap_dir_groups = icmp_install_dir + "resources/pcap/groups/"
-    cpp_options.pcap_prefix = node + "_"
-    cpp_options.low_rate_dpr = 10
-    cpp_options.measurement_time = 5
-    cpp_options.output_file = icmp_install_dir + "test"
-    cpp_options.target_loss_rate_interval = "[0.30,0.99]"
-    cpp_options.exponential_ratio = 2
-    """
-        Survey stuff
-    """
-    # ip_version = str(ip_version)
-    # cpp_options.individual_result_file = (
-    #     icmp_install_dir + "resources/results/survey_individual_paper_" + ip_version
-    # )
-
-    # cpp_individual_file = (
-    #     icmp_install_dir + "resources/results/survey_individual_paper_" + ip_version
-    # )
-    # cpp_individual_file_witness = (
-    #     icmp_install_dir + "resources/results/survey_individual_witness" + ip_version
-    # )
-    # witness_by_candidate_file = "resources/witness_by_candidate" + ip_version + ".json"
-    # hop_by_candidate_file = "resources/hop_by_candidate" + ip_version + ".json"
-
-    """
-        Internet2
-    """
-    # cpp_options.individual_result_file = icmp_install_dir + "resources/results/internet2_individual" + ip_version + "_0.05"
-    
-    # cpp_individual_file = icmp_install_dir + "resources/results/internet2_individual" + ip_version + "_0.05"
-    # cpp_individual_file_witness = icmp_install_dir + "resources/results/internet2_individual_witness" + ip_version
-    # witness_by_candidate_file = "resources/witness_by_candidate_internet2" + ip_version + ".json"
-    # hop_by_candidate_file = "resources/hop_by_candidate_internet2" + ip_version + ".json"
-
-    """
-        SWITCH
-    """
-    # cpp_options.individual_result_file = icmp_install_dir + "resources/results/switch_individual" + ip_version
     #
-    # cpp_individual_file = icmp_install_dir + "resources/results/switch_individual" + ip_version
-    # cpp_individual_file_witness = icmp_install_dir + "resources/results/switch_individual_witness" + ip_version
-    # witness_by_candidate_file = "resources/witness_by_candidate_switch" + ip_version + ".json"
-    # hop_by_candidate_file = "resources/hop_by_candidate_switch" + ip_version + ".json"
+    # ---- Options ----
+    #
 
-    """
-        Debug
-    """
-    cpp_options.individual_result_file = icmp_install_dir + "resources/results/debug_individual" + ip_version 
-    
-    cpp_individual_file = icmp_install_dir + "resources/results/debug_individual" + ip_version 
-    cpp_individual_file_witness = icmp_install_dir + "resources/results/debug_individual_witness" + ip_version
-    witness_by_candidate_file = "resources/witness_by_candidate_debug" + ip_version + ".json"
-    hop_by_candidate_file = "resources/hop_by_candidate_debug" + ip_version + ".json"
+    # Binary options
+    cpp_options = generate_cpp_options(config)
 
-
-    """
-        Serialiazed classifier
-    """
-    classifier_file_name = "resources/random_forest_classifier4" + ".joblib"
-    classifier = load(filename=classifier_file_name)
-
-    # classifier_file_name = "resources/random_forest_classifier.json"
-    # with open(classifier_file_name) as fp:
-    #     classifier = json.load(fp)
-    #     classifier = jsonpickle.decode(classifier)
-    # Build the cpp target_file
-
-    """
-        Global parameters of the classifier
-    """
+    # Classifier options
+    classifier = load(filename=config["CLASSIFIER"]["ClassifierPath"])
     classifier_options = ClassifierOptions()
 
-    aliases = []
+    #
+    # ---- Individual phase ----
+    #
 
-    candidates = []
-    unresponsive_candidates = []
-    with open(targets_file) as targets_file_fp:
-        for line in targets_file_fp:
-            line = line.strip("\n")
-            if re.match(ipv4_regex, line) or re.match(ipv6_regex, line):
-                if not line in candidates:
-                    if len(candidates) < 10460:
-                        candidates.append(line)
-
-    # Individual phase
     # Batch candidates into 1 candidate because of RAM issues.
     do_individual = True
     if do_individual:
-        execute_individual(
-            ip_version,
-            node,
-            candidates,
-            icmp_install_dir,
-            cpp_binary_cmd,
-            cpp_options,
-            classifier_options,
-            cpp_individual_file,
-        )
+        execute_individual(candidates, config, cpp_options, classifier_options)
     else:
         # Take the intersection of the candidates list and the individual file.
         individual_ips = set(
             extract_individual(
-                cpp_individual_file, classifier_options.global_raw_columns
+                config["BINARY_OPTIONS"]["IndividualResultFile"],
+                classifier_options.global_raw_columns,
             )["ip_address"]
         )
-        # individual_ips_old = set(extract_individual(cpp_individual_file+"-old", classifier_options.global_raw_columns)["ip_address"])
 
-        candidates = list(
-            set(candidates).intersection(individual_ips)
-        )  # .intersection(individual_ips_old))
+        candidates = list(set(candidates).intersection(individual_ips))
         print(
             "Only "
             + str(len(candidates))
             + " found in the individual file. Will use the algorithm on these."
         )
 
-    # Witness phase
+    #
+    # ---- Witness phase ----
+    #
+
     # Be careful, this function remove candidates with no witness.
     do_witness = True
     if do_witness:
         witness_by_candidate, hop_by_candidate = find_witness_phase(
-            ip_version,
-            node,
-            candidates,
-            icmp_install_dir,
-            cpp_binary_cmd,
-            cpp_options,
-            classifier_options,
-            witness_by_candidate_file,
-            hop_by_candidate_file,
-            cpp_individual_file_witness,
+            candidates, config, cpp_options, classifier_options
         )
 
         if len(witness_by_candidate) == 0 or len(hop_by_candidate) == 0:
             return
 
         df_individual_witness = extract_individual(
-            cpp_individual_file_witness, classifier_options.global_raw_columns
+            config["BINARY_OPTIONS"]["WitnessResultFile"],
+            classifier_options.global_raw_columns,
         )
     df_individual = extract_individual(
-        cpp_individual_file, classifier_options.global_raw_columns
+        config["BINARY_OPTIONS"]["IndividualResultFile"],
+        classifier_options.global_raw_columns,
     )
     # Remove unresponsive addresses
     df_individual = df_individual.apply(pd.to_numeric, errors="ignore")
     df_individual = df_individual[df_individual["loss_rate"].apply(pd.to_numeric) < 1]
 
-    # HACK to remove already computed candidates:
-    # computed_candidates_file = "resources/survey/already_computed_candidates4"
-    # computed_candidates = set()
-    # if os.path.isfile(computed_candidates_file):
-    #     with open(computed_candidates_file) as fp:
-    #         for ip in fp:
-    #             computed_candidates.add(ip.strip())
+    #
+    # ---- Alias resolution phase ----
+    #
 
-    # Cluster the results by triggering rates
-    do_groups = True
-    if do_groups:
-        use_cluster = True
-        if use_cluster:
-            clusters = []
-            for i in range(7, 16):
-                cluster_triggering_rate = 2 ** i
-                probing_rate_column = df_individual["probing_rate"]
-                # remaining_candidates_file = "resources/survey/remaining_candidates" + str(cluster_triggering_rate)
-                # if os.path.isfile(remaining_candidates_file):
-                #     with open(remaining_candidates_file) as fp:
-                #         cluster = []
-                #         for ip in fp:
-                #             cluster.append(ip.strip())
-                # else:
-                cluster = list(
-                    df_individual[
-                        (2 ** i <= probing_rate_column)
-                        & (probing_rate_column < 2 ** (i + 1))
-                    ]["ip_address"]
-                )
+    aliases = []
+    unresponsive_candidates = []
 
-                clusters.append(
-                    (
-                        sorted(list(set(cluster).intersection(candidates))),
-                        cluster_triggering_rate,
-                    )
-                )
-        else:
-            clusters = [(candidates, router_id)]
-        for cluster, cluster_triggering_rate in clusters:
+    use_cluster = True
+    if use_cluster:
+        clusters = cluster_by_triggering_rate(df_individual, candidates)
+    else:
+        clusters = [(candidates, 0)]
+
+    for cluster, cluster_triggering_rate in clusters:
+        print(
+            "Performing alias resolution on cluster with triggering rate "
+            + str(cluster_triggering_rate)
+        )
+
+        iteration = 0
+        while len(cluster) > 1:
             print(
-                "Performing alias resolution on cluster with triggering rate "
-                + str(cluster_triggering_rate)
+                "Performing iteration "
+                + str(iteration)
+                + " on candidates: "
+                + str(len(cluster))
             )
-            cpp_options.low_rate_dpr = 10
-            iteration = 0
-            #         cluster = [
-            # "5.178.43.130",
-            # "195.22.199.7",
-            # "195.22.199.65",
-            #             "195.22.196.213",
-            #
-            #                    ]
-            while len(cluster) > 1:
-                print(
-                    "Performing iteration "
-                    + str(iteration)
-                    + " on candidates: "
-                    + str(len(cluster))
-                )
-                aliases_found, remaining_candidates, new_unresponsive_candidates = simultaneous_phase(
-                    ip_version,
-                    node,
-                    cluster,
-                    icmp_install_dir,
-                    cpp_binary_cmd,
-                    cpp_options,
-                    classifier,
-                    classifier_options,
-                    iteration,
-                    cluster_triggering_rate,
-                    witness_by_candidate,
-                    hop_by_candidate,
-                    df_individual,
-                    df_individual_witness,
-                )
-                unresponsive_candidates.extend(new_unresponsive_candidates)
-                aliases.extend(aliases_found)
-                cluster = remaining_candidates
-                iteration += 1
-                if not use_cluster:
-                    break
-        if len(aliases) > 0:
-            final_aliases = transitive_closure(aliases)
-            with open("aliases.json", "w") as fp:
-                serializable_aliases = [list(router) for router in final_aliases]
-                json.dump(serializable_aliases, fp)
-            with open("unresponsive.json", "w") as fp:
-                json.dump(unresponsive_candidates, fp)
-            print("Aliases : " + str(final_aliases))
-            print("Unresponsive: " + str(unresponsive_candidates))
+            aliases_found, cluster, new_unresponsive_candidates = simultaneous_phase(
+                cluster,
+                config,
+                cpp_options,
+                classifier,
+                classifier_options,
+                iteration,
+                cluster_triggering_rate,
+                witness_by_candidate,
+                hop_by_candidate,
+                df_individual,
+                df_individual_witness,
+            )
+            unresponsive_candidates.extend(new_unresponsive_candidates)
+            aliases.extend(aliases_found)
+            iteration += 1
+            if not use_cluster:
+                break
+
+    if len(aliases) > 0:
+        final_aliases = transitive_closure(aliases)
+        with open(config["OUTPUT"]["AliasFile"], "w") as fp:
+            serializable_aliases = [list(router) for router in final_aliases]
+            json.dump(serializable_aliases, fp)
+        with open(config["OUTPUT"]["UnresponsiveFile"], "w") as fp:
+            json.dump(unresponsive_candidates, fp)
+        print("Aliases : " + str(final_aliases))
+        print("Unresponsive: " + str(unresponsive_candidates))
 
 
 if __name__ == "__main__":
-    # Internet2targets
+    # Arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("targets", help="Path of targets file.")
+    parser.add_argument(
+        "--configuration",
+        help="Path of configuration file.",
+        default="configuration/default.ini",
+    )
+    args = parser.parse_args()
 
-    # targets_file = "resources/internet2/ips4"
+    # Configuration
+    config = configparser.ConfigParser(
+        interpolation=configparser.ExtendedInterpolation()
+    )
+    config.read(args.configuration)
 
-    # SWITCH targets
+    # Candidates
+    candidates = candidates = get_candidates(args.targets)
 
-    # targets_file = "resources/SWITCH/ips6"
-
-    # Survey targets
-
-    targets_file = "resources/test"
-
-    main(targets_file, router_id=0, ip_version="4")
+    # Main execution
+    main(config, candidates)

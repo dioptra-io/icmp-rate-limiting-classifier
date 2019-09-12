@@ -1,24 +1,212 @@
+import csv
 import json
+import numpy as np
+import os
 import pandas as pd
 import random
-import numpy as np
-from Cpp.launcher import *
+
+from Algorithms.algorithms import rotate, transitive_closure
+from Cpp.launcher import (
+    find_witness,
+    execute_icmp_rate_limiting_command,
+    execute_ping_and_icmp_rate_limiting_command,
+)
 from Data.preprocess import (
     build_classifier_entry_from_csv,
     parse_labels_and_features,
     extract_individual,
 )
-from Cpp.cpp_files import *
-from Algorithms.algorithms import rotate, transitive_closure
-from csv import reader
+from Cpp.cpp_files import (
+    write_cpp_candidates_file,
+    write_cpp_witness_file,
+    is_witness_already_probed,
+    is_group_already_probed,
+)
+
+
+#
+# ---- Individual phase ----
+#
+
+
+def execute_individual(candidates, config, cpp_options, classifier_options):
+    if os.path.isfile(config["BINARY_OPTIONS"]["IndividualResultFile"]):
+        return
+
+    for candidate in candidates:
+        cpp_candidates_file = (
+            config["BINARY_PATH"]["InstallationDirectory"]
+            + "/resources/cpp_targets_file_"
+            + candidate
+        )
+        print(
+            "Writing the candidates file for the cpp individual tool in: "
+            + str(cpp_candidates_file)
+            + "...",
+            end="",
+            flush=True,
+        )
+        write_cpp_candidates_file(
+            config["DEFAULT"]["IPVersion"], [candidate], [], cpp_candidates_file
+        )
+        print(" done")
+        cpp_output_file = (
+            config["BINARY_PATH"]["InstallationDirectory"]
+            + "/resources/results/individual/individual_"
+            + candidate
+        )
+        if os.path.isfile(cpp_output_file):
+            continue
+
+        cpp_options.starting_probing_rate = 512
+        execute_icmp_rate_limiting_command(
+            config["BINARY_PATH"]["ExecCommand"],
+            cpp_candidates_file,
+            cpp_options,
+            cpp_output_file,
+            is_individual=True,
+            only_analyse=False,
+        )
+        print(" done")
+
+    # Merge the individual file into one single dataframe
+    df_candidates = []
+    for candidate in candidates:
+        cpp_output_file = (
+            config["BINARY_PATH"]["InstallationDirectory"]
+            + "/resources/results/individual/individual_"
+            + candidate
+        )
+        df_candidate = pd.read_csv(
+            cpp_output_file,
+            names=classifier_options.global_raw_columns,
+            skipinitialspace=True,
+            # encoding="utf-8",
+            engine="python",
+            index_col=False,
+        )
+        df_candidates.append(df_candidate)
+    df_individual = pd.concat(df_candidates)
+    df_individual.to_csv(config["BINARY_OPTIONS"]["IndividualResultFile"], index=False)
+
+
+#
+# --- Witness phase ----
+#
+
+
+def create_witness_features(ip_witness):
+    line = (
+        ip_witness
+        + ",INDIVIDUAL, 32768, 163840, 0.505804, 0.797142, 0.202858, 0.1982, 0.8018"
+    )
+    return line
+
+
+def create_df_witness_individual(witnesses, columns, cpp_output_file_witness):
+    df_witnesses = []
+    for witness in witnesses:
+
+        df_witness = pd.DataFrame(
+            list(csv.reader([create_witness_features(witness)])),
+            columns=columns
+            # encoding="utf-8",
+        )
+        df_witnesses.append(df_witness)
+    df_individual = pd.concat(df_witnesses)
+    df_individual.to_csv(cpp_output_file_witness, index=False)
+
+
+def find_witness_phase(candidates, config, cpp_options, classifier_options):
+    """Launch a traceroute to the first candidate to find a witness.
+    If not responsive, pass to the second, etc...
+    """
+    # if iteration == 1:
+    #     candidates = rotate(candidates, candidates.index("198.71.46.178"))
+
+    print("Starting finding witness phase...")
+
+    witness_by_candidate, hop_by_candidate = find_witness(
+        config["DEFAULT"]["IPVersion"], candidates
+    )
+    with open(
+        config["OUTPUT"]["WitnessByCandidateFile"], "w"
+    ) as witness_by_candidate_fp:
+        json.dump(witness_by_candidate, witness_by_candidate_fp)
+    high_rate_candidate = None
+
+    unresponsive_candidates = []
+    for candidate in candidates:
+        if candidate in witness_by_candidate:
+            if high_rate_candidate is None:
+                high_rate_candidate = candidate
+
+        else:
+            unresponsive_candidates.append(candidate)
+    for candidate in unresponsive_candidates:
+        if candidate in candidates:
+            candidates.remove(candidate)
+    if high_rate_candidate is None:
+        print("No witness for any of the candidates found. Exiting...")
+        return {}, {}
+    print("End of the traceroute phase")
+    witnesses = set()
+    witnesses_not_candidates = set()
+
+    individual_results_dir = (
+        config["BINARY_PATH"]["InstallationDirectory"]
+        + "/resources/results/individual/"
+    )
+
+    cpp_output_file_witness = config["BINARY_OPTIONS"]["WitnessResultFile"]
+
+    if os.path.isfile(cpp_output_file_witness):
+        return witness_by_candidate, hop_by_candidate
+
+    for candidate in candidates:
+        if candidate in witness_by_candidate:
+            witness = witness_by_candidate[candidate]
+            if witness not in candidates:
+                witnesses_not_candidates.add(witness)
+                if not is_witness_already_probed(witness, individual_results_dir):
+                    witnesses.add(witness)
+
+    witnesses_not_candidates = sorted(list(witnesses_not_candidates))
+
+    cpp_witness_file = (
+        config["BINARY_PATH"]["InstallationDirectory"] + "/resources/cpp_witness_file"
+    )
+    print(
+        "Writing the witness for the cpp tool in: " + str(cpp_witness_file) + "...",
+        end="",
+        flush=True,
+    )
+    write_cpp_witness_file(
+        config["DEFAULT"]["IPVersion"], witnesses_not_candidates, cpp_witness_file
+    )
+    print(" done")
+    if len(witnesses_not_candidates) > 0:
+        # Launch individual phase for witness
+
+        create_df_witness_individual(
+            witnesses_not_candidates,
+            classifier_options.global_raw_columns,
+            cpp_output_file_witness,
+        )
+
+        print(" done")
+
+    return witness_by_candidate, hop_by_candidate
+
+
+#
+# ---- Alias resolution phase ----
+#
 
 
 def simultaneous_phase_impl(
-    ip_version,
-    node,
     candidates,
-    icmp_install_dir,
-    cpp_binary_cmd,
+    config,
     cpp_options,
     classifier,
     classifier_options,
@@ -31,7 +219,6 @@ def simultaneous_phase_impl(
     df_witness_individual,
     use_fine_grained_classifier,
 ):
-
     high_rate_candidate = candidates[0]
 
     hop_high_rate_candidate = hop_by_candidate[high_rate_candidate]
@@ -60,8 +247,8 @@ def simultaneous_phase_impl(
 
     # Build the cpp candidates files for the CPP tool.
     cpp_candidates_file = (
-        icmp_install_dir
-        + "resources/cpp_targets_file_cluster"
+        config["BINARY_PATH"]["InstallationDirectory"]
+        + "/resources/cpp_targets_file_cluster"
         + str(cluster_triggering_rate)
         + "_"
         + str(iteration)
@@ -76,7 +263,10 @@ def simultaneous_phase_impl(
         flush=True,
     )
     write_cpp_candidates_file(
-        ip_version, close_candidates, witnesses_not_candidates, cpp_candidates_file
+        config["DEFAULT"]["IPVersion"],
+        close_candidates,
+        witnesses_not_candidates,
+        cpp_candidates_file,
     )
     print(" done")
 
@@ -105,7 +295,7 @@ def simultaneous_phase_impl(
     if not only_analyse:
         execute_ping_and_icmp_rate_limiting_command(
             high_rate_candidate,
-            cpp_binary_cmd,
+            config["BINARY_PATH"]["ExecCommand"],
             cpp_candidates_file,
             cpp_options,
             cpp_output_file,
@@ -225,8 +415,10 @@ def simultaneous_phase_impl(
     remaining_candidates = list(set(candidates) - to_remove_candidates)
     print(" done")
     with open(
-        cpp_options.pcap_prefix
-        + "_aliases_cluster"
+        config["OUTPUT"]["OutputPath"]
+        + "/"
+        + cpp_options.pcap_prefix
+        + "aliases_cluster"
         + str(cluster_triggering_rate)
         + "_"
         + str(iteration)
@@ -244,107 +436,9 @@ def simultaneous_phase_impl(
     return aliases, remaining_candidates, unresponsive_candidates, high_rate_candidate
 
 
-def find_witness_phase(
-    ip_version,
-    node,
-    candidates,
-    icmp_install_dir,
-    cpp_binary_cmd,
-    cpp_options,
-    classifier_options,
-    witness_by_candidate_file,
-    hop_by_candidate_file,
-    cpp_individual_witness_file,
-):
-    # Launch a traceroute to the first candidate to find a witness.
-    # If not responsive, pass to the second, etc...
-    # if iteration == 1:
-    #     candidates = rotate(candidates, candidates.index("198.71.46.178"))
-
-    print("Starting finding witness phase...")
-    # if os.path.isfile(witness_by_candidate_file):
-    #     with open(witness_by_candidate_file) as witness_by_candidate_fp:
-    #         witness_by_candidate = json.load(witness_by_candidate_fp)
-    #     with open(hop_by_candidate_file) as hop_by_candidate_fp:
-    #         hop_by_candidate = json.load(hop_by_candidate_fp)
-
-    witness_by_candidate, hop_by_candidate = find_witness(ip_version, candidates)
-    with open(witness_by_candidate_file, "w") as witness_by_candidate_fp:
-        json.dump(witness_by_candidate, witness_by_candidate_fp)
-    high_rate_candidate = None
-
-    unresponsive_candidates = []
-    for candidate in candidates:
-        if candidate in witness_by_candidate:
-            if high_rate_candidate is None:
-                high_rate_candidate = candidate
-
-        else:
-            unresponsive_candidates.append(candidate)
-    for candidate in unresponsive_candidates:
-        if candidate in candidates:
-            candidates.remove(candidate)
-    if high_rate_candidate is None:
-        print("No witness for any of the candidates found. Exiting...")
-        return {}, {}
-    print("End of the traceroute phase")
-    witnesses = set()
-    witnesses_not_candidates = set()
-
-    individual_results_dir = icmp_install_dir + "resources/results/individual/"
-
-    cpp_output_file_witness = cpp_individual_witness_file
-
-    if os.path.isfile(cpp_output_file_witness):
-        return witness_by_candidate, hop_by_candidate
-
-    for candidate in candidates:
-        if candidate in witness_by_candidate:
-            witness = witness_by_candidate[candidate]
-            if witness not in candidates:
-                witnesses_not_candidates.add(witness)
-                if not is_witness_already_probed(witness, individual_results_dir):
-                    witnesses.add(witness)
-
-    witnesses_not_candidates = sorted(list(witnesses_not_candidates))
-
-    cpp_witness_file = icmp_install_dir + "resources/cpp_witness_file"
-    print(
-        "Writing the witness for the cpp tool in: " + str(cpp_witness_file) + "...",
-        end="",
-        flush=True,
-    )
-    write_cpp_witness_file(ip_version, witnesses_not_candidates, cpp_witness_file)
-    print(" done")
-    if len(witnesses_not_candidates) > 0:
-        # Launch individual phase for witness
-
-        create_df_witness_individual(
-            ip_version,
-            icmp_install_dir,
-            witnesses_not_candidates,
-            classifier_options.global_raw_columns,
-            cpp_output_file_witness,
-        )
-
-        # execute_individual(ip_version, node,
-        #                    witnesses_not_candidates,
-        #                    icmp_install_dir,
-        #                    cpp_binary_cmd,
-        #                    cpp_options,
-        #                    classifier_options,
-        #                    cpp_output_file_witness)
-        print(" done")
-
-    return witness_by_candidate, hop_by_candidate
-
-
 def simultaneous_phase(
-    ip_version,
-    node,
     candidates,
-    icmp_install_dir,
-    cpp_binary_cmd,
+    config,
     cpp_options,
     classifier,
     classifier_options,
@@ -355,7 +449,6 @@ def simultaneous_phase(
     df_individual,
     df_individual_witness,
 ):
-
     # Keep track of the remaining candidates
     with open(
         "resources/survey/remaining_candidates" + str(cluster_triggering_rate), "w"
@@ -367,11 +460,8 @@ def simultaneous_phase(
     classifier_options.probability_threshold = 0.6
     step_stable = 0
     aliases, remaining_candidates, new_unresponsive_candidates, high_rate_candidate = simultaneous_phase_impl(
-        ip_version,
-        node,
         candidates,
-        icmp_install_dir,
-        cpp_binary_cmd,
+        config,
         cpp_options,
         classifier,
         classifier_options,
@@ -411,11 +501,8 @@ def simultaneous_phase(
             else:
                 use_fine_grained_classifier = True
             aliases, remaining_candidates_sub, new_unresponsive_candidates_sub, high_rate_candidate = simultaneous_phase_impl(
-                ip_version,
-                node,
                 aliases_tc,
-                icmp_install_dir,
-                cpp_binary_cmd,
+                config,
                 cpp_options,
                 classifier,
                 classifier_options,
@@ -458,11 +545,8 @@ def simultaneous_phase(
             aliases_tc = rotate(aliases_tc, aliases_tc.index(new_high_rate_candidate))
 
             aliases, remaining_candidates_sub, new_unresponsive_candidates_sub, new_high_rate_candidate = simultaneous_phase_impl(
-                ip_version,
-                node,
                 aliases_tc,
-                icmp_install_dir,
-                cpp_binary_cmd,
+                config,
                 cpp_options,
                 classifier,
                 classifier_options,
@@ -509,8 +593,10 @@ def simultaneous_phase(
         # Output the final file of alias
         for i in range(0, len(final_alias_sets)):
             with open(
-                cpp_options.pcap_prefix
-                + "_aliases_cluster"
+                config["OUTPUT"]["OutputPath"]
+                + "/"
+                + cpp_options.pcap_prefix
+                + "aliases_cluster"
                 + str(cluster_triggering_rate)
                 + "_"
                 + str(iteration)
@@ -544,84 +630,12 @@ def simultaneous_phase(
     return aliases, remaining_candidates, new_unresponsive_candidates
 
 
-def execute_individual(
-    ip_version,
-    node,
-    candidates,
-    icmp_install_dir,
-    cpp_binary_cmd,
-    cpp_options,
-    classifier_options,
-    cpp_output_individual_file,
-):
-
-    if os.path.isfile(cpp_output_individual_file):
-        return
-
-    for candidate in candidates:
-        cpp_candidates_file = (
-            icmp_install_dir + "resources/cpp_targets_file_" + candidate
-        )
-        print(
-            "Writing the candidates file for the cpp individual tool in: "
-            + str(cpp_candidates_file)
-            + "...",
-            end="",
-            flush=True,
-        )
-        write_cpp_candidates_file(ip_version, [candidate], [], cpp_candidates_file)
-        print(" done")
-        cpp_output_file = (
-            icmp_install_dir
-            + "resources/results/individual/"
-            + node
-            + "_individual_"
-            + candidate
-        )
-        if os.path.isfile(cpp_output_file):
-            continue
-
-        cpp_options.starting_probing_rate = 512
-        # execute_ping_and_icmp_rate_limiting_command(candidate,cpp_binary_cmd,
-        #                                                  cpp_candidates_file,
-        #                                                  cpp_options,
-        #                                                  cpp_output_file,
-        #                                                  is_individual=True,
-        #                                                  only_analyse=False)
-        execute_icmp_rate_limiting_command(
-            cpp_binary_cmd,
-            cpp_candidates_file,
-            cpp_options,
-            cpp_output_file,
-            is_individual=True,
-            only_analyse=False,
-        )
-        print(" done")
-
-    # Merge the individual file into one single dataframe
-    df_candidates = []
-    for candidate in candidates:
-        cpp_output_file = (
-            icmp_install_dir
-            + "resources/results/individual/"
-            + node
-            + "_individual_"
-            + candidate
-        )
-        df_candidate = pd.read_csv(
-            cpp_output_file,
-            names=classifier_options.global_raw_columns,
-            skipinitialspace=True,
-            # encoding="utf-8",
-            engine="python",
-            index_col=False,
-        )
-        df_candidates.append(df_candidate)
-    df_individual = pd.concat(df_candidates)
-    df_individual.to_csv(cpp_output_individual_file, index=False)
+#
+# ---- Utils ----
+#
 
 
-def merge_results_file(icmp_install_dir, node, results_dir, columns):
+def merge_results_file(icmp_install_dir, results_dir, columns):
     df_candidates = []
     i = 0
     for result_file in os.listdir(results_dir):
@@ -631,11 +645,7 @@ def merge_results_file(icmp_install_dir, node, results_dir, columns):
             break
         candidate = result_file.split("_")[2]
         cpp_output_file = (
-            icmp_install_dir
-            + "resources/results/individual/"
-            + node
-            + "_individual_"
-            + candidate
+            icmp_install_dir + "resources/results/individual/individual_" + candidate
         )
         df_candidate = pd.read_csv(
             cpp_output_file,
@@ -652,34 +662,8 @@ def merge_results_file(icmp_install_dir, node, results_dir, columns):
     )
 
 
-def create_witness_features(ip_witness):
-    line = (
-        ip_witness
-        + ",INDIVIDUAL, 32768, 163840, 0.505804, 0.797142, 0.202858, 0.1982, 0.8018"
-    )
-    return line
-
-
-def create_df_witness_individual(ip_version, icmp_install_dir, witnesses, columns, cpp_output_file_witness):
-    df_witnesses = []
-    for witness in witnesses:
-
-        df_witness = pd.DataFrame(
-            list(reader([create_witness_features(witness)])),
-            columns=columns
-            # encoding="utf-8",
-        )
-        df_witnesses.append(df_witness)
-    df_individual = pd.concat(df_witnesses)
-    df_individual.to_csv(
-        cpp_output_file_witness,
-        index=False,
-    )
-
-
 if __name__ == "__main__":
     icmp_install_dir = "/root/ICMPRateLimiting/"
-    node = "ple2.planet-lab.eu"
     results_dir = icmp_install_dir + "resources/results/individual/"
     columns = [
         "ip_address",
@@ -693,7 +677,7 @@ if __name__ == "__main__":
         "transition_1_1",
     ]
 
-    merge_results_file(icmp_install_dir, node, results_dir, columns)
+    merge_results_file(icmp_install_dir, results_dir, columns)
 
     ########################### Analyze hop in traceroutes #####################
     # import json
@@ -726,12 +710,11 @@ if __name__ == "__main__":
     # Compute remaining candidates to not redo the experiment.
     if False:
         results_dir = "./"
-        node = "ple41.planet-lab.eu"
 
         # remaining_candidates = []
         removed_candidates = set()
         for filename in os.listdir(results_dir):
-            alias_prefix = node + "__aliases_cluster2048"
+            alias_prefix = "_aliases_cluster2048"
             if not filename.startswith(alias_prefix):
                 continue
 

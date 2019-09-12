@@ -1,4 +1,4 @@
-class CppOptions:
+class CppOptions(object):
     def __init__(self):
         self.analyse_only = False
         self.probe_only = False
@@ -50,3 +50,23 @@ class CppOptions:
             options_str += " -r " + str(self.low_rate_dpr)
 
         return options_str
+
+
+def generate_cpp_options(config):
+    """Generate a Cpp option instance."""
+    # TODO Directly pass the config in the CppOptions class
+    cpp_options = CppOptions()
+    cpp_options.pcap_dir_individual = config["BINARY_OPTIONS"]["PCAPDirIndividual"]
+    cpp_options.pcap_dir_groups = config["BINARY_OPTIONS"]["PCAPDirIndividual"]
+    cpp_options.pcap_prefix = config["BINARY_OPTIONS"]["PCAPPrefix"]
+    cpp_options.low_rate_dpr = config["BINARY_OPTIONS"]["LowRateDPR"]
+    cpp_options.measurement_time = config["BINARY_OPTIONS"]["MeasurementTime"]
+    cpp_options.output_file = config["BINARY_OPTIONS"]["OutputFile"]
+    cpp_options.target_loss_rate_interval = config["BINARY_OPTIONS"][
+        "TargetLossRateInterval"
+    ]
+    cpp_options.exponential_ratio = config["BINARY_OPTIONS"]["ExponentialRatio"]
+    cpp_options.individual_result_file = config["BINARY_OPTIONS"][
+        "IndividualResultFile"
+    ]
+    return cpp_options

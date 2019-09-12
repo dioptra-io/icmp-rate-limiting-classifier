@@ -73,9 +73,13 @@ docs/_build/
 
 # VS Code
 .vscode
+*.code-workspace
 
 # Application input 
-resources
+resources/*
+!resources/default
+!resources/random_forest_classifier4.joblib
+!resources/random_forest_classifier6.joblib
 
 # Program output 
 aliases.json
