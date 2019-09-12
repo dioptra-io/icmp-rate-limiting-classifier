@@ -324,6 +324,7 @@ def find_witness_phase(
             icmp_install_dir,
             witnesses_not_candidates,
             classifier_options.global_raw_columns,
+            cpp_output_file_witness,
         )
 
         # execute_individual(ip_version, node,
@@ -593,7 +594,7 @@ def execute_individual(
             cpp_options,
             cpp_output_file,
             is_individual=True,
-            only_analyse=True,
+            only_analyse=False,
         )
         print(" done")
 
@@ -659,7 +660,7 @@ def create_witness_features(ip_witness):
     return line
 
 
-def create_df_witness_individual(ip_version, icmp_install_dir, witnesses, columns):
+def create_df_witness_individual(ip_version, icmp_install_dir, witnesses, columns, cpp_output_file_witness):
     df_witnesses = []
     for witness in witnesses:
 
@@ -671,7 +672,7 @@ def create_df_witness_individual(ip_version, icmp_install_dir, witnesses, column
         df_witnesses.append(df_witness)
     df_individual = pd.concat(df_witnesses)
     df_individual.to_csv(
-        icmp_install_dir + "resources/results/switch_individual_witness" + ip_version,
+        cpp_output_file_witness,
         index=False,
     )
 

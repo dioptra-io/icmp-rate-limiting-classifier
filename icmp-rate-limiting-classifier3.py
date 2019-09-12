@@ -590,7 +590,7 @@ if __name__ == "__main__":
 
     """
 
-    target_loss_rate_window = "lr0.45-0.50"
+    target_loss_rate_window = "lr0.05-0.10"
     alpha = 0.05
     n_not_triggered_threshold = 0.05
     is_detect_per_interface = True
@@ -602,33 +602,33 @@ if __name__ == "__main__":
     """
     IPv4
     """
-    # version = "4"
-    # measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
-    # candidates_witness_dir = ""
-    # results_dir = measurement_prefix + "results/"
-    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
-    # df_file = "resources/test_set_" + target_loss_rate_window
-    # if is_detect_per_interface:
-    #     df_file = "resources/test_set_without_per_interface_strict" + target_loss_rate_window
+    version = "4"
+    measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
+    candidates_witness_dir = ""
+    results_dir = measurement_prefix + "results/"
+    routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
+    df_file = "resources/test_set_" + target_loss_rate_window
+    if is_detect_per_interface:
+        df_file = "resources/test_set_without_per_interface_strict" + target_loss_rate_window
     # ground_truth_routers = extract_routers_by_node(routers_path)
-    # ground_truth_routers = []
+    ground_truth_routers = []
 
     """
     IPv6
     """
-    version = "6"
-    measurement_prefix = (
-        "/srv/icmp-rl-survey/speedtrap/survey/" + target_loss_rate_window + "/"
-    )
-    candidates_witness_dir = ""
-    results_dir = measurement_prefix + "results/"
-    routers_path = "/home/kevin/mda-lite-v6-survey/resources/speedtrap/routers/"
-    df_file = "resources/test_set6_" + target_loss_rate_window
-    if is_detect_per_interface:
-        df_file = (
-            "resources/test_set6_without_per_interface_strict" + target_loss_rate_window
-        )
-    ground_truth_routers = extract_routers_by_node(routers_path)
+    # version = "6"
+    # measurement_prefix = (
+    #     "/srv/icmp-rl-survey/speedtrap/survey/" + target_loss_rate_window + "/"
+    # )
+    # candidates_witness_dir = ""
+    # results_dir = measurement_prefix + "results/"
+    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/speedtrap/routers/"
+    # df_file = "resources/test_set6_" + target_loss_rate_window
+    # if is_detect_per_interface:
+    #     df_file = (
+    #         "resources/test_set6_without_per_interface_strict" + target_loss_rate_window
+    #     )
+    # ground_truth_routers = extract_routers_by_node(routers_path)
 
     """
     Internet2
