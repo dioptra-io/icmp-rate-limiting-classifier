@@ -35,7 +35,7 @@ pd.options.display.float_format = '{:.3f}'.format
 
 import json
 from Data.preprocess import *
-
+from Algorithms.algorithms import rotate
 labels_map = {"P" : 1, "N" : 0, "U": 2}
 
 # Add the type of probing to the columns.
@@ -537,7 +537,7 @@ if __name__ == "__main__":
     '''
 
 
-    target_loss_rate_window = "lr0.45-0.50"
+    target_loss_rate_window = "lr0.05-0.10"
     alpha = 0.05
     n_not_triggered_threshold = 0.05
     is_detect_per_interface = True
@@ -550,34 +550,34 @@ if __name__ == "__main__":
     '''
     IPv4
     '''
-    # version = "4"
-    # measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
-    # candidates_witness_dir = ""
-    # results_dir = measurement_prefix + "results/"
-    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
-    # df_file = "resources/test_set_" + target_loss_rate_window
+    version = "4"
+    measurement_prefix = "/srv/icmp-rl-survey/midar/survey/batch2/" + target_loss_rate_window + "/"
+    candidates_witness_dir = ""
+    results_dir = measurement_prefix + "results/"
+    routers_path = "/home/kevin/mda-lite-v6-survey/resources/midar/batch2/routers/"
+    df_file = "resources/test_set_" + target_loss_rate_window
     # if is_detect_per_interface:
     #     df_file = "resources/test_set_without_per_interface_strict" + target_loss_rate_window
     # ground_truth_routers = extract_routers_by_node(routers_path)
-    # ground_truth_routers = []
+    ground_truth_routers = []
 
     '''
     IPv6
     '''
-    version = "6"
-    measurement_prefix = "/srv/icmp-rl-survey/speedtrap/survey/" + target_loss_rate_window + "/"
-    candidates_witness_dir = ""
-    results_dir = measurement_prefix + "results/"
-    routers_path = "/home/kevin/mda-lite-v6-survey/resources/speedtrap/routers/"
-    df_file = "resources/test_set6_" + target_loss_rate_window
-    if is_detect_per_interface:
-        df_file = "resources/test_set6_without_per_interface_strict" + target_loss_rate_window
-    ground_truth_routers = extract_routers_by_node(routers_path)
+    # version = "6"
+    # measurement_prefix = "/srv/icmp-rl-survey/speedtrap/survey/" + target_loss_rate_window + "/"
+    # candidates_witness_dir = ""
+    # results_dir = measurement_prefix + "results/"
+    # routers_path = "/home/kevin/mda-lite-v6-survey/resources/speedtrap/routers/"
+    # df_file = "resources/test_set6_" + target_loss_rate_window
+    # if is_detect_per_interface:
+    #     df_file = "resources/test_set6_without_per_interface_strict" + target_loss_rate_window
+    # ground_truth_routers = extract_routers_by_node(routers_path)
 
     '''
     Internet2
     '''
-    # ground_truth_routers = []
+    ground_truth_routers = []
 
     # measurement_prefix = "/srv/icmp-rl-survey/midar/survey/internet2/"
     # candidates_witness_dir = measurement_prefix +"candidates-witness/"
@@ -632,17 +632,31 @@ if __name__ == "__main__":
         save_classifier = True
         best_classifier = None
 
+
+        # 10-fold validation
+        k_fold = 10
+        labeled_df = labeled_df.reindex(np.random.permutation(labeled_df.index))
+        chunks = np.array_split(labeled_df, k_fold)
+
         for i in range(0, 10):
-            labeled_df = labeled_df.reindex(np.random.permutation(labeled_df.index))
-            labeled_df.to_csv("resources/labeled_test_set", encoding='utf-8')
+            i_rotation = rotate(chunks, i)
+            # Get 90% of the dataset as training set.
+            training_df = i_rotation[0]
+            for k in range(0, k_fold - 1):
+                training_df = pd.concat([training_df, i_rotation[k]])
+
+            # labeled_df = labeled_df.reindex(np.random.permutation(labeled_df.index))
+            # labeled_df.to_csv("resources/labeled_test_set", encoding='utf-8')
             # Split the training validation and test set
-            training_n = int(0.3 * len(labeled_df))
-            training_df = labeled_df.iloc[0:training_n]
+            # training_n  = int(0.9 * len(labeled_df))
+            # training_df = labeled_df.iloc[0:training_n]
 
-            cross_validation_n = int(0.3 * len(labeled_df))
-            cross_validation_df = labeled_df.iloc[training_n + 1:cross_validation_n + training_n]
+            # cross_validation_n = int(0 * len(labeled_df))
+            # cross_validation_df = labeled_df.iloc[training_n + 1:cross_validation_n + training_n]
 
-            test_df = labeled_df.iloc[cross_validation_n + training_n + 1:]
+            # test_df = labeled_df.iloc[cross_validation_n + training_n + 1:]
+
+            cross_validation_df = chunks[-1]
 
             training_targets, training_examples = parse_labels_and_features(training_df, labels_column, feature_columns)
             print ("Size of the training examples: " + str(training_examples.shape))
@@ -652,15 +666,15 @@ if __name__ == "__main__":
             print ("Size of the validation examples: " + str(validation_examples.shape))
             print_df_labels(cross_validation_df)
 
-            test_targets, test_examples = parse_labels_and_features(test_df, labels_column, feature_columns)
-            print ("Size of the test examples: " + str(test_examples.shape))
-            print_df_labels(test_df)
+            # test_targets, test_examples = parse_labels_and_features(test_df, labels_column, feature_columns)
+            # print ("Size of the test examples: " + str(test_examples.shape))
+            # print_df_labels(test_df)
 
 
             classifier, threshold_decision = compute_classifier(feature_columns,
                                             training_examples, training_targets,
                                             validation_examples, validation_targets,
-                                            test_examples, test_targets,
+                                            None, None,
                                             use_dnn = use_dnn,
                                             use_random_forest = use_random_forest,
                                             use_mlp = use_mlp,
@@ -669,8 +683,10 @@ if __name__ == "__main__":
 
 
             if use_random_forest or use_mlp or use_knn or use_svm:
-                examples = pd.concat([validation_examples, test_examples])
-                targets = pd.concat([validation_targets, test_targets])
+                # examples = pd.concat([validation_examples, None])
+                # targets = pd.concat([validation_targets, None])
+                examples = validation_examples
+                targets = validation_targets
                 probabilities = classifier.predict_proba(examples)
                 predictions = []
                 for probability in probabilities:

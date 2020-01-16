@@ -1181,13 +1181,13 @@ if __name__ == "__main__":
     #analyse_rerun()
     imc_paper_root = "/Users/kevinvermeulen/PycharmProjects/icmp-rate-limiting-paper/resources/"
     # Only consider responsive addresses
-    is_only_responsive = False
+    is_only_responsive = True
     is_v4 = True
     is_v6 = False
     '''
     Survey
     '''
-    is_survey = True
+    is_survey = False
     if is_survey:
         if is_v4:
             node = "ple41.planet-lab.eu"
@@ -1223,7 +1223,7 @@ if __name__ == "__main__":
         Internet 2
     '''
 
-    is_internet2 = False
+    is_internet2 = True
     if is_internet2:
         if is_v4:
             # rate_limiting_nodes = ["cse-yellow.cse.chalmers.se", "ple1.cesnet.cz",
