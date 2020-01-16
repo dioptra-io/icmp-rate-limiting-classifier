@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 import numpy as np
 from Classification.metrics import compute_metrics, evaluate_classifier
-from sklearn.utils.fixes import signature
+# from sklearn.utils.fixes import signature
 
 
 def print_false_positives(predictions, labels, features, labeled_df):
