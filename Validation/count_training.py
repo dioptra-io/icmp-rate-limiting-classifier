@@ -1,11 +1,14 @@
 import os
+
+
 def get_alias_pairs(routers):
     alias_pairs = set()
     for router_name, router in routers.items():
         for i in range(0, len(router)):
-            for j in range(i+1, len(router)):
+            for j in range(i + 1, len(router)):
                 alias_pairs.add(frozenset({router[i], router[j]}))
     return alias_pairs
+
 
 def count_ips(routers_path):
     ips = set()
@@ -26,10 +29,8 @@ def count_ips(routers_path):
     print("Distincts IPs: " + str(len(ips)))
     print("IPs: " + str(len(ips_l)))
 
-
     alias_pairs = get_alias_pairs(routers)
     print("Unique alias pairs", len(alias_pairs))
-
 
 
 # def count_pairs(routers_path):

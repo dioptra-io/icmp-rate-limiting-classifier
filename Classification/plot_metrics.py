@@ -4,7 +4,9 @@ import numpy as np
 import seaborn as sns
 
 
-def plot_metrics(training_errors, validation_errors, validation_targets, final_predictions):
+def plot_metrics(
+    training_errors, validation_errors, validation_targets, final_predictions
+):
     # Output a graph of loss metrics over periods.
     plt.ylabel("LogLoss")
     plt.xlabel("Periods")
@@ -25,6 +27,7 @@ def plot_metrics(training_errors, validation_errors, validation_targets, final_p
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
     plt.show()
+
 
 def show_confusion_matrix(predictions, labels):
     # Output a plot of the confusion matrix.

@@ -6,8 +6,6 @@ dic = {}
 trouve = False
 
 
-
-
 def hop_by_candidate():
     traceroute_dir = "resources/traceroutes/"
 
@@ -18,7 +16,7 @@ def hop_by_candidate():
         for ip in ips6:
             trouve = False
             for file_name in os.listdir(traceroute_dir):
-                if file_name.split('.')[0] == ip:
+                if file_name.split(".")[0] == ip:
                     with open(traceroute_dir + file_name, "r") as f1:
                         lines = f1.readlines()
                         for line in lines:
@@ -38,6 +36,5 @@ def hop_by_candidate():
                 else:
                     continue
 
-    with open('hop_by_candidate6_random.json', 'w') as f1:
+    with open("hop_by_candidate6_random.json", "w") as f1:
         json.dump(dic, f1, indent=4)
-

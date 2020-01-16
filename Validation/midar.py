@@ -1,6 +1,7 @@
 import re
 import os
 
+
 def compute_midar_routers(midar_dir):
     """ Parsing midar-noconflicts.sets file(s)
         Returns a list of sets
@@ -20,17 +21,18 @@ def compute_midar_routers(midar_dir):
             lines = f.readlines()
 
         for line in lines:
-            if re.match('# end', line) is None:
-                if re.match('# set', line):
+            if re.match("# end", line) is None:
+                if re.match("# set", line):
                     if len(router) > 0:
                         list_routers.append(router)
                     router = set()
-                if re.match('^[0-9]', line):
+                if re.match("^[0-9]", line):
                     router.add(line.strip())
             else:
                 list_routers.append(router)
 
     return list_routers
+
 
 def extract_routers(routers_dir):
     routers = {}
@@ -57,7 +59,6 @@ def extract_routers_by_node(routers_dir):
             routers_by_node[node] = {}
         routers_by_node[node][router_file] = router
     return routers_by_node
-
 
 
 def extract_routers_evaluation(routers_dir):
@@ -103,6 +104,8 @@ def find_router_from_ip(ip, routers):
         if ip in ips:
             return router_name
     return None
+
+
 def set_router_labels(df, ground_truth_routers, candidates, witnesses):
 
     # First candidate is router 1
