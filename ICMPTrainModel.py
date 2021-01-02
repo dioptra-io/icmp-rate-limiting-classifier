@@ -17,7 +17,7 @@ from sklearn.metrics import f1_score
 from sklearn import clone
 
 # from Cluster.dbscan import kmeans, DBSCAN_impl
-from Algorithms.algorithms import transitive_closure
+from Algorithms.algorithms import connected
 
 # from Classification import neural_network as nn
 # from Classification.neural_network import print_bad_labels

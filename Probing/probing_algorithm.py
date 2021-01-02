@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import random
 
-from Algorithms.algorithms import rotate, transitive_closure
+from Algorithms.algorithms import rotate, connected
 from Cpp.launcher import (
     find_witness,
     execute_icmp_rate_limiting_command,
@@ -58,7 +58,7 @@ def execute_individual(candidates, config, cpp_options, classifier_options):
         if os.path.isfile(cpp_output_file):
             continue
 
-        cpp_options.starting_probing_rate = 512
+        cpp_options.starting_probing_rate = 256
         execute_icmp_rate_limiting_command(
             config["BINARY_PATH"]["ExecCommand"],
             cpp_candidates_file,
@@ -452,6 +452,7 @@ def simultaneous_phase(
     # Keep track of the remaining candidates
     with open(
         "resources/survey/remaining_candidates" + str(cluster_triggering_rate), "w"
+        # "resources/survey_1024/remaining_candidates" + str(cluster_triggering_rate), "w"
     ) as remaining_candidates_fp:
         for candidate in candidates:
             remaining_candidates_fp.write(candidate + "\n")
@@ -491,7 +492,7 @@ def simultaneous_phase(
         cpp_options.low_rate_dpr = max(
             10, min(int(cluster_triggering_rate / (2 * (len(aliases)))), 20)
         )
-        aliases_tc = transitive_closure(aliases)
+        aliases_tc = connected(aliases)
         if len(aliases_tc) == 1:
             aliases_tc = list(aliases_tc[0])
             aliases_tc = rotate(aliases_tc, aliases_tc.index(high_rate_candidate))
@@ -524,7 +525,7 @@ def simultaneous_phase(
 
     if len(aliases) > 0:
         # Last step, try another high rate to be sure that the rate limiting was triggered by the high rate candidate.
-        aliases_tc = transitive_closure(aliases)
+        aliases_tc = connected(aliases)
         aliases_tc = list(aliases_tc[0])
 
         n_alias = len(aliases_tc)
@@ -561,7 +562,7 @@ def simultaneous_phase(
             )
 
             if len(aliases) > 0:
-                alias_sets = transitive_closure(aliases)
+                alias_sets = connected(aliases)
                 if len(alias_sets) > 1:
                     print(
                         "Error, alias sets of 1 high rate candidate can not have a length > 1"
@@ -588,7 +589,7 @@ def simultaneous_phase(
                 if decisions_matrix[i][j] == 1:
                     final_alias_sets.append({aliases_tc[i], aliases_tc[j]})
 
-        final_alias_sets = transitive_closure(final_alias_sets)
+        final_alias_sets = connected(final_alias_sets)
         aliases = final_alias_sets
         # Output the final file of alias
         for i in range(0, len(final_alias_sets)):

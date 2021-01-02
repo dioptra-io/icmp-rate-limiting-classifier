@@ -3,7 +3,7 @@ from Validation.midar import (
     extract_routers_by_node,
     extract_routers_evaluation,
 )
-from Algorithms.algorithms import transitive_closure
+from Algorithms.algorithms import connected
 import pandas as pd
 import copy
 import numpy as np
@@ -138,7 +138,7 @@ def write_uncommon_routers(
     # Uncommon IPs
     routers = [set(x) for x in uncommon_pairs]
     if do_transitive_closure:
-        uncommon_routers = transitive_closure(routers)
+        uncommon_routers = connected(routers)
     else:
         uncommon_routers = routers
     print("Routers found by Lovebirds but not MIDAR: " + str(len(uncommon_routers)))
@@ -226,7 +226,7 @@ def compare_tools():
             # routers_tc = []
             for router_name, router in routers_node.items():
                 routers.append(set(router))
-        routers = transitive_closure(routers)
+        routers = connected(routers)
         routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
 
         print("Mean precision over ple nodes:" + str(np.mean(precisions)))
@@ -247,7 +247,7 @@ def compare_tools():
             )
             for router_name, router in midar_routers_node.items():
                 midar_routers.append(set(router))
-        midar_routers = transitive_closure(midar_routers)
+        midar_routers = connected(midar_routers)
         midar_routers_tc_dic = {
             i: list(midar_routers[i]) for i in range(0, len(midar_routers))
         }
@@ -353,7 +353,7 @@ def compare_tools():
             # routers_tc = []
             for router_name, router in routers_node.items():
                 routers.append(set(router))
-        routers = transitive_closure(routers)
+        routers = connected(routers)
         routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
 
         print("Mean precision over ple nodes:" + str(np.mean(precisions)))
@@ -456,7 +456,7 @@ def compare_tools():
         print("Ratio disagree: " + str(len(disagreement_pairs) / total_pairs))
 
         routers = [set(x) for x in uncommon_pairs]
-        uncommon_routers = transitive_closure(routers)
+        uncommon_routers = connected(routers)
         print("Routers found by MIDAR but not Lovebirds: " + str(len(uncommon_routers)))
         # n_uncommon = 0
         # for uncommom_router in uncommon_routers:
@@ -1527,7 +1527,7 @@ if __name__ == "__main__":
                 print(node, len(routers_node))
                 for router_name, router in routers_node.items():
                     routers.append(set(router))
-            routers = transitive_closure(routers)
+            routers = connected(routers)
             print("Number of distinct routers: " + str(len(routers)))
             routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
             routers_tc_dic_final, tp, fp = clean_false_positives(
@@ -1551,7 +1551,7 @@ if __name__ == "__main__":
                 )
                 for router_name, router in midar_routers_node.items():
                     midar_routers.append(set(router))
-            midar_routers = transitive_closure(midar_routers)
+            midar_routers = connected(midar_routers)
             print("Number of distinct routers: " + str(len(midar_routers)))
             midar_routers_tc_dic = {
                 i: list(midar_routers[i]) for i in range(0, len(midar_routers))
@@ -1573,7 +1573,7 @@ if __name__ == "__main__":
 
             union_routers = copy.deepcopy(routers)
             union_routers.extend(midar_routers)
-            union_routers = transitive_closure(union_routers)
+            union_routers = connected(union_routers)
             print("Number of distinct routers: " + str(len(union_routers)))
             midar_routers_tc_dic = {
                 i: list(union_routers[i]) for i in range(0, len(union_routers))
@@ -1621,7 +1621,7 @@ if __name__ == "__main__":
                 # routers_tc = []
                 for router_name, router in routers_node.items():
                     routers.append(set(router))
-            routers = transitive_closure(routers)
+            routers = connected(routers)
             routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
 
             print("Mean precision over ple nodes:" + str(np.mean(precisions)))
@@ -1679,7 +1679,7 @@ if __name__ == "__main__":
                 print(node, len(routers_node))
                 for router_name, router in routers_node.items():
                     routers.append(set(router))
-            routers = transitive_closure(routers)
+            routers = connected(routers)
             print("Number of distinct routers: " + str(len(routers)))
             routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
             routers_tc_dic_final, tp, fp = clean_false_positives(
@@ -1703,7 +1703,7 @@ if __name__ == "__main__":
                 )
                 for router_name, router in midar_routers_node.items():
                     midar_routers.append(set(router))
-            midar_routers = transitive_closure(midar_routers)
+            midar_routers = connected(midar_routers)
             print("Number of distinct routers: " + str(len(midar_routers)))
             midar_routers_tc_dic = {
                 i: list(midar_routers[i]) for i in range(0, len(midar_routers))
@@ -1722,7 +1722,7 @@ if __name__ == "__main__":
 
             union_routers = copy.deepcopy(routers)
             union_routers.extend(midar_routers)
-            union_routers = transitive_closure(union_routers)
+            union_routers = connected(union_routers)
             print("Number of distinct routers: " + str(len(union_routers)))
             midar_routers_tc_dic = {
                 i: list(union_routers[i]) for i in range(0, len(union_routers))
@@ -1763,7 +1763,7 @@ if __name__ == "__main__":
                 print("False positives", fp)
                 for router_name, router in routers_node.items():
                     routers.append(set(router))
-                routers = transitive_closure(routers)
+                routers = connected(routers)
                 routers_tc_dic = {i: list(routers[i]) for i in range(0, len(routers))}
 
             #
@@ -1789,7 +1789,7 @@ if __name__ == "__main__":
 
             union_routers = copy.deepcopy(routers)
             union_routers.extend([set(router) for router in speedtrap_routers])
-            union_routers = transitive_closure(union_routers)
+            union_routers = connected(union_routers)
             print("Number of distinct routers: " + str(len(union_routers)))
             union_routers_tc_dic = {
                 i: list(union_routers[i]) for i in range(0, len(union_routers))

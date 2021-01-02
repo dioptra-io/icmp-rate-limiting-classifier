@@ -2,7 +2,7 @@ def rotate(l, n):
     return l[n:] + l[:n]
 
 
-def transitive_closure(routers):
+def connected(routers):
     # Apply transitive closure
     old_len_tc = len(routers)
     new_len = 0

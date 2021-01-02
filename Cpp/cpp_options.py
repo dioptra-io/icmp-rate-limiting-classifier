@@ -57,7 +57,7 @@ def generate_cpp_options(config):
     # TODO Directly pass the config in the CppOptions class
     cpp_options = CppOptions()
     cpp_options.pcap_dir_individual = config["BINARY_OPTIONS"]["PCAPDirIndividual"]
-    cpp_options.pcap_dir_groups = config["BINARY_OPTIONS"]["PCAPDirIndividual"]
+    cpp_options.pcap_dir_groups = config["BINARY_OPTIONS"]["PCAPDirGroups"]
     cpp_options.pcap_prefix = config["BINARY_OPTIONS"]["PCAPPrefix"]
     cpp_options.low_rate_dpr = config["BINARY_OPTIONS"]["LowRateDPR"]
     cpp_options.measurement_time = config["BINARY_OPTIONS"]["MeasurementTime"]

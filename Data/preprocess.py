@@ -10,7 +10,7 @@ minimum_probing_rate = 512
 
 def minmax_scale(features):
     scaler = MinMaxScaler()
-    scaler.fit(features)
+    scaler.fit(features.astype(float))
     return scaler.transform(features)
 
 
@@ -465,6 +465,9 @@ def build_classifier_entry_from_csv(
         ]
         df_list_pairwise.append(df_pairwise)
         pairwise_candidates_list.append([candidates[0], candidates[i]])
+
+    if not df_list_pairwise:
+        return unresponsive_candidates, None, None, None
 
     for i in range(0, len(df_list_pairwise)):
         # print(i)

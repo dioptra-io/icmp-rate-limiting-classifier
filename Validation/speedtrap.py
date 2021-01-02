@@ -1,4 +1,4 @@
-from Algorithms.algorithms import transitive_closure
+from Algorithms.algorithms import connected
 
 
 def extract_speedtrap_routers(speedtrap_result_file):
@@ -18,7 +18,7 @@ def extract_speedtrap_routers(speedtrap_result_file):
                 ip2 = split[1]
                 routers.append({ip1, ip2})
 
-    tc_routers = transitive_closure(routers)
+    tc_routers = connected(routers)
 
     final_routers = {}
     for i in range(0, len(tc_routers)):

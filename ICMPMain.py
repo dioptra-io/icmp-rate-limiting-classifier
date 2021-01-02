@@ -7,7 +7,7 @@ import re
 
 from joblib import load
 
-from Algorithms.algorithms import transitive_closure
+from Algorithms.algorithms import connected
 from Classification.classifier_options import ClassifierOptions
 from Cpp.cpp_files import ipv4_regex, ipv6_regex
 from Cpp.cpp_options import generate_cpp_options
@@ -27,6 +27,7 @@ def get_candidates(targets_file, max_candidates=None):
             break
 
         line = line.strip("\n")
+        line = line.strip()
         if re.match(ipv4_regex, line) or re.match(ipv6_regex, line):
             if line not in candidates:
                 candidates.append(line)
@@ -164,7 +165,7 @@ def main(config, candidates):
                 break
 
     if len(aliases) > 0:
-        final_aliases = transitive_closure(aliases)
+        final_aliases = connected(aliases)
         with open(config["OUTPUT"]["AliasFile"], "w") as fp:
             serializable_aliases = [list(router) for router in final_aliases]
             json.dump(serializable_aliases, fp)
